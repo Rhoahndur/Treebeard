@@ -131,6 +131,10 @@ class RankedPlan:
     monthly_fee: Optional[Decimal] = None
     connection_fee: Optional[Decimal] = None
 
+    # Savings vs current plan (populated when current_plan is provided)
+    projected_annual_savings: Optional[Decimal] = None
+    break_even_months: Optional[int] = None
+
 
 @dataclass
 class RecommendationResult:

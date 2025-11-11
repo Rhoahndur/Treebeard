@@ -53,6 +53,12 @@ class Supplier(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         comment="Supplier's official website URL"
     )
 
+    logo_url: Mapped[Optional[str]] = mapped_column(
+        String(500),
+        nullable=True,
+        comment="URL to supplier's logo image"
+    )
+
     customer_service_phone: Mapped[Optional[str]] = mapped_column(
         String(20),
         nullable=True,

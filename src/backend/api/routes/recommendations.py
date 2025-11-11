@@ -7,7 +7,7 @@ Story 6.3: Enhanced to include risk detection and stay recommendations.
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 from uuid import UUID, uuid4
 
@@ -15,9 +15,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ...config.database import get_db
+from ...models.plan import Supplier
 from ...models.recommendation import Recommendation
 from ...models.user import User
-from ...schemas.usage_schemas import MonthlyUsage
+from ...schemas.usage_analysis import MonthlyUsage
 from ...services.explanation_service import create_explanation_service
 from ...services.recommendation_engine import get_enhanced_recommendations
 from ...services.risk_detection import (
@@ -64,8 +65,8 @@ logger = logging.getLogger(__name__)
 )
 async def generate_recommendations(
     request: GenerateRecommendationRequest,
-    current_user: CurrentUser,
     db: DBSession,
+    current_user: CurrentActiveUser,
 ):
     """
     Generate plan recommendations for a user.
@@ -82,9 +83,10 @@ async def generate_recommendations(
         HTTPException: If generation fails
     """
     try:
+        user_id = current_user.id
         logger.info(
-            f"Generating recommendations for user {current_user.id}",
-            extra={"user_id": str(current_user.id)},
+            f"Generating recommendations for user {user_id}",
+            extra={"user_id": str(user_id)},
         )
 
         # Step 1: Analyze usage patterns (Story 1.4)
@@ -98,7 +100,7 @@ async def generate_recommendations(
 
         usage_profile = usage_service.analyze_usage_patterns(
             usage_data=usage_data,
-            user_id=str(current_user.id),
+            user_id=str(user_id),
         )
 
         logger.info(
@@ -107,7 +109,7 @@ async def generate_recommendations(
         )
 
         # Step 2: Get recommendations (Story 2.2)
-        from ...schemas.recommendation_schemas import UserPreferences
+        from ...schemas.explanation_schemas import UserPreferences
 
         preferences = UserPreferences(
             cost_priority=request.preferences.cost_priority,
@@ -127,11 +129,14 @@ async def generate_recommendations(
                 current_rate=request.current_plan.current_rate,
                 contract_end_date=request.current_plan.contract_end_date,
                 early_termination_fee=request.current_plan.early_termination_fee,
-                plan_start_date=request.current_plan.plan_start_date,
+                contract_start_date=request.current_plan.contract_start_date,
             )
+            # Add annual_cost dynamically
+            if request.current_plan.annual_cost is not None:
+                current_plan.annual_cost = request.current_plan.annual_cost
 
         recommendation_result = get_enhanced_recommendations(
-            user_id=current_user.id,
+            user_id=user_id,
             usage_profile=usage_profile.projection,
             preferences=preferences,
             db=db,
@@ -153,7 +158,7 @@ async def generate_recommendations(
         from ...config.settings import settings
 
         explanation_service = create_explanation_service(
-            api_key=settings.claude_api_key,
+            api_key=settings.openai_api_key,
             redis_client=None,  # Will use default from cache service
         )
 
@@ -198,14 +203,42 @@ async def generate_recommendations(
                     )
 
                 # Create SavingsAnalysis for risk detection
+                # Generate monthly breakdown (required by schema)
+                from ...schemas.savings_schemas import MonthlyCost
+                from datetime import datetime
+
+                monthly_breakdown = []
+                current_date = datetime.now()
+                monthly_cost = ranked_plan.projected_monthly_cost
+                monthly_kwh = Decimal(str(usage_profile.projection.projected_annual_kwh)) / Decimal("12")
+                for month_num in range(1, 13):
+                    monthly_breakdown.append(
+                        MonthlyCost(
+                            month=month_num,
+                            year=current_date.year,
+                            projected_kwh=monthly_kwh,
+                            energy_cost=monthly_cost,
+                            monthly_fee=ranked_plan.monthly_fee
+                            if ranked_plan.monthly_fee
+                            else Decimal("0"),
+                            other_fees=Decimal("0"),
+                            total_cost=monthly_cost
+                            + (
+                                ranked_plan.monthly_fee
+                                if ranked_plan.monthly_fee
+                                else Decimal("0")
+                            ),
+                        )
+                    )
+
                 savings_analysis = SavingsAnalysis(
                     plan_id=ranked_plan.plan_id,
-                    user_id=current_user.id,
+                    user_id=user_id,
                     projected_annual_cost=ranked_plan.projected_annual_cost,
                     current_annual_cost=current_annual_cost,
                     annual_savings=annual_savings,
                     savings_percentage=savings_pct,
-                    monthly_breakdown=[],  # Not needed for risk detection
+                    monthly_breakdown=monthly_breakdown,
                     total_cost_of_ownership=ranked_plan.projected_annual_cost,
                     tco_current_plan=current_annual_cost,
                     contract_length_months=ranked_plan.contract_length_months,
@@ -241,7 +274,7 @@ async def generate_recommendations(
                     str(request.current_plan.early_termination_fee or 0)
                 ),
                 annual_cost=current_annual_cost if request.current_plan else None,
-                plan_start_date=request.current_plan.plan_start_date,
+                contract_start_date=request.current_plan.contract_start_date,
             )
 
             # Detect risks for all plans
@@ -278,7 +311,13 @@ async def generate_recommendations(
                 f"should_stay={should_stay}"
             )
 
-        # Step 5: Build plan responses with risk warnings
+        # Step 5: Query supplier websites and logos for all plans (to avoid N+1 queries)
+        supplier_names = [plan.supplier_name for plan in recommendation_result.top_plans]
+        suppliers = db.query(Supplier).filter(Supplier.supplier_name.in_(supplier_names)).all()
+        supplier_websites = {s.supplier_name: s.website for s in suppliers}
+        supplier_logo_urls = {s.supplier_name: s.logo_url for s in suppliers}
+
+        # Step 6: Build plan responses with risk warnings
         plan_responses = []
         for i, ranked_plan in enumerate(recommendation_result.top_plans):
             savings_data = None
@@ -328,6 +367,8 @@ async def generate_recommendations(
                 plan_id=ranked_plan.plan_id,
                 plan_name=ranked_plan.plan_name,
                 supplier_name=ranked_plan.supplier_name,
+                supplier_website=supplier_websites.get(ranked_plan.supplier_name),
+                supplier_logo_url=supplier_logo_urls.get(ranked_plan.supplier_name),
                 plan_type=ranked_plan.plan_type,
                 scores=PlanScoresResponse(
                     cost_score=ranked_plan.scores.cost_score,
@@ -355,11 +396,13 @@ async def generate_recommendations(
 
         # Create recommendation record in database
         recommendation_id = uuid4()
+        generated_at = datetime.utcnow()
         db_recommendation = Recommendation(
             id=recommendation_id,
-            user_id=current_user.id,
+            user_id=user_id,
             usage_profile=usage_profile.to_dict(),
-            generated_at=datetime.utcnow(),
+            generated_at=generated_at,
+            expires_at=generated_at + timedelta(hours=24),  # Recommendations expire after 24 hours
         )
         db.add(db_recommendation)
         db.commit()

@@ -53,7 +53,7 @@ class CurrentPlan:
         contract_end_date: Optional[datetime] = None,
         early_termination_fee: Decimal = Decimal("0.00"),
         annual_cost: Optional[Decimal] = None,
-        plan_start_date: Optional[datetime] = None,
+        contract_start_date: Optional[datetime] = None,
     ):
         self.plan_name = plan_name
         self.supplier_name = supplier_name
@@ -61,7 +61,7 @@ class CurrentPlan:
         self.contract_end_date = contract_end_date
         self.early_termination_fee = early_termination_fee
         self.annual_cost = annual_cost
-        self.plan_start_date = plan_start_date
+        self.contract_start_date = contract_start_date
 
 
 # ============================================================================
@@ -577,7 +577,7 @@ class RiskDetectionService:
         days_until_end = None
         if current_plan.contract_end_date:
             days_until_end = (
-                current_plan.contract_end_date - datetime.now()
+                current_plan.contract_end_date - datetime.now().date()
             ).days
             if (
                 days_until_end < self.config.contract_ending_soon_days

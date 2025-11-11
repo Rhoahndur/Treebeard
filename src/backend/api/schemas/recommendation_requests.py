@@ -68,7 +68,10 @@ class CurrentPlanRequest(BaseModel):
     early_termination_fee: Optional[Decimal] = Field(
         None, ge=0, description="Early termination fee"
     )
-    plan_start_date: Optional[date] = Field(None, description="Plan start date")
+    annual_cost: Optional[Decimal] = Field(
+        None, ge=0, description="Annual cost of current plan"
+    )
+    contract_start_date: Optional[date] = Field(None, description="Contract start date")
 
 
 class GenerateRecommendationRequest(BaseModel):
@@ -189,6 +192,8 @@ class PlanRecommendationResponse(BaseModel):
     plan_id: UUID = Field(..., description="Plan ID")
     plan_name: str = Field(..., description="Plan name")
     supplier_name: str = Field(..., description="Supplier name")
+    supplier_website: Optional[str] = Field(None, description="Supplier website URL")
+    supplier_logo_url: Optional[str] = Field(None, description="Supplier logo URL")
     plan_type: str = Field(..., description="Plan type")
 
     # Scores

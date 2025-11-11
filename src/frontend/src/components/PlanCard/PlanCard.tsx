@@ -67,9 +67,22 @@ export const PlanCard: React.FC<PlanCardProps> = ({
 
       <CardHeader>
         <div className="flex items-start justify-between pr-12">
-          <div className="flex-1">
-            <CardTitle>{plan.plan_name}</CardTitle>
-            <p className="text-sm text-gray-600 mt-1">{plan.supplier_name}</p>
+          <div className="flex items-start gap-3 flex-1">
+            {plan.supplier_logo_url && (
+              <img
+                src={plan.supplier_logo_url}
+                alt={plan.supplier_name + ' logo'}
+                className="w-12 h-12 object-contain rounded flex-shrink-0"
+                onError={(e) => {
+                  // Hide image on error
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <CardTitle>{plan.plan_name}</CardTitle>
+              <p className="text-sm text-gray-600 mt-1">{plan.supplier_name}</p>
+            </div>
           </div>
         </div>
       </CardHeader>
@@ -79,7 +92,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
         {plan.savings && plan.savings.annual_savings > 0 && (
           <div className="mb-4">
             <Badge variant={savingsBadgeVariant} size="lg">
-              Save {formatCurrency(plan.savings.annual_savings)}/year ({formatPercentage(plan.savings.savings_percentage)}%)
+              Save {formatCurrency(plan.savings.annual_savings)}/year ({formatPercentage(plan.savings.savings_percentage)})
             </Badge>
           </div>
         )}
@@ -109,7 +122,9 @@ export const PlanCard: React.FC<PlanCardProps> = ({
             <div>
               <p className="text-xs text-gray-500">Rate</p>
               <p className="font-semibold text-gray-900">
-                {plan.average_rate_per_kwh.toFixed(2)}¢/kWh
+                {(typeof plan.average_rate_per_kwh === 'string'
+                  ? parseFloat(plan.average_rate_per_kwh)
+                  : plan.average_rate_per_kwh).toFixed(2)}¢/kWh
               </p>
             </div>
           </div>
@@ -119,7 +134,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
             <div>
               <p className="text-xs text-gray-500">Renewable</p>
               <p className="font-semibold text-renewable-700">
-                {formatPercentage(plan.renewable_percentage)}%
+                {formatPercentage(plan.renewable_percentage)}
               </p>
             </div>
           </div>

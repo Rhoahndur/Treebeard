@@ -292,6 +292,58 @@ class CacheService:
             return 0
 
     # ========================================================================
+    # GENERIC CACHE METHODS (for middleware)
+    # ========================================================================
+
+    async def get(self, key: str) -> Optional[str]:
+        """Get value from cache by key."""
+        if not self.enabled or not self._client:
+            return None
+        try:
+            return self._client.get(key)
+        except Exception:
+            return None
+
+    async def set(self, key: str, value: str, ttl: Optional[int] = None) -> None:
+        """Set value with optional TTL."""
+        if not self.enabled or not self._client:
+            return
+        try:
+            if ttl:
+                self._client.setex(key, ttl, str(value))
+            else:
+                self._client.set(key, str(value))
+        except Exception:
+            pass
+
+    async def setex(self, key: str, ttl: int, value: str) -> None:
+        """Set value with TTL."""
+        if not self.enabled or not self._client:
+            return
+        try:
+            self._client.setex(key, ttl, value)
+        except Exception:
+            pass
+
+    async def delete(self, key: str) -> None:
+        """Delete key."""
+        if not self.enabled or not self._client:
+            return
+        try:
+            self._client.delete(key)
+        except Exception:
+            pass
+
+    async def incr(self, key: str) -> int:
+        """Increment counter."""
+        if not self.enabled or not self._client:
+            return 0
+        try:
+            return self._client.incr(key)
+        except Exception:
+            return 0
+
+    # ========================================================================
     # PRIVATE HELPER METHODS
     # ========================================================================
 

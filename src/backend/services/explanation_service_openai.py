@@ -138,6 +138,7 @@ class OpenAIExplanationService:
                 explanation_text=explanation_text,
                 persona_type=preferences.get_persona_type(),
                 readability_score=readability_score,
+                generated_via="openai",
                 generation_time_ms=int((time.time() - start_time) * 1000),
                 model_used=self.model,
                 is_fallback=False,
@@ -156,11 +157,23 @@ class OpenAIExplanationService:
 
         except Exception as e:
             logger.error(f"OpenAI generation failed: {e}, using template fallback")
-            self.metrics.fallbacks += 1
+            self.metrics.fallback_used += 1
 
             # Fallback to template
-            return self.template_generator.generate_explanation(
+            explanation_text = self.template_generator.generate_explanation(
                 plan, user_profile, preferences, current_plan
+            )
+
+            # Wrap template result in PlanExplanation object
+            return PlanExplanation(
+                plan_id=plan.plan_id,
+                explanation_text=explanation_text,
+                persona_type=preferences.get_persona_type() if hasattr(preferences, 'get_persona_type') else "balanced",
+                readability_score=65.0,  # Default acceptable score
+                generated_via="template",
+                generation_time_ms=int((time.time() - start_time) * 1000),
+                model_used="template",
+                is_fallback=True,
             )
 
     async def generate_batch(
@@ -287,12 +300,13 @@ class OpenAIExplanationService:
 
         # Build current plan comparison
         current_plan_context = ""
-        if current_plan and current_plan.annual_cost:
-            savings = plan.projected_annual_savings or Decimal("0")
-            savings_pct = (savings / current_plan.annual_cost * 100) if current_plan.annual_cost > 0 else 0
+        annual_cost = getattr(current_plan, 'annual_cost', None) if current_plan else None
+        if current_plan and annual_cost:
+            savings = getattr(plan, 'projected_annual_savings', None) or Decimal("0")
+            savings_pct = (savings / annual_cost * 100) if annual_cost > 0 else 0
             current_plan_context = f"""
 Current Plan:
-- Annual cost: ${current_plan.annual_cost:.0f}
+- Annual cost: ${annual_cost:.0f}
 - Annual savings with new plan: ${savings:.0f}
 - Savings percentage: {savings_pct:.1f}%
 """
@@ -403,7 +417,7 @@ Generate the explanation now (just the explanation text, no labels):"""
                 "flexibility": preferences.flexibility_priority,
                 "rating": preferences.rating_priority,
             },
-            "current_plan_cost": current_plan.annual_cost if current_plan else None,
+            "current_plan_cost": getattr(current_plan, 'annual_cost', None) if current_plan else None,
         }
 
         key_str = json.dumps(key_data, sort_keys=True)

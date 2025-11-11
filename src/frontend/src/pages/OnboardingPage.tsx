@@ -8,6 +8,7 @@ import type {
   MonthlyUsage,
   Preferences,
 } from '@/types/onboarding';
+import { Header } from '@/components/Header';
 import { ProgressIndicator } from '@/components/ProgressIndicator/ProgressIndicator';
 import { Step1UserInfo } from '@/components/OnboardingFlow/Step1UserInfo';
 import { Step2CurrentPlan } from '@/components/OnboardingFlow/Step2CurrentPlan';
@@ -163,7 +164,10 @@ export const OnboardingPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <Header showBack={false} showHome={false} showLogout={true} />
+
+      <div className="py-8">
       {/* Restore prompt */}
       {showRestorePrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
@@ -317,6 +321,7 @@ export const OnboardingPage: React.FC = () => {
         <p className="text-center text-sm text-gray-500 mt-6">
           Your data is encrypted and secure. We never share your information with third parties.
         </p>
+      </div>
       </div>
     </div>
   );

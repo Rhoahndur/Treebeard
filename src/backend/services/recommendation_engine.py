@@ -15,7 +15,7 @@ from uuid import UUID
 import logging
 
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy import and_, any_
 
 from ..models.plan import PlanCatalog, Supplier
 from ..models.user import User, UserPreference, CurrentPlan
@@ -125,7 +125,8 @@ def calculate_plan_cost(
 
 def _calculate_fixed_cost(rate_structure: Dict[str, Any], annual_kwh: float) -> Decimal:
     """Calculate cost for fixed-rate plan."""
-    rate_per_kwh = Decimal(str(rate_structure.get('rate_per_kwh', 0)))
+    # Support both 'rate' and 'rate_per_kwh' keys for backwards compatibility
+    rate_per_kwh = Decimal(str(rate_structure.get('rate', rate_structure.get('rate_per_kwh', 0))))
     # Convert from cents to dollars
     return (rate_per_kwh / 100) * Decimal(str(annual_kwh))
 
@@ -235,7 +236,7 @@ def filter_eligible_plans(
         and_(
             PlanCatalog.is_active == True,
             Supplier.is_active == True,
-            PlanCatalog.available_regions.contains([plan_filter.zip_code])
+            plan_filter.zip_code == any_(PlanCatalog.available_regions)
         )
     )
 
@@ -595,6 +596,31 @@ def get_enhanced_recommendations(
             stay_with_current=False,
             stay_reason=None
         )
+
+    # Calculate current plan annual cost if provided
+    current_annual_cost = None
+    if current_plan and current_plan.current_rate:
+        current_annual_cost = (
+            Decimal(str(current_plan.current_rate)) *
+            Decimal(str(usage_profile.projected_annual_kwh)) /
+            Decimal("100")  # Convert cents to dollars
+        )
+
+    # Populate savings fields on each plan
+    for plan in base_result.top_plans:
+        if current_annual_cost:
+            # Calculate annual savings
+            plan.projected_annual_savings = current_annual_cost - plan.projected_annual_cost
+
+            # Calculate break-even months if there's an ETF
+            if plan.early_termination_fee > 0 and plan.projected_annual_savings > 0:
+                monthly_savings = plan.projected_annual_savings / Decimal("12")
+                plan.break_even_months = int(plan.early_termination_fee / monthly_savings)
+            else:
+                plan.break_even_months = None
+        else:
+            plan.projected_annual_savings = None
+            plan.break_even_months = None
 
     # Perform switching analysis
     switching_analysis = analyze_switching_timing(

@@ -64,6 +64,8 @@ export interface RankedPlan {
   plan_id: string;                   // UUID
   plan_name: string;
   supplier_name: string;
+  supplier_website?: string;         // Supplier website URL
+  supplier_logo_url?: string;        // Supplier logo URL
   plan_type: string;
   scores: PlanScores;
   projected_annual_cost: number;

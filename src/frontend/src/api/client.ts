@@ -7,6 +7,9 @@ export class ApiClient {
   private token: string | null = null;
 
   constructor() {
+    // Load token from localStorage on initialization
+    this.token = localStorage.getItem('auth_token');
+
     this.client = axios.create({
       baseURL: `${API_BASE_URL}/api/v1`,
       headers: {

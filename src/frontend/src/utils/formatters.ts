@@ -2,31 +2,35 @@
  * Utility functions for formatting data in the UI
  */
 
-export const formatCurrency = (amount: number): string => {
+export const formatCurrency = (amount: number | string): string => {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(numAmount);
 };
 
-export const formatCurrencyDetailed = (amount: number): string => {
+export const formatCurrencyDetailed = (amount: number | string): string => {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(numAmount);
 };
 
-export const formatPercentage = (value: number, decimals = 0): string => {
-  const fixed = value.toFixed(decimals);
+export const formatPercentage = (value: number | string, decimals = 0): string => {
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+  const fixed = numValue.toFixed(decimals);
   return fixed + '%';
 };
 
-export const formatNumber = (value: number): string => {
-  return new Intl.NumberFormat('en-US').format(value);
+export const formatNumber = (value: number | string): string => {
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+  return new Intl.NumberFormat('en-US').format(numValue);
 };
 
 export const formatDate = (dateString: string): string => {
@@ -45,10 +49,11 @@ export const formatMonthYear = (dateString: string): string => {
   }).format(date);
 };
 
-export const getSavingsLevel = (savingsPercentage: number): 'high' | 'medium' | 'low' | 'none' => {
-  if (savingsPercentage >= 15) return 'high';
-  if (savingsPercentage >= 5) return 'medium';
-  if (savingsPercentage > 0) return 'low';
+export const getSavingsLevel = (savingsPercentage: number | string): 'high' | 'medium' | 'low' | 'none' => {
+  const numPercentage = typeof savingsPercentage === 'string' ? parseFloat(savingsPercentage) : savingsPercentage;
+  if (numPercentage >= 15) return 'high';
+  if (numPercentage >= 5) return 'medium';
+  if (numPercentage > 0) return 'low';
   return 'none';
 };
 

@@ -85,20 +85,22 @@ class TemplateExplanationGenerator:
 
         # Cost benefit
         if preferences.cost_priority > 30:
-            if plan.projected_annual_savings and plan.projected_annual_savings > 0:
+            projected_savings = getattr(plan, 'projected_annual_savings', None)
+            if projected_savings and projected_savings > 0:
+                annual_cost = getattr(current_plan, 'annual_cost', None) if current_plan else None
                 savings_pct = (
-                    plan.projected_annual_savings / current_plan.annual_cost * 100
-                    if current_plan and current_plan.annual_cost
+                    projected_savings / annual_cost * 100
+                    if current_plan and annual_cost
                     else 0
                 )
                 if savings_pct > 10:
                     benefits.append(
-                        f"You'll save ${plan.projected_annual_savings:.0f} per year "
+                        f"You'll save ${projected_savings:.0f} per year "
                         f"({savings_pct:.0f}% less than your current plan)"
                     )
                 else:
                     benefits.append(
-                        f"You'll save ${plan.projected_annual_savings:.0f} annually"
+                        f"You'll save ${projected_savings:.0f} annually"
                     )
             else:
                 avg_usage = user_profile.get("statistics", {}).get("mean_kwh", 1000)
@@ -177,12 +179,14 @@ class TemplateExplanationGenerator:
             )
 
         # Low savings
+        projected_savings = getattr(plan, 'projected_annual_savings', None)
+        annual_cost = getattr(current_plan, 'annual_cost', None) if current_plan else None
         if (
-            plan.projected_annual_savings
+            projected_savings
             and current_plan
-            and current_plan.annual_cost
+            and annual_cost
         ):
-            savings_pct = plan.projected_annual_savings / current_plan.annual_cost * 100
+            savings_pct = projected_savings / annual_cost * 100
             if 0 < savings_pct < 5:
                 tradeoffs.append(
                     "The savings are modest, so switching may not be worth the effort"
@@ -283,9 +287,10 @@ class TemplateExplanationGenerator:
             trade_offs.append("Rate can change based on market conditions")
 
         # Cost vs renewable trade-off
-        if current_plan and plan.projected_annual_savings:
-            if plan.projected_annual_savings < 0:
-                cost_increase = abs(plan.projected_annual_savings)
+        projected_savings = getattr(plan, 'projected_annual_savings', None)
+        if current_plan and projected_savings:
+            if projected_savings < 0:
+                cost_increase = abs(projected_savings)
                 if plan.renewable_percentage > 50:
                     trade_offs.append(
                         f"Costs ${cost_increase:.0f} more per year for renewable energy"
@@ -346,11 +351,13 @@ def get_context_aware_message(
         )
 
     # Low savings warning
-    if plan.projected_annual_savings and current_plan and current_plan.annual_cost:
-        savings_pct = plan.projected_annual_savings / current_plan.annual_cost * 100
+    projected_savings = getattr(plan, 'projected_annual_savings', None)
+    annual_cost = getattr(current_plan, 'annual_cost', None) if current_plan else None
+    if projected_savings and current_plan and annual_cost:
+        savings_pct = projected_savings / annual_cost * 100
         if 0 < savings_pct < 5:
             return (
-                f"While this plan saves you ${plan.projected_annual_savings:.0f} per year, "
+                f"While this plan saves you ${projected_savings:.0f} per year, "
                 f"the savings are modest ({savings_pct:.1f}%). Consider whether switching "
                 f"is worth the administrative effort."
             )

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, CheckCircle, Sparkles } from 'lucide-react';
+import { Header } from '@/components/Header';
 import { PlanCard } from '@/components/PlanCard/PlanCard';
 import { CostBreakdown } from '@/components/CostBreakdown/CostBreakdown';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
@@ -30,7 +31,9 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50">
+        <Header title="Generating Recommendations" showLogout={true} />
+        <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4 animate-pulse-soft">
@@ -50,6 +53,7 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
             <SkeletonCard />
           </div>
         </div>
+        </div>
       </div>
     );
   }
@@ -57,7 +61,9 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50">
+        <Header title="Error" showLogout={true} />
+        <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
           <div 
             className="bg-white rounded-lg shadow-card p-8 text-center"
@@ -79,6 +85,7 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
             </button>
           </div>
         </div>
+        </div>
       </div>
     );
   }
@@ -86,7 +93,9 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
   // Empty state - no recommendations
   if (!recommendation || !recommendation.top_plans || recommendation.top_plans.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50">
+        <Header title="No Results" showLogout={true} />
+        <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
           <div className="bg-white rounded-lg shadow-card p-8 text-center">
             <AlertCircle className="w-16 h-16 text-warning mx-auto mb-4" aria-hidden="true" />
@@ -104,6 +113,7 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
             </button>
           </div>
         </div>
+        </div>
       </div>
     );
   }
@@ -112,7 +122,9 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
   const totalSavings = topPlans[0]?.savings?.annual_savings || 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50">
+      <Header title="Your Recommendations" showLogout={true} />
+      <div className="py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <header className="text-center mb-8" role="banner">
@@ -180,7 +192,9 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
             <div>
               <p className="text-xs text-gray-500 mb-1">Confidence</p>
               <p className="font-medium text-gray-900">
-                {(recommendation.user_profile.confidence_score * 100).toFixed(0)}%
+                {((typeof recommendation.user_profile.confidence_score === 'string'
+                  ? parseFloat(recommendation.user_profile.confidence_score)
+                  : recommendation.user_profile.confidence_score) * 100).toFixed(0)}%
               </p>
             </div>
           </div>
@@ -232,19 +246,23 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
             Ready to Switch?
           </h3>
           <p className="text-gray-600 mb-4">
-            Contact the supplier directly to sign up for your chosen plan
+            {selectedPlan?.supplier_website
+              ? `Visit ${selectedPlan.supplier_name}'s website to sign up for your chosen plan`
+              : 'Contact the supplier directly to sign up for your chosen plan'}
           </p>
           <button
-            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 min-h-[44px]"
+            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => {
-              if (selectedPlan) {
-                alert('Contact: ' + selectedPlan.supplier_name);
+              if (selectedPlan?.supplier_website) {
+                window.open(selectedPlan.supplier_website, '_blank', 'noopener,noreferrer');
               }
             }}
+            disabled={!selectedPlan?.supplier_website}
           >
-            Get Started
+            {selectedPlan?.supplier_website ? 'Visit Supplier Website' : 'Contact Supplier'}
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

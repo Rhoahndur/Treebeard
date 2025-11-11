@@ -4,6 +4,7 @@ Application settings and configuration.
 Uses Pydantic Settings for environment variable management.
 """
 
+import json
 from typing import Optional
 
 from pydantic import Field, PostgresDsn, field_validator
@@ -103,6 +104,24 @@ class Settings(BaseSettings):
     pagerduty_routing_key: Optional[str] = Field(None, description="PagerDuty routing key")
     slack_webhook_url: Optional[str] = Field(None, description="Slack webhook URL for alerts")
     slack_bot_token: Optional[str] = Field(None, description="Slack bot token")
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def validate_cors_origins(cls, v) -> list[str]:
+        """Parse CORS origins from JSON string if needed."""
+        if isinstance(v, str):
+            try:
+                # Try to parse as JSON array
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return parsed
+                return [v]  # Single origin as string
+            except json.JSONDecodeError:
+                # If not valid JSON, treat as comma-separated list
+                return [origin.strip() for origin in v.split(",")]
+        elif isinstance(v, list):
+            return v
+        return ["http://localhost:3000"]  # Fallback default
 
     @field_validator("environment")
     @classmethod
