@@ -12,7 +12,7 @@ The AI Energy Plan Recommendation Agent helps customers in deregulated energy ma
 **Key Features:**
 - Analyzes 12 months of usage data
 - Matches against 50+ energy plans
-- AI-powered personalized explanations (Claude API)
+- AI-powered personalized explanations (openAI API)
 - Risk detection and warnings
 - Cost projections and savings calculations
 - Mobile-responsive React frontend
@@ -23,9 +23,7 @@ The AI Energy Plan Recommendation Agent helps customers in deregulated energy ma
 ## Documentation Structure
 
 ### Planning Documents
-- **[PRD.md](PRD.md)** - Product Requirements Document with 14 PRs
 - **[architecture.md](architecture.md)** - System architecture with diagrams
-- **[Tasklist.md](Tasklist.md)** - Detailed task breakdown
 
 ### Execution Documents
 - **[docs/execution-plan.md](docs/execution-plan.md)** - Epic and story breakdown optimized for parallelization
