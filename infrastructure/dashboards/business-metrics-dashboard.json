@@ -1,0 +1,319 @@
+{
+  "title": "TreeBeard - Business Metrics",
+  "description": "Business KPIs and user activity metrics",
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "template_variables": [
+    {
+      "name": "environment",
+      "default": "production",
+      "prefix": "env"
+    }
+  ],
+  "widgets": [
+    {
+      "id": 1,
+      "definition": {
+        "type": "note",
+        "content": "## Business Metrics\n\nUser activity, recommendations, registrations, and key business KPIs.",
+        "background_color": "orange",
+        "font_size": "18",
+        "text_align": "center"
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "title": "Active Users (24h)",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:treebeard.user.active_count{$environment}",
+            "aggregator": "last"
+          }
+        ],
+        "precision": 0,
+        "autoscale": true,
+        "text_align": "center"
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "title": "New Registrations (24h)",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:treebeard.user.registrations{$environment}.as_count()",
+            "aggregator": "sum"
+          }
+        ],
+        "precision": 0,
+        "autoscale": true,
+        "text_align": "center"
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "title": "Recommendations Generated (24h)",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:treebeard.recommendations.generated{$environment}.as_count()",
+            "aggregator": "sum"
+          }
+        ],
+        "precision": 0,
+        "autoscale": true,
+        "text_align": "center"
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "title": "Avg Recommendations per User",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:treebeard.recommendations.generated{$environment}.as_count() / sum:treebeard.user.active_count{$environment}",
+            "aggregator": "avg"
+          }
+        ],
+        "precision": 2,
+        "autoscale": true,
+        "text_align": "center"
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "title": "User Registrations Over Time",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.user.registrations{$environment}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "green"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "registrations"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "title": "Active Users Trend",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.user.active_count{$environment}",
+            "display_type": "line",
+            "style": {
+              "palette": "blue"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "users"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "title": "Recommendations per Hour",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.recommendations.generated{$environment}.as_count().rollup(sum, 3600)",
+            "display_type": "bars",
+            "style": {
+              "palette": "purple"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "recommendations"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "title": "User Activity by Type",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.user.activity{$environment} by {activity}.as_count()",
+            "display_type": "area",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "events"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "title": "Top User Activities",
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(sum:treebeard.user.activity{$environment} by {activity}.as_count(), 10, 'sum', 'desc')"
+          }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "title": "API Calls by Endpoint",
+        "type": "treemap",
+        "requests": [
+          {
+            "q": "sum:treebeard.api.requests{$environment} by {endpoint}.as_count()"
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "definition": {
+        "title": "Recommendation Acceptance Rate",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "(sum:treebeard.user.activity{$environment,activity:recommendation_accepted}.as_count() / sum:treebeard.recommendations.generated{$environment}.as_count()) * 100",
+            "display_type": "line",
+            "style": {
+              "palette": "green"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "%",
+          "min": "0",
+          "max": "100"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "definition": {
+        "title": "User Feedback Sentiment",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:treebeard.feedback.sentiment_score{$environment}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "score",
+          "min": "-1",
+          "max": "1"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "definition": {
+        "title": "Conversion Funnel",
+        "type": "funnel",
+        "requests": [
+          {
+            "query_index": 0,
+            "request_type": "funnel",
+            "formulas": [
+              {
+                "formula": "a"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "a",
+                "query": "sum:treebeard.user.activity{$environment,activity:page_view}.as_count()"
+              }
+            ]
+          },
+          {
+            "query_index": 1,
+            "request_type": "funnel",
+            "formulas": [
+              {
+                "formula": "b"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "b",
+                "query": "sum:treebeard.user.activity{$environment,activity:registration}.as_count()"
+              }
+            ]
+          },
+          {
+            "query_index": 2,
+            "request_type": "funnel",
+            "formulas": [
+              {
+                "formula": "c"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "c",
+                "query": "sum:treebeard.recommendations.generated{$environment}.as_count()"
+              }
+            ]
+          },
+          {
+            "query_index": 3,
+            "request_type": "funnel",
+            "formulas": [
+              {
+                "formula": "d"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "d",
+                "query": "sum:treebeard.user.activity{$environment,activity:recommendation_accepted}.as_count()"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "definition": {
+        "title": "Peak Usage Hours",
+        "type": "heatmap",
+        "requests": [
+          {
+            "q": "sum:treebeard.api.requests{$environment}.as_count()",
+            "style": {
+              "palette": "green_to_orange"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

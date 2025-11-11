@@ -1,0 +1,158 @@
+/* Print stylesheet for TreeBeard */
+
+@media print {
+  /* Hide interactive elements */
+  button,
+  .no-print,
+  nav,
+  header nav,
+  footer nav,
+  .sticky {
+    display: none !important;
+  }
+
+  /* Page setup */
+  @page {
+    margin: 1cm;
+    size: auto;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  /* Optimize for black and white */
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Preserve essential backgrounds */
+  .print-bg {
+    background: #f3f4f6 !important;
+  }
+
+  /* Links */
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 10pt;
+    color: #666;
+  }
+
+  a[href^="#"]:after {
+    content: "";
+  }
+
+  /* Page breaks */
+  h1,
+  h2,
+  h3 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  table,
+  figure,
+  .chart-wrapper {
+    page-break-inside: avoid;
+  }
+
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  /* Tables */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  table th,
+  table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 24pt;
+  }
+
+  h2 {
+    font-size: 18pt;
+  }
+
+  h3 {
+    font-size: 14pt;
+  }
+
+  /* Charts - show as placeholder */
+  .recharts-wrapper {
+    border: 1px solid #ddd;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .recharts-wrapper:before {
+    content: "[Chart: " attr(aria-label) "]";
+    font-style: italic;
+    color: #666;
+  }
+
+  /* Cards */
+  .shadow-card {
+    border: 1px solid #ddd;
+    margin-bottom: 1cm;
+  }
+
+  /* Footer with page numbers */
+  .print-footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 10pt;
+    color: #666;
+  }
+
+  .print-footer:after {
+    content: "Page " counter(page);
+  }
+
+  /* Optimize spacing */
+  .p-6,
+  .p-8 {
+    padding: 1cm !important;
+  }
+
+  .mb-6,
+  .mb-8 {
+    margin-bottom: 0.5cm !important;
+  }
+
+  /* Plan cards */
+  .plan-card {
+    border: 1px solid #ddd;
+    padding: 0.5cm;
+    margin-bottom: 0.5cm;
+  }
+
+  /* Hide expandable sections - show all */
+  .collapsed {
+    display: block !important;
+    height: auto !important;
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "treebeard-business-intelligence",
+    "title": "TreeBeard - Business Intelligence",
+    "tags": ["treebeard", "business", "intelligence"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "5m",
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "type": "piechart",
+        "title": "Most Popular Plan Types",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'plan_type' as plan_type, COUNT(*) as count FROM analytics_events WHERE event = 'plan_card_clicked' AND timestamp >= NOW() - INTERVAL '30 days' GROUP BY plan_type ORDER BY count DESC",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "type": "stat",
+        "title": "Average Savings Amount",
+        "targets": [
+          {
+            "expr": "SELECT AVG((properties->>'total_savings')::float) as avg_savings FROM analytics_events WHERE event = 'recommendation_generated' AND properties->>'total_savings' IS NOT NULL AND timestamp >= NOW() - INTERVAL '30 days'",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 2,
+            "color": { "mode": "thresholds" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 100, "color": "yellow" },
+                { "value": 200, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "type": "bargauge",
+        "title": "Risk Warnings by Type",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'risk_type' as risk_type, COUNT(*) as count FROM analytics_events WHERE event = 'risk_warning_triggered' AND timestamp >= NOW() - INTERVAL '30 days' GROUP BY risk_type ORDER BY count DESC",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient"
+        }
+      },
+      {
+        "id": 4,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "type": "piechart",
+        "title": "Risk Warning Severity Distribution",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'severity' as severity, COUNT(*) as count FROM analytics_events WHERE event = 'risk_warning_triggered' AND timestamp >= NOW() - INTERVAL '30 days' GROUP BY severity",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "type": "piechart",
+        "title": "User Property Type Distribution",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'property_type' as property_type, COUNT(DISTINCT user_id) as users FROM analytics_events WHERE event = 'user_created' AND timestamp >= NOW() - INTERVAL '90 days' GROUP BY property_type",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "type": "map",
+        "title": "Geographic Usage by ZIP Code",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'zip_code' as zip, COUNT(DISTINCT user_id) as users FROM analytics_events WHERE event = 'user_created' AND properties->>'zip_code' IS NOT NULL AND timestamp >= NOW() - INTERVAL '90 days' GROUP BY zip ORDER BY users DESC LIMIT 50",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+        "type": "table",
+        "title": "Top ZIP Codes by User Count",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'zip_code' as zip_code, COUNT(DISTINCT user_id) as total_users, COUNT(DISTINCT CASE WHEN event = 'recommendation_generated' THEN user_id END) as active_users, ROUND((COUNT(DISTINCT CASE WHEN event = 'recommendation_generated' THEN user_id END)::float / NULLIF(COUNT(DISTINCT user_id), 0) * 100), 2) as activation_rate FROM analytics_events WHERE properties->>'zip_code' IS NOT NULL AND timestamp >= NOW() - INTERVAL '90 days' GROUP BY zip_code ORDER BY total_users DESC LIMIT 20",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+        "type": "graph",
+        "title": "User Preferences Trends",
+        "targets": [
+          {
+            "expr": "SELECT date_trunc('day', timestamp) as time, AVG((properties->'preferences'->>'cost_priority')::float) as avg_cost_priority, AVG((properties->'preferences'->>'renewable_priority')::float) as avg_renewable_priority, AVG((properties->'preferences'->>'flexibility_priority')::float) as avg_flexibility_priority FROM analytics_events WHERE event = 'user_preferences_updated' AND timestamp >= NOW() - INTERVAL '30 days' GROUP BY time ORDER BY time",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+        "type": "stat",
+        "title": "Return User Rate",
+        "targets": [
+          {
+            "expr": "WITH user_sessions AS (SELECT user_id, COUNT(DISTINCT DATE(timestamp)) as session_days FROM analytics_events WHERE timestamp >= NOW() - INTERVAL '30 days' GROUP BY user_id) SELECT (COUNT(CASE WHEN session_days > 1 THEN 1 END)::float / NULLIF(COUNT(*), 0) * 100) as return_rate FROM user_sessions",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1
+          }
+        }
+      },
+      {
+        "id": 10,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+        "type": "bargauge",
+        "title": "File Upload Success Rate by Type",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'file_type' as file_type, COUNT(CASE WHEN event = 'file_uploaded' THEN 1 END) as success, COUNT(CASE WHEN event = 'file_upload_failed' THEN 1 END) as failed, ROUND((COUNT(CASE WHEN event = 'file_uploaded' THEN 1 END)::float / NULLIF(COUNT(*), 0) * 100), 2) as success_rate FROM analytics_events WHERE event IN ('file_uploaded', 'file_upload_failed') AND timestamp >= NOW() - INTERVAL '30 days' GROUP BY file_type",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
+        "type": "table",
+        "title": "User Segment Performance",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'user_profile_type' as segment, COUNT(DISTINCT user_id) as users, AVG((properties->>'total_savings')::float) as avg_savings, COUNT(*) as total_recommendations FROM analytics_events WHERE event = 'recommendation_generated' AND timestamp >= NOW() - INTERVAL '30 days' GROUP BY segment ORDER BY users DESC",
+            "refId": "A"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-30d",
+      "to": "now"
+    }
+  }
+}

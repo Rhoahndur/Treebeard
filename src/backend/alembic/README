@@ -1,0 +1,64 @@
+TreeBeard Energy Recommendation System - Database Migrations
+
+This directory contains Alembic migration scripts for managing database schema changes.
+
+## Quick Start
+
+1. Ensure your database is running:
+   ```bash
+   docker-compose up -d postgres
+   ```
+
+2. Create a new migration:
+   ```bash
+   cd src/backend
+   alembic revision --autogenerate -m "Description of changes"
+   ```
+
+3. Apply migrations:
+   ```bash
+   alembic upgrade head
+   ```
+
+4. Rollback last migration:
+   ```bash
+   alembic downgrade -1
+   ```
+
+## Migration Commands
+
+- `alembic current` - Show current revision
+- `alembic history` - Show migration history
+- `alembic upgrade head` - Apply all pending migrations
+- `alembic upgrade +1` - Apply next migration
+- `alembic downgrade -1` - Rollback last migration
+- `alembic downgrade base` - Rollback all migrations
+
+## Initial Migration
+
+The initial migration (001_initial_schema) creates all tables:
+- users
+- user_preferences
+- current_plans
+- usage_history
+- suppliers
+- plan_catalog
+- recommendations
+- recommendation_plans
+- feedback
+
+## Development Guidelines
+
+1. Always review auto-generated migrations before applying
+2. Test migrations on a development database first
+3. Include both upgrade() and downgrade() functions
+4. Add descriptive comments for complex migrations
+5. Never modify applied migrations - create new ones instead
+
+## Database URL
+
+Database URL is configured in:
+- Development: src/backend/.env
+- Production: Environment variables
+
+Default: postgresql://treebeard:treebeard@localhost:5432/treebeard

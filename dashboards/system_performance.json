@@ -1,0 +1,242 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "treebeard-system-performance",
+    "title": "TreeBeard - System Performance Metrics",
+    "tags": ["treebeard", "performance", "monitoring"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+        "type": "stat",
+        "title": "API Response Time (P50)",
+        "targets": [
+          {
+            "expr": "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY (properties->>'duration_ms')::float) as p50 FROM analytics_events WHERE event = 'api_request' AND timestamp >= NOW() - INTERVAL '1 hour'",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 1000, "color": "yellow" },
+                { "value": 2000, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+        "type": "stat",
+        "title": "API Response Time (P95)",
+        "targets": [
+          {
+            "expr": "SELECT percentile_cont(0.95) WITHIN GROUP (ORDER BY (properties->>'duration_ms')::float) as p95 FROM analytics_events WHERE event = 'api_request' AND timestamp >= NOW() - INTERVAL '1 hour'",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 2000, "color": "yellow" },
+                { "value": 3000, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+        "type": "stat",
+        "title": "API Response Time (P99)",
+        "targets": [
+          {
+            "expr": "SELECT percentile_cont(0.99) WITHIN GROUP (ORDER BY (properties->>'duration_ms')::float) as p99 FROM analytics_events WHERE event = 'api_request' AND timestamp >= NOW() - INTERVAL '1 hour'",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 3000, "color": "yellow" },
+                { "value": 5000, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+        "type": "gauge",
+        "title": "Error Rate (%)",
+        "targets": [
+          {
+            "expr": "SELECT (COUNT(CASE WHEN event = 'error_occurred' THEN 1 END)::float / NULLIF(COUNT(*), 0) * 100) as error_rate FROM analytics_events WHERE event IN ('api_request', 'error_occurred') AND timestamp >= NOW() - INTERVAL '1 hour'",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 2,
+            "min": 0,
+            "max": 5,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 1, "color": "yellow" },
+                { "value": 3, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+        "type": "gauge",
+        "title": "Cache Hit Rate (%)",
+        "targets": [
+          {
+            "expr": "SELECT (COUNT(CASE WHEN event = 'cache_hit' THEN 1 END)::float / NULLIF(COUNT(*), 0) * 100) as hit_rate FROM analytics_events WHERE event IN ('cache_hit', 'cache_miss') AND timestamp >= NOW() - INTERVAL '1 hour'",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1,
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 60, "color": "yellow" },
+                { "value": 80, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+        "type": "stat",
+        "title": "Recommendations per Hour",
+        "targets": [
+          {
+            "expr": "SELECT COUNT(*) as count FROM analytics_events WHERE event = 'recommendation_generated' AND timestamp >= NOW() - INTERVAL '1 hour'",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "type": "graph",
+        "title": "API Response Times (P50, P95, P99)",
+        "targets": [
+          {
+            "expr": "SELECT date_trunc('minute', timestamp) as time, percentile_cont(0.5) WITHIN GROUP (ORDER BY (properties->>'duration_ms')::float) as p50, percentile_cont(0.95) WITHIN GROUP (ORDER BY (properties->>'duration_ms')::float) as p95, percentile_cont(0.99) WITHIN GROUP (ORDER BY (properties->>'duration_ms')::float) as p99 FROM analytics_events WHERE event = 'api_request' AND timestamp >= NOW() - INTERVAL '1 hour' GROUP BY time ORDER BY time",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ms",
+            "label": "Response Time"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "type": "graph",
+        "title": "Request Rate by Endpoint",
+        "targets": [
+          {
+            "expr": "SELECT date_trunc('minute', timestamp) as time, properties->>'endpoint' as endpoint, COUNT(*) as requests FROM analytics_events WHERE event = 'api_request' AND timestamp >= NOW() - INTERVAL '1 hour' GROUP BY time, endpoint ORDER BY time",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "type": "table",
+        "title": "Slowest Endpoints (P95)",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'endpoint' as endpoint, COUNT(*) as requests, ROUND(percentile_cont(0.95) WITHIN GROUP (ORDER BY (properties->>'duration_ms')::float), 2) as p95_ms FROM analytics_events WHERE event = 'api_request' AND timestamp >= NOW() - INTERVAL '1 hour' GROUP BY endpoint ORDER BY p95_ms DESC LIMIT 10",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "type": "table",
+        "title": "Error Breakdown by Type",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'error_type' as error_type, properties->>'endpoint' as endpoint, COUNT(*) as count FROM analytics_events WHERE event = 'error_occurred' AND timestamp >= NOW() - INTERVAL '1 hour' GROUP BY error_type, endpoint ORDER BY count DESC LIMIT 10",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+        "type": "graph",
+        "title": "Peak Usage Times (Requests per Hour)",
+        "targets": [
+          {
+            "expr": "SELECT date_trunc('hour', timestamp) as time, COUNT(*) as requests FROM analytics_events WHERE event = 'api_request' AND timestamp >= NOW() - INTERVAL '7 days' GROUP BY time ORDER BY time",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+        "type": "heatmap",
+        "title": "Request Distribution by Hour of Day",
+        "targets": [
+          {
+            "expr": "SELECT date_trunc('hour', timestamp) as time, EXTRACT(hour FROM timestamp) as hour, COUNT(*) as count FROM analytics_events WHERE event = 'api_request' AND timestamp >= NOW() - INTERVAL '7 days' GROUP BY time, hour ORDER BY time",
+            "refId": "A"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    }
+  }
+}

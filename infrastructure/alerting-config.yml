@@ -1,0 +1,389 @@
+# TreeBeard Alerting Configuration
+# Alert rules and notification channels
+
+alerting:
+  # Enable/disable alerting
+  enabled: true
+
+  # Default notification channels
+  default_channels:
+    critical: [pagerduty, slack]
+    high: [slack]
+    medium: [slack]
+    low: [email]
+    info: [email]
+
+# Notification Channels
+channels:
+  # PagerDuty (Critical alerts)
+  pagerduty:
+    enabled: true
+    integration_key: ${PAGERDUTY_INTEGRATION_KEY}
+    routing_key: ${PAGERDUTY_ROUTING_KEY}
+    service_name: TreeBeard API
+    escalation_policy: on-call-engineering
+
+  # Slack (Critical and Warning alerts)
+  slack:
+    enabled: true
+    webhook_url: ${SLACK_WEBHOOK_URL}
+    token: ${SLACK_BOT_TOKEN}
+    channels:
+      critical: "#alerts"
+      high: "#alerts"
+      medium: "#warnings"
+      low: "#monitoring"
+
+  # Email (Digests and low priority)
+  email:
+    enabled: true
+    smtp_host: ${SMTP_HOST}
+    smtp_port: ${SMTP_PORT}
+    from_address: alerts@treebeard.com
+    to_addresses:
+      - engineering@treebeard.com
+      - devops@treebeard.com
+
+  # Webhooks (Custom integrations)
+  webhook:
+    enabled: false
+    urls:
+      - ${CUSTOM_WEBHOOK_URL}
+
+# Alert Rules
+alerts:
+  # ===== CRITICAL ALERTS =====
+  # These trigger PagerDuty and require immediate attention
+
+  - name: high_error_rate
+    description: "API error rate exceeded 5% threshold"
+    severity: critical
+    condition: "error_rate > 5%"
+    query: "avg(last_5m):sum:treebeard.api.errors{*}.as_count() / sum:treebeard.api.requests{*}.as_count() > 0.05"
+    threshold: 5.0
+    duration: 5m
+    evaluation_window: 5m
+    channels: [pagerduty, slack]
+    tags:
+      - api
+      - errors
+      - critical
+    runbook_url: "https://docs.treebeard.com/runbooks/high-error-rate"
+    auto_resolve: true
+    notify_no_data: true
+
+  - name: high_api_latency
+    description: "API P95 latency exceeded 3 seconds"
+    severity: critical
+    condition: "api_latency_p95 > 3s"
+    query: "avg(last_10m):p95:treebeard.api.request.duration{*} > 3000"
+    threshold: 3000.0
+    duration: 10m
+    evaluation_window: 10m
+    channels: [pagerduty, slack]
+    tags:
+      - api
+      - performance
+      - latency
+    runbook_url: "https://docs.treebeard.com/runbooks/high-latency"
+    auto_resolve: true
+
+  - name: database_connection_failure
+    description: "Database connections failing"
+    severity: critical
+    condition: "database_errors > 0"
+    query: "avg(last_1m):sum:treebeard.database.errors{*}.as_count() > 0"
+    threshold: 1.0
+    duration: 1m
+    evaluation_window: 1m
+    channels: [pagerduty, slack]
+    tags:
+      - database
+      - infrastructure
+      - critical
+    runbook_url: "https://docs.treebeard.com/runbooks/database-issues"
+    auto_resolve: false
+    notify_no_data: true
+
+  - name: redis_unavailable
+    description: "Redis cache unavailable"
+    severity: critical
+    condition: "redis_connection_errors > 0"
+    query: "avg(last_1m):sum:treebeard.cache.errors{*}.as_count() > 0"
+    threshold: 1.0
+    duration: 1m
+    evaluation_window: 1m
+    channels: [pagerduty, slack]
+    tags:
+      - cache
+      - infrastructure
+      - redis
+    runbook_url: "https://docs.treebeard.com/runbooks/cache-failure"
+    auto_resolve: false
+    notify_no_data: true
+
+  - name: claude_api_rate_limit
+    description: "Claude API rate limit exceeded"
+    severity: critical
+    condition: "claude_api_rate_limit_errors > 0"
+    query: "avg(last_1m):sum:treebeard.external_api.errors{api:claude,error:rate_limit}.as_count() > 0"
+    threshold: 1.0
+    duration: 1m
+    evaluation_window: 1m
+    channels: [pagerduty, slack]
+    tags:
+      - external_api
+      - claude
+      - rate_limit
+    runbook_url: "https://docs.treebeard.com/runbooks/claude-api-issues"
+    auto_resolve: true
+
+  - name: high_cpu_usage
+    description: "CPU usage exceeded 90%"
+    severity: critical
+    condition: "cpu_usage > 90%"
+    query: "avg(last_15m):avg:system.cpu.user{*} > 90"
+    threshold: 90.0
+    duration: 15m
+    evaluation_window: 15m
+    channels: [pagerduty, slack]
+    tags:
+      - infrastructure
+      - cpu
+      - resources
+    runbook_url: "https://docs.treebeard.com/runbooks/high-resource-usage"
+    auto_resolve: true
+
+  - name: high_memory_usage
+    description: "Memory usage exceeded 85%"
+    severity: critical
+    condition: "memory_usage > 85%"
+    query: "avg(last_5m):avg:system.mem.used{*} / avg:system.mem.total{*} * 100 > 85"
+    threshold: 85.0
+    duration: 5m
+    evaluation_window: 5m
+    channels: [pagerduty, slack]
+    tags:
+      - infrastructure
+      - memory
+      - resources
+    runbook_url: "https://docs.treebeard.com/runbooks/high-resource-usage"
+    auto_resolve: true
+
+  - name: low_disk_space
+    description: "Disk space below 10%"
+    severity: critical
+    condition: "disk_usage > 90%"
+    query: "avg(last_5m):avg:system.disk.in_use{*} > 0.9"
+    threshold: 90.0
+    duration: 5m
+    evaluation_window: 5m
+    channels: [pagerduty, slack]
+    tags:
+      - infrastructure
+      - disk
+      - storage
+    runbook_url: "https://docs.treebeard.com/runbooks/disk-space"
+    auto_resolve: false
+
+  # ===== WARNING ALERTS =====
+  # These go to Slack and should be investigated
+
+  - name: elevated_error_rate
+    description: "API error rate elevated above 2%"
+    severity: high
+    condition: "error_rate > 2%"
+    query: "avg(last_10m):sum:treebeard.api.errors{*}.as_count() / sum:treebeard.api.requests{*}.as_count() > 0.02"
+    threshold: 2.0
+    duration: 10m
+    evaluation_window: 10m
+    channels: [slack]
+    tags:
+      - api
+      - errors
+    runbook_url: "https://docs.treebeard.com/runbooks/high-error-rate"
+    auto_resolve: true
+
+  - name: elevated_api_latency
+    description: "API P95 latency elevated above 2 seconds"
+    severity: high
+    condition: "api_latency_p95 > 2s"
+    query: "avg(last_15m):p95:treebeard.api.request.duration{*} > 2000"
+    threshold: 2000.0
+    duration: 15m
+    evaluation_window: 15m
+    channels: [slack]
+    tags:
+      - api
+      - performance
+      - latency
+    runbook_url: "https://docs.treebeard.com/runbooks/high-latency"
+    auto_resolve: true
+
+  - name: low_cache_hit_rate
+    description: "Cache hit rate below 60%"
+    severity: medium
+    condition: "cache_hit_rate < 60%"
+    query: "avg(last_30m):avg:treebeard.cache.hit_rate{*} < 60"
+    threshold: 60.0
+    duration: 30m
+    evaluation_window: 30m
+    channels: [slack]
+    tags:
+      - cache
+      - performance
+    runbook_url: "https://docs.treebeard.com/runbooks/cache-performance"
+    auto_resolve: true
+
+  - name: slow_database_queries
+    description: "High number of slow database queries"
+    severity: medium
+    condition: "slow_query_count > 10"
+    query: "avg(last_10m):sum:treebeard.database.slow_queries{*}.as_count() > 10"
+    threshold: 10.0
+    duration: 10m
+    evaluation_window: 10m
+    channels: [slack]
+    tags:
+      - database
+      - performance
+    runbook_url: "https://docs.treebeard.com/runbooks/database-issues"
+    auto_resolve: true
+
+  - name: high_recommendation_time
+    description: "Recommendation generation time elevated"
+    severity: medium
+    condition: "recommendation_duration_p95 > 5s"
+    query: "avg(last_15m):p95:treebeard.recommendations.duration{*} > 5000"
+    threshold: 5000.0
+    duration: 15m
+    evaluation_window: 15m
+    channels: [slack]
+    tags:
+      - recommendation
+      - performance
+    runbook_url: "https://docs.treebeard.com/runbooks/slow-recommendations"
+    auto_resolve: true
+
+  - name: claude_api_errors
+    description: "Claude API error rate elevated"
+    severity: high
+    condition: "claude_api_error_rate > 5%"
+    query: "avg(last_5m):sum:treebeard.external_api.errors{api:claude}.as_count() / sum:treebeard.external_api.calls{api:claude}.as_count() > 0.05"
+    threshold: 5.0
+    duration: 5m
+    evaluation_window: 5m
+    channels: [slack]
+    tags:
+      - external_api
+      - claude
+    runbook_url: "https://docs.treebeard.com/runbooks/claude-api-issues"
+    auto_resolve: true
+
+  - name: elevated_cpu_usage
+    description: "CPU usage elevated above 75%"
+    severity: medium
+    condition: "cpu_usage > 75%"
+    query: "avg(last_30m):avg:system.cpu.user{*} > 75"
+    threshold: 75.0
+    duration: 30m
+    evaluation_window: 30m
+    channels: [slack]
+    tags:
+      - infrastructure
+      - cpu
+    runbook_url: "https://docs.treebeard.com/runbooks/high-resource-usage"
+    auto_resolve: true
+
+  - name: elevated_memory_usage
+    description: "Memory usage elevated above 70%"
+    severity: medium
+    condition: "memory_usage > 70%"
+    query: "avg(last_30m):avg:system.mem.used{*} / avg:system.mem.total{*} * 100 > 70"
+    threshold: 70.0
+    duration: 30m
+    evaluation_window: 30m
+    channels: [slack]
+    tags:
+      - infrastructure
+      - memory
+    runbook_url: "https://docs.treebeard.com/runbooks/high-resource-usage"
+    auto_resolve: true
+
+  # ===== INFORMATIONAL ALERTS =====
+  # These are sent via email digest
+
+  - name: daily_error_summary
+    description: "Daily error summary report"
+    severity: info
+    schedule: "0 9 * * *"  # Daily at 9 AM
+    channels: [email]
+    tags:
+      - summary
+      - errors
+      - daily
+
+  - name: weekly_performance_report
+    description: "Weekly performance report"
+    severity: info
+    schedule: "0 9 * * 1"  # Weekly on Monday at 9 AM
+    channels: [email]
+    tags:
+      - summary
+      - performance
+      - weekly
+
+# Escalation Policies
+escalation:
+  # Escalation delays in minutes
+  delays:
+    level_1: 0      # Immediate
+    level_2: 15     # After 15 minutes
+    level_3: 30     # After 30 minutes
+
+  # On-call schedule
+  on_call:
+    primary: ${PRIMARY_ONCALL}
+    secondary: ${SECONDARY_ONCALL}
+    manager: ${MANAGER_ONCALL}
+
+# Alert Grouping
+grouping:
+  # Group alerts by these tags
+  group_by:
+    - severity
+    - service
+    - environment
+
+  # Grouping window (minutes)
+  window: 5
+
+  # Maximum alerts in a group
+  max_group_size: 10
+
+# Anomaly Detection
+anomaly_detection:
+  enabled: true
+
+  # Algorithms
+  algorithms:
+    - agile       # For metrics with weekly patterns
+    - basic       # For metrics with daily patterns
+    - robust      # For noisy metrics
+
+  # Sensitivity (1-5, 1 = most sensitive)
+  sensitivity: 3
+
+  # Seasonality
+  seasonality: weekly
+
+# Maintenance Windows
+maintenance:
+  # Suppress alerts during maintenance
+  suppress_during_maintenance: true
+
+  # Maintenance schedule (cron format)
+  scheduled:
+    - name: Weekly Maintenance
+      schedule: "0 2 * * 0"  # Sunday at 2 AM
+      duration: 2h

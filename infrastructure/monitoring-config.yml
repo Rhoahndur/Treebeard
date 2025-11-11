@@ -1,0 +1,316 @@
+# TreeBeard Monitoring Configuration
+# APM and Observability Setup
+
+monitoring:
+  # APM Provider (datadog, newrelic, opentelemetry)
+  provider: datadog
+
+  # Enable/disable monitoring
+  enabled: true
+
+  # Sampling rates
+  sampling:
+    traces:
+      production: 1.0      # 100% in production
+      staging: 0.5         # 50% in staging
+      development: 0.1     # 10% in development
+    profiles:
+      production: 1.0
+      staging: 0.5
+      development: 0.0
+
+# DataDog Configuration
+datadog:
+  # Service configuration
+  service:
+    name: treebeard-api
+    env: ${ENVIRONMENT}
+    version: ${APP_VERSION}
+
+  # Agent configuration
+  agent:
+    host: localhost
+    port: 8125
+    namespace: treebeard
+
+  # APM settings
+  apm:
+    enabled: true
+    analytics_enabled: true
+    log_level: INFO
+
+  # Profiling
+  profiling:
+    enabled: true
+
+  # Tags applied to all metrics
+  tags:
+    - service:treebeard-api
+    - team:engineering
+    - component:backend
+
+# Metrics Configuration
+metrics:
+  # Metrics backend (datadog, prometheus, logging)
+  backend: datadog
+
+  # Custom metrics collection
+  custom_metrics:
+    # API metrics
+    api:
+      - name: api.requests
+        type: counter
+        description: "Total API requests"
+        tags:
+          - endpoint
+          - method
+          - status
+
+      - name: api.request.duration
+        type: histogram
+        description: "API request duration in milliseconds"
+        tags:
+          - endpoint
+          - method
+
+      - name: api.errors
+        type: counter
+        description: "API errors"
+        tags:
+          - endpoint
+          - error_type
+
+    # Database metrics
+    database:
+      - name: database.queries
+        type: counter
+        description: "Database queries executed"
+        tags:
+          - query_type
+          - table
+
+      - name: database.query.duration
+        type: histogram
+        description: "Database query duration in milliseconds"
+        tags:
+          - query_type
+          - table
+
+      - name: database.slow_queries
+        type: counter
+        description: "Slow database queries (>1s)"
+        tags:
+          - query_type
+          - table
+
+      - name: database.connections
+        type: gauge
+        description: "Active database connections"
+
+    # Cache metrics
+    cache:
+      - name: cache.operations
+        type: counter
+        description: "Cache operations"
+        tags:
+          - operation
+          - key_pattern
+
+      - name: cache.result
+        type: counter
+        description: "Cache hit/miss results"
+        tags:
+          - result
+
+      - name: cache.hit_rate
+        type: gauge
+        description: "Cache hit rate percentage"
+
+      - name: cache.memory_usage
+        type: gauge
+        description: "Redis memory usage in bytes"
+
+    # External API metrics
+    external_api:
+      - name: external_api.calls
+        type: counter
+        description: "External API calls"
+        tags:
+          - api
+          - endpoint
+
+      - name: external_api.duration
+        type: histogram
+        description: "External API call duration in milliseconds"
+        tags:
+          - api
+          - endpoint
+
+      - name: external_api.errors
+        type: counter
+        description: "External API errors"
+        tags:
+          - api
+          - error_type
+
+    # Recommendation metrics
+    recommendations:
+      - name: recommendations.generated
+        type: counter
+        description: "Recommendations generated"
+        tags:
+          - profile_type
+          - cached
+
+      - name: recommendations.duration
+        type: histogram
+        description: "Recommendation generation duration in milliseconds"
+        tags:
+          - profile_type
+
+      - name: recommendations.count
+        type: histogram
+        description: "Number of recommendations per request"
+
+    # Business metrics
+    business:
+      - name: user.activity
+        type: counter
+        description: "User activity events"
+        tags:
+          - activity
+
+      - name: user.registrations
+        type: counter
+        description: "User registrations"
+
+      - name: user.active_count
+        type: gauge
+        description: "Active users count"
+
+    # Resource metrics
+    resources:
+      - name: resources.cpu
+        type: gauge
+        description: "CPU usage percentage"
+
+      - name: resources.memory
+        type: gauge
+        description: "Memory usage in bytes"
+
+      - name: resources.disk
+        type: gauge
+        description: "Disk usage percentage"
+
+      - name: resources.network_rx
+        type: gauge
+        description: "Network receive bytes per second"
+
+      - name: resources.network_tx
+        type: gauge
+        description: "Network transmit bytes per second"
+
+# Distributed Tracing
+tracing:
+  enabled: true
+
+  # Services to trace
+  services:
+    - fastapi
+    - sqlalchemy
+    - redis
+    - httpx
+    - aiohttp
+
+  # Trace configuration
+  trace_config:
+    # Sample rate (0.0 to 1.0)
+    sample_rate: 1.0
+
+    # Maximum trace depth
+    max_depth: 10
+
+    # Include query strings in HTTP traces
+    include_query_strings: false
+
+    # Include request headers
+    include_headers: false
+
+# Log Collection
+logging:
+  # Log level
+  level: INFO
+
+  # Structured logging
+  structured: true
+
+  # JSON output
+  json: true
+
+  # Include trace IDs
+  include_trace_id: true
+
+  # Log aggregation
+  aggregation:
+    enabled: true
+    service: datadog
+
+# Health Checks
+health_checks:
+  enabled: true
+
+  # Health check endpoints
+  endpoints:
+    - name: api
+      url: http://localhost:8000/health
+      interval: 30s
+      timeout: 5s
+
+    - name: database
+      type: postgres
+      interval: 30s
+      timeout: 5s
+
+    - name: cache
+      type: redis
+      interval: 30s
+      timeout: 5s
+
+# Performance Monitoring
+performance:
+  # Track these percentiles
+  percentiles:
+    - 50   # P50 (median)
+    - 75   # P75
+    - 90   # P90
+    - 95   # P95
+    - 99   # P99
+    - 99.9 # P99.9
+
+  # Slow request threshold (milliseconds)
+  slow_request_threshold: 2000
+
+  # Very slow request threshold (milliseconds)
+  very_slow_request_threshold: 5000
+
+  # Track request/response sizes
+  track_payload_size: true
+
+  # Maximum payload size to log (bytes)
+  max_payload_log_size: 10240
+
+# Error Tracking
+error_tracking:
+  # Capture errors
+  enabled: true
+
+  # Error types to ignore
+  ignore_errors:
+    - NotFoundError
+    - ValidationError
+
+  # Include local variables in error reports
+  include_locals: false
+
+  # Maximum number of breadcrumbs
+  max_breadcrumbs: 50

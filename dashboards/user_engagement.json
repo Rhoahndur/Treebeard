@@ -1,0 +1,172 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "treebeard-user-engagement",
+    "title": "TreeBeard - User Engagement Metrics",
+    "tags": ["treebeard", "analytics", "engagement"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "1m",
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+        "type": "stat",
+        "title": "Total Users",
+        "targets": [
+          {
+            "expr": "SELECT COUNT(DISTINCT user_id) as total_users FROM analytics_events WHERE timestamp >= NOW() - INTERVAL '30 days'",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "orientation": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": { "mode": "thresholds" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 1000, "color": "yellow" },
+                { "value": 5000, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+        "type": "stat",
+        "title": "Daily Active Users (DAU)",
+        "targets": [
+          {
+            "expr": "SELECT COUNT(DISTINCT user_id) as dau FROM analytics_events WHERE timestamp >= NOW() - INTERVAL '24 hours'",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "orientation": "auto"
+        }
+      },
+      {
+        "id": 3,
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+        "type": "stat",
+        "title": "Weekly Active Users (WAU)",
+        "targets": [
+          {
+            "expr": "SELECT COUNT(DISTINCT user_id) as wau FROM analytics_events WHERE timestamp >= NOW() - INTERVAL '7 days'",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "orientation": "auto"
+        }
+      },
+      {
+        "id": 4,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "type": "graph",
+        "title": "Onboarding Funnel",
+        "targets": [
+          {
+            "expr": "SELECT date_trunc('day', timestamp) as time, COUNT(DISTINCT CASE WHEN event = 'onboarding_started' THEN user_id END) as started, COUNT(DISTINCT CASE WHEN event = 'onboarding_step_completed' AND properties->>'step' = '1' THEN user_id END) as step1, COUNT(DISTINCT CASE WHEN event = 'onboarding_step_completed' AND properties->>'step' = '2' THEN user_id END) as step2, COUNT(DISTINCT CASE WHEN event = 'onboarding_step_completed' AND properties->>'step' = '3' THEN user_id END) as step3, COUNT(DISTINCT CASE WHEN event = 'onboarding_step_completed' AND properties->>'step' = '4' THEN user_id END) as step4, COUNT(DISTINCT CASE WHEN event = 'onboarding_completed' THEN user_id END) as completed FROM analytics_events WHERE timestamp >= NOW() - INTERVAL '30 days' GROUP BY time ORDER BY time",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "type": "gauge",
+        "title": "Onboarding Completion Rate",
+        "targets": [
+          {
+            "expr": "SELECT (COUNT(DISTINCT CASE WHEN event = 'onboarding_completed' THEN user_id END)::float / NULLIF(COUNT(DISTINCT CASE WHEN event = 'onboarding_started' THEN user_id END), 0) * 100) as completion_rate FROM analytics_events WHERE timestamp >= NOW() - INTERVAL '7 days'",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 50, "color": "yellow" },
+                { "value": 70, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "type": "bargauge",
+        "title": "Abandonment Rate by Step",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'step_name' as step, COUNT(*) as abandonments FROM analytics_events WHERE event = 'onboarding_abandoned' AND timestamp >= NOW() - INTERVAL '30 days' GROUP BY step ORDER BY abandonments DESC",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient"
+        }
+      },
+      {
+        "id": 7,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "type": "stat",
+        "title": "Average Onboarding Time",
+        "targets": [
+          {
+            "expr": "SELECT AVG((properties->>'total_time_seconds')::float) as avg_time FROM analytics_events WHERE event = 'onboarding_completed' AND timestamp >= NOW() - INTERVAL '7 days'",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "decimals": 0
+          }
+        }
+      },
+      {
+        "id": 8,
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+        "type": "table",
+        "title": "Top Abandonment Reasons",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'abandonment_reason' as reason, COUNT(*) as count, ROUND((COUNT(*)::float / SUM(COUNT(*)) OVER () * 100), 2) as percentage FROM analytics_events WHERE event = 'onboarding_abandoned' AND timestamp >= NOW() - INTERVAL '30 days' GROUP BY reason ORDER BY count DESC LIMIT 10",
+            "refId": "A"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-30d",
+      "to": "now"
+    }
+  }
+}

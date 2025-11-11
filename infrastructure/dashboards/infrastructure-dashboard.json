@@ -1,0 +1,324 @@
+{
+  "title": "TreeBeard - Infrastructure",
+  "description": "Infrastructure resource monitoring: CPU, memory, disk, network",
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "template_variables": [
+    {
+      "name": "environment",
+      "default": "production",
+      "prefix": "env"
+    },
+    {
+      "name": "host",
+      "default": "*",
+      "prefix": "host"
+    }
+  ],
+  "widgets": [
+    {
+      "id": 1,
+      "definition": {
+        "type": "note",
+        "content": "## Infrastructure Monitoring\n\nSystem resources, database, cache, and network performance.",
+        "background_color": "purple",
+        "font_size": "18",
+        "text_align": "center"
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "title": "CPU Usage %",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "avg:system.cpu.user{$environment,$host}",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 90,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 75,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 75,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "precision": 1,
+        "custom_unit": "%"
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "title": "Memory Usage %",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "(avg:system.mem.used{$environment,$host} / avg:system.mem.total{$environment,$host}) * 100",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 85,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 70,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 70,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "precision": 1,
+        "custom_unit": "%"
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "title": "Disk Usage %",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "avg:system.disk.in_use{$environment,$host} * 100",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 90,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 80,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 80,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "precision": 1,
+        "custom_unit": "%"
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "title": "CPU Usage Over Time",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:system.cpu.user{$environment,$host}",
+            "display_type": "area",
+            "style": {
+              "palette": "cool"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "%",
+          "scale": "linear",
+          "min": "0",
+          "max": "100"
+        },
+        "markers": [
+          {
+            "value": "y = 90",
+            "display_type": "error dashed"
+          }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "title": "Memory Usage Over Time",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:system.mem.used{$environment,$host}",
+            "display_type": "area",
+            "style": {
+              "palette": "purple"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "bytes",
+          "scale": "linear"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "title": "Disk I/O",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:system.io.r_s{$environment,$host}",
+            "display_type": "line",
+            "style": {
+              "palette": "green"
+            }
+          },
+          {
+            "q": "avg:system.io.w_s{$environment,$host}",
+            "display_type": "line",
+            "style": {
+              "palette": "orange"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "ops/sec"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "title": "Network Throughput",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:system.net.bytes_rcvd{$environment,$host}",
+            "display_type": "line",
+            "style": {
+              "palette": "blue"
+            }
+          },
+          {
+            "q": "avg:system.net.bytes_sent{$environment,$host}",
+            "display_type": "line",
+            "style": {
+              "palette": "orange"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "bytes/sec"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "title": "Database Connections",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:treebeard.database.connections{$environment}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "connections"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "title": "Database Query Duration",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "p50:treebeard.database.query.duration{$environment}",
+            "display_type": "line",
+            "style": {
+              "palette": "green"
+            }
+          },
+          {
+            "q": "p95:treebeard.database.query.duration{$environment}",
+            "display_type": "line",
+            "style": {
+              "palette": "orange"
+            }
+          },
+          {
+            "q": "p99:treebeard.database.query.duration{$environment}",
+            "display_type": "line",
+            "style": {
+              "palette": "red"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "milliseconds"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "title": "Redis Memory Usage",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:treebeard.cache.memory_usage{$environment}",
+            "display_type": "area",
+            "style": {
+              "palette": "warm"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "bytes"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "definition": {
+        "title": "Cache Hit Rate %",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:treebeard.cache.hit_rate{$environment}",
+            "display_type": "line",
+            "style": {
+              "palette": "green"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "%",
+          "min": "0",
+          "max": "100"
+        },
+        "markers": [
+          {
+            "value": "y = 80",
+            "display_type": "ok dashed"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,347 @@
+{
+  "title": "TreeBeard - Application Performance",
+  "description": "Application-specific metrics: recommendations, Claude API, cache performance",
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "template_variables": [
+    {
+      "name": "environment",
+      "default": "production",
+      "prefix": "env"
+    }
+  ],
+  "widgets": [
+    {
+      "id": 1,
+      "definition": {
+        "type": "note",
+        "content": "## Application Performance\n\nRecommendation engine, external APIs, and application-specific metrics.",
+        "background_color": "green",
+        "font_size": "18",
+        "text_align": "center"
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "title": "Recommendation Generation Time (P95)",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "p95:treebeard.recommendations.duration{$environment}",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 5000,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 3000,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 3000,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "precision": 0,
+        "custom_unit": "ms"
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "title": "Claude API Response Time (P95)",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "p95:treebeard.external_api.duration{$environment,api:claude}",
+            "aggregator": "avg"
+          }
+        ],
+        "precision": 0,
+        "custom_unit": "ms"
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "title": "Cache Hit Rate %",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "avg:treebeard.cache.hit_rate{$environment}",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": "<",
+                "value": 60,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 60,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": ">=",
+                "value": 80,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "precision": 1,
+        "custom_unit": "%"
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "title": "Recommendation Generation Duration",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "p50:treebeard.recommendations.duration{$environment}",
+            "display_type": "line",
+            "style": {
+              "palette": "green"
+            }
+          },
+          {
+            "q": "p95:treebeard.recommendations.duration{$environment}",
+            "display_type": "line",
+            "style": {
+              "palette": "orange"
+            }
+          },
+          {
+            "q": "p99:treebeard.recommendations.duration{$environment}",
+            "display_type": "line",
+            "style": {
+              "palette": "red"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "milliseconds"
+        },
+        "markers": [
+          {
+            "value": "y = 5000",
+            "display_type": "warning dashed"
+          }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "title": "Recommendations Generated",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.recommendations.generated{$environment}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "count"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "title": "Recommendations by Profile Type",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.recommendations.generated{$environment} by {profile_type}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "count"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "title": "Cached vs Fresh Recommendations",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.recommendations.generated{$environment,cached:true}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "green"
+            }
+          },
+          {
+            "q": "sum:treebeard.recommendations.generated{$environment,cached:false}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "orange"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "count"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "title": "Claude API Call Rate",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.external_api.calls{$environment,api:claude}.as_rate()",
+            "display_type": "line",
+            "style": {
+              "palette": "blue"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "calls/sec"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "title": "Claude API Response Time",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "p50:treebeard.external_api.duration{$environment,api:claude}",
+            "display_type": "line",
+            "style": {
+              "palette": "green"
+            }
+          },
+          {
+            "q": "p95:treebeard.external_api.duration{$environment,api:claude}",
+            "display_type": "line",
+            "style": {
+              "palette": "orange"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "milliseconds"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "title": "External API Errors",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.external_api.errors{$environment} by {api}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "warm"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "errors"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "definition": {
+        "title": "Cache Operations",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.cache.operations{$environment} by {operation}.as_count()",
+            "display_type": "area",
+            "style": {
+              "palette": "cool"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "operations"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "definition": {
+        "title": "Cache Hit vs Miss",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.cache.result{$environment,result:hit}.as_count()",
+            "display_type": "area",
+            "style": {
+              "palette": "green"
+            }
+          },
+          {
+            "q": "sum:treebeard.cache.result{$environment,result:miss}.as_count()",
+            "display_type": "area",
+            "style": {
+              "palette": "red"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "operations"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "definition": {
+        "title": "Database Query Performance by Table",
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:treebeard.database.query.duration{$environment} by {table}, 10, 'mean', 'desc')"
+          }
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "definition": {
+        "title": "Slow Queries Count",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.database.slow_queries{$environment} by {table}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "warm"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "count"
+        }
+      }
+    }
+  ]
+}

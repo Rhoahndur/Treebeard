@@ -1,0 +1,26 @@
+# Workflow Status
+# This tracks progress through BMM methodology phases
+# Phase 3 (Implementation) is tracked separately in sprint-status.yaml
+
+generated: "2025-11-10"
+project: "TreeBeard"
+project_type: "software"
+selected_track: "method"
+field_type: "greenfield"
+workflow_path: "method-greenfield.yaml"
+
+workflow_status:
+  # Phase 0: Discovery (Optional) - Skipped
+
+  # Phase 1: Planning
+  prd: PRD.md  # agent: pm
+  validate-prd: skipped  # agent: pm (optional)
+  create-design: skipped  # agent: ux-designer (conditional - no UI design created yet)
+
+  # Phase 2: Solutioning
+  create-architecture: architecture.md  # agent: architect
+  validate-architecture: skipped  # agent: architect (optional)
+  solutioning-gate-check: required  # agent: architect
+
+  # Phase 3: Implementation
+  sprint-planning: required  # agent: sm

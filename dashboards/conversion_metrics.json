@@ -1,0 +1,176 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "treebeard-conversion-metrics",
+    "title": "TreeBeard - Conversion Metrics",
+    "tags": ["treebeard", "analytics", "conversion"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "1m",
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
+        "type": "stat",
+        "title": "Recommendation Generation Rate",
+        "targets": [
+          {
+            "expr": "SELECT COUNT(*) as total_recommendations FROM analytics_events WHERE event = 'recommendation_generated' AND timestamp >= NOW() - INTERVAL '24 hours'",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 2,
+        "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
+        "type": "stat",
+        "title": "Avg Plans per User",
+        "targets": [
+          {
+            "expr": "SELECT AVG((properties->>'num_plans')::float) as avg_plans FROM analytics_events WHERE event = 'recommendation_generated' AND timestamp >= NOW() - INTERVAL '7 days'",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 1
+          }
+        }
+      },
+      {
+        "id": 3,
+        "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
+        "type": "stat",
+        "title": "Plan Card Expansion Rate",
+        "targets": [
+          {
+            "expr": "SELECT (COUNT(DISTINCT CASE WHEN event = 'plan_card_expanded' THEN user_id END)::float / NULLIF(COUNT(DISTINCT CASE WHEN event = 'recommendation_generated' THEN user_id END), 0) * 100) as expansion_rate FROM analytics_events WHERE timestamp >= NOW() - INTERVAL '7 days'",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1
+          }
+        }
+      },
+      {
+        "id": 4,
+        "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+        "type": "stat",
+        "title": "Cost Breakdown View Rate",
+        "targets": [
+          {
+            "expr": "SELECT (COUNT(DISTINCT CASE WHEN event = 'cost_breakdown_viewed' THEN user_id END)::float / NULLIF(COUNT(DISTINCT CASE WHEN event = 'recommendation_generated' THEN user_id END), 0) * 100) as view_rate FROM analytics_events WHERE timestamp >= NOW() - INTERVAL '7 days'",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1
+          }
+        }
+      },
+      {
+        "id": 5,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "type": "graph",
+        "title": "Recommendations Generated Over Time",
+        "targets": [
+          {
+            "expr": "SELECT date_trunc('hour', timestamp) as time, COUNT(*) as recommendations FROM analytics_events WHERE event = 'recommendation_generated' AND timestamp >= NOW() - INTERVAL '7 days' GROUP BY time ORDER BY time",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Recommendations"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "type": "piechart",
+        "title": "User Profile Type Distribution",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'user_profile_type' as profile_type, COUNT(*) as count FROM analytics_events WHERE event = 'recommendation_generated' AND timestamp >= NOW() - INTERVAL '30 days' GROUP BY profile_type",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "type": "stat",
+        "title": "Average Savings Shown",
+        "targets": [
+          {
+            "expr": "SELECT AVG((properties->>'total_savings')::float) as avg_savings FROM analytics_events WHERE event = 'recommendation_generated' AND properties->>'total_savings' IS NOT NULL AND timestamp >= NOW() - INTERVAL '7 days'",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 2
+          }
+        }
+      },
+      {
+        "id": 8,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "type": "bargauge",
+        "title": "Plan Interaction by Position",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'position' as position, COUNT(*) as interactions FROM analytics_events WHERE event IN ('plan_card_expanded', 'plan_card_clicked') AND timestamp >= NOW() - INTERVAL '7 days' GROUP BY position ORDER BY position::int",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient"
+        }
+      },
+      {
+        "id": 9,
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "type": "graph",
+        "title": "Conversion Funnel Over Time",
+        "targets": [
+          {
+            "expr": "SELECT date_trunc('day', timestamp) as time, COUNT(DISTINCT CASE WHEN event = 'recommendation_generated' THEN user_id END) as generated, COUNT(DISTINCT CASE WHEN event = 'plan_card_expanded' THEN user_id END) as expanded, COUNT(DISTINCT CASE WHEN event = 'cost_breakdown_viewed' THEN user_id END) as viewed_breakdown, COUNT(DISTINCT CASE WHEN event = 'plan_card_clicked' THEN user_id END) as clicked FROM analytics_events WHERE timestamp >= NOW() - INTERVAL '30 days' GROUP BY time ORDER BY time",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "type": "table",
+        "title": "Top Recommended Plans",
+        "targets": [
+          {
+            "expr": "SELECT properties->>'plan_name' as plan, COUNT(*) as times_recommended, COUNT(DISTINCT user_id) as unique_users FROM analytics_events WHERE event = 'plan_card_expanded' AND timestamp >= NOW() - INTERVAL '30 days' GROUP BY plan ORDER BY times_recommended DESC LIMIT 10",
+            "refId": "A"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-7d",
+      "to": "now"
+    }
+  }
+}

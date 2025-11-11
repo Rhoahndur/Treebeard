@@ -1,0 +1,297 @@
+{
+  "title": "TreeBeard - Service Health",
+  "description": "Real-time service health and API performance monitoring",
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "notify_list": [],
+  "template_variables": [
+    {
+      "name": "environment",
+      "default": "production",
+      "prefix": "env"
+    },
+    {
+      "name": "service",
+      "default": "treebeard-api",
+      "prefix": "service"
+    }
+  ],
+  "widgets": [
+    {
+      "id": 1,
+      "definition": {
+        "type": "note",
+        "content": "## Service Health Overview\n\nReal-time monitoring of API health, request rates, and error rates.",
+        "background_color": "blue",
+        "font_size": "18",
+        "text_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      }
+    },
+    {
+      "id": 2,
+      "definition": {
+        "title": "API Uptime %",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "avg:treebeard.api.uptime{$environment,$service}",
+            "aggregator": "avg"
+          }
+        ],
+        "precision": 2,
+        "autoscale": false,
+        "custom_unit": "%",
+        "text_align": "center"
+      }
+    },
+    {
+      "id": 3,
+      "definition": {
+        "title": "Request Rate (req/sec)",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:treebeard.api.requests{$environment,$service}.as_rate()",
+            "aggregator": "avg"
+          }
+        ],
+        "precision": 2,
+        "autoscale": true,
+        "text_align": "center"
+      }
+    },
+    {
+      "id": 4,
+      "definition": {
+        "title": "Error Rate %",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "(sum:treebeard.api.errors{$environment,$service}.as_count() / sum:treebeard.api.requests{$environment,$service}.as_count()) * 100",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 5,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 2,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 2,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "precision": 2,
+        "custom_unit": "%",
+        "text_align": "center"
+      }
+    },
+    {
+      "id": 5,
+      "definition": {
+        "title": "Average Latency (ms)",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "avg:treebeard.api.request.duration{$environment,$service}",
+            "aggregator": "avg"
+          }
+        ],
+        "precision": 0,
+        "custom_unit": "ms",
+        "text_align": "center"
+      }
+    },
+    {
+      "id": 6,
+      "definition": {
+        "title": "Request Rate Over Time",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.api.requests{$environment,$service}.as_rate()",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "requests/sec",
+          "scale": "linear"
+        },
+        "markers": []
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "title": "API Latency Percentiles",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "p50:treebeard.api.request.duration{$environment,$service}",
+            "display_type": "line",
+            "style": {
+              "palette": "green",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          },
+          {
+            "q": "p95:treebeard.api.request.duration{$environment,$service}",
+            "display_type": "line",
+            "style": {
+              "palette": "orange",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          },
+          {
+            "q": "p99:treebeard.api.request.duration{$environment,$service}",
+            "display_type": "line",
+            "style": {
+              "palette": "red",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "milliseconds",
+          "scale": "linear"
+        },
+        "legend": {
+          "type": "automatic"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "definition": {
+        "title": "Error Rate Over Time",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "(sum:treebeard.api.errors{$environment,$service}.as_count() / sum:treebeard.api.requests{$environment,$service}.as_count()) * 100",
+            "display_type": "line",
+            "style": {
+              "palette": "warm",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "%",
+          "scale": "linear"
+        },
+        "markers": [
+          {
+            "value": "y = 5",
+            "display_type": "error dashed"
+          }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "definition": {
+        "title": "Requests by Endpoint",
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(sum:treebeard.api.requests{$environment,$service} by {endpoint}.as_count(), 10, 'sum', 'desc')"
+          }
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "definition": {
+        "title": "Errors by Endpoint",
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(sum:treebeard.api.errors{$environment,$service} by {endpoint}.as_count(), 10, 'sum', 'desc')",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 10,
+                "palette": "white_on_red"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "definition": {
+        "title": "HTTP Status Codes",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:treebeard.api.requests{$environment,$service,status:2*}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "green"
+            }
+          },
+          {
+            "q": "sum:treebeard.api.requests{$environment,$service,status:4*}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "orange"
+            }
+          },
+          {
+            "q": "sum:treebeard.api.requests{$environment,$service,status:5*}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "red"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "requests",
+          "scale": "linear"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "definition": {
+        "title": "Active Connections",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:treebeard.api.connections.active{$environment,$service}",
+            "display_type": "line",
+            "style": {
+              "palette": "blue",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "yaxis": {
+          "label": "connections",
+          "scale": "linear"
+        }
+      }
+    }
+  ]
+}
