@@ -10,9 +10,9 @@ from uuid import UUID
 from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 
-from ..config.database import get_db
-from ..models.user import User
-from .auth.jwt import decode_jwt, oauth2_scheme
+from config.database import get_db
+from models.user import User
+from api.auth.jwt import decode_jwt, oauth2_scheme
 
 
 async def get_current_user(

@@ -110,28 +110,65 @@ Before you begin, make sure you have:
 
 ## 🗃️ Step 4: Initialize Database (2 minutes)
 
-After the backend deploys successfully, you need to run database migrations:
+After the backend deploys successfully, you need to run database migrations.
 
-1. **Open Railway CLI in your backend service:**
-   - Click on your backend service
-   - Go to "Settings" tab
-   - Scroll to "Service" section
-   - Click "Open Terminal" (or use Railway CLI locally)
+### Option A: Using Railway CLI (Recommended)
 
-2. **Run migrations:**
+1. **Install Railway CLI locally** (if not already installed):
+   ```bash
+   # macOS/Linux
+   brew install railway
+
+   # Or using npm
+   npm install -g @railway/cli
+
+   # Or using curl
+   bash <(curl -fsSL cli.new)
+   ```
+
+2. **Login and link to your project:**
+   ```bash
+   railway login
+   railway link
+   ```
+   - Select your TreeBeard project when prompted
+
+3. **Run migrations:**
+   ```bash
+   railway run --service backend alembic upgrade head
+   ```
+
+   Or if you're in the backend directory:
    ```bash
    cd src/backend
-   alembic upgrade head
+   railway run --service backend python -m alembic upgrade head
    ```
 
-   Or if that doesn't work, try:
+4. **Verify database is initialized:**
+   - Check your Railway logs for success messages
+   - You should see "Running upgrade" messages
+
+### Option B: Automatic Migrations via Start Command
+
+Alternatively, you can have migrations run automatically on deploy by updating your start command:
+
+1. Go to your backend service → **Settings** → **Deploy**
+2. Change **Start Command** to:
    ```bash
-   python -m alembic upgrade head
+   alembic upgrade head && uvicorn api.main:app --host 0.0.0.0 --port $PORT
    ```
+3. **Redeploy** the service
 
-3. **Verify database is initialized:**
-   - Check the logs for success messages
-   - You should see tables created
+This will run migrations before starting the server on every deploy.
+
+### Option C: One-Time Job (Manual)
+
+1. In Railway dashboard, go to your backend service
+2. Click **"Run Command"** button (if available)
+3. Enter: `alembic upgrade head`
+4. Click **"Run"**
+
+**Note:** If you see migration errors, check that your `DATABASE_URL` environment variable is properly set (Railway should set this automatically when you add PostgreSQL).
 
 ---
 

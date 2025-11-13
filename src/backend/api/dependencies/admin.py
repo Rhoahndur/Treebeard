@@ -6,8 +6,8 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 
-from ...models.user import User
-from ..auth_dependencies import get_current_user
+from models.user import User
+from api.auth_dependencies import get_current_user
 
 
 async def require_admin(

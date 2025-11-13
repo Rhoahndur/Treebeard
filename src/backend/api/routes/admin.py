@@ -12,8 +12,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...config.database import get_db
-from ...schemas.admin_schemas import (
+from config.database import get_db
+from schemas.admin_schemas import (
     PaginationParams,
     PlanCatalogCreate,
     PlanCatalogResponse,
@@ -25,12 +25,12 @@ from ...schemas.admin_schemas import (
     UserListResponse,
     UserRoleUpdate,
 )
-from ...schemas.audit_schemas import (
+from schemas.audit_schemas import (
     AuditLogFilter,
     AuditLogListResponse,
     AuditLogStats,
 )
-from ...services.admin_service import (
+from services.admin_service import (
     create_plan,
     get_plans,
     get_recommendations,
@@ -42,8 +42,8 @@ from ...services.admin_service import (
     update_plan,
     update_user_role,
 )
-from ...services.audit_service import get_audit_logs, get_audit_stats, log_admin_action
-from ..dependencies.admin import AdminUser
+from services.audit_service import get_audit_logs, get_audit_stats, log_admin_action
+from api.dependencies.admin import AdminUser
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

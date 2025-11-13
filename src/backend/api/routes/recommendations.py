@@ -14,23 +14,23 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from ...config.database import get_db
-from ...models.plan import Supplier
-from ...models.recommendation import Recommendation
-from ...models.user import User
-from ...schemas.usage_analysis import MonthlyUsage
-from ...services.explanation_service import create_explanation_service
-from ...services.recommendation_engine import get_enhanced_recommendations
-from ...services.risk_detection import (
+from config.database import get_db
+from models.plan import Supplier
+from models.recommendation import Recommendation
+from models.user import User
+from schemas.usage_analysis import MonthlyUsage
+from services.explanation_service import create_explanation_service
+from services.recommendation_engine import get_enhanced_recommendations
+from services.risk_detection import (
     CurrentPlan as RiskCurrentPlan,
     create_risk_detection_service,
 )
-from ...services.savings_calculator import SavingsCalculatorService
-from ...services.usage_analysis import UsageAnalysisService
-from ..auth.rbac import Permission, require_permission
-from ..auth_dependencies import CurrentActiveUser, CurrentUser, DBSession, OptionalUser
-from ..schemas.common import MessageResponse
-from ..schemas.recommendation_requests import (
+from services.savings_calculator import SavingsCalculatorService
+from services.usage_analysis import UsageAnalysisService
+from api.auth.rbac import Permission, require_permission
+from api.auth_dependencies import CurrentActiveUser, CurrentUser, DBSession, OptionalUser
+from api.schemas.common import MessageResponse
+from api.schemas.recommendation_requests import (
     GenerateRecommendationRequest,
     GenerateRecommendationResponse,
     PlanRecommendationResponse,

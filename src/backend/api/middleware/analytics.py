@@ -11,7 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 import logging
 
-from ...services.analytics_service import get_analytics_service
+from services.analytics_service import get_analytics_service
 
 logger = logging.getLogger(__name__)
 

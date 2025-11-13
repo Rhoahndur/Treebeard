@@ -9,8 +9,8 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from ...config.database import get_db
-from ...services.audit_service import log_admin_action_sync
+from config.database import get_db
+from services.audit_service import log_admin_action_sync
 
 logger = logging.getLogger(__name__)
 

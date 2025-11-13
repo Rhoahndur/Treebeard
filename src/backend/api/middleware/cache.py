@@ -12,7 +12,7 @@ from typing import Callable
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from ...services.cache_service import get_cache_service
+from services.cache_service import get_cache_service
 
 logger = logging.getLogger(__name__)
 

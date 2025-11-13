@@ -12,9 +12,9 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
-from ...models.usage import UsageHistory
-from ..auth_dependencies import CurrentUser, DBSession
-from ..schemas.common import MessageResponse
+from models.usage import UsageHistory
+from api.auth_dependencies import CurrentUser, DBSession
+from api.schemas.common import MessageResponse
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

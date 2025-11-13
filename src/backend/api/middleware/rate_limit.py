@@ -11,7 +11,7 @@ from typing import Callable, Dict, Optional
 from fastapi import HTTPException, Request, Response, status
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from ...services.cache_service import get_cache_service
+from services.cache_service import get_cache_service
 
 logger = logging.getLogger(__name__)
 

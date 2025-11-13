@@ -11,9 +11,9 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field
 
-from ...models.user import UserPreference
-from ..auth_dependencies import CurrentAdminUser, CurrentUser, DBSession
-from ..schemas.common import MessageResponse
+from models.user import UserPreference
+from api.auth_dependencies import CurrentAdminUser, CurrentUser, DBSession
+from api.schemas.common import MessageResponse
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

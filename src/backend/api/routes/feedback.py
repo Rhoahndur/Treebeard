@@ -12,7 +12,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-from ...schemas.feedback_schemas import (
+from schemas.feedback_schemas import (
     FeedbackAnalyticsResponse,
     FeedbackSearchParams,
     FeedbackSearchResponse,
@@ -21,8 +21,8 @@ from ...schemas.feedback_schemas import (
     PlanFeedbackCreate,
     RecommendationFeedbackCreate,
 )
-from ...services.feedback_service import FeedbackService, create_feedback_service
-from ..auth_dependencies import CurrentAdminUser, DBSession, OptionalUser
+from services.feedback_service import FeedbackService, create_feedback_service
+from api.auth_dependencies import CurrentAdminUser, DBSession, OptionalUser
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

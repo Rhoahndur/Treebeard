@@ -12,14 +12,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from ..config.settings import settings
-from .middleware.audit_middleware import AuditMiddleware
-from .middleware.cache import CacheMiddleware
-from .middleware.error_handler import ErrorHandlerMiddleware
-from .middleware.logging import LoggingMiddleware
-from .middleware.rate_limit import RateLimitMiddleware
-from .middleware.request_id import RequestIDMiddleware
-from .routes import (
+from config.settings import settings
+from api.middleware.audit_middleware import AuditMiddleware
+from api.middleware.cache import CacheMiddleware
+from api.middleware.error_handler import ErrorHandlerMiddleware
+from api.middleware.logging import LoggingMiddleware
+from api.middleware.rate_limit import RateLimitMiddleware
+from api.middleware.request_id import RequestIDMiddleware
+from api.routes import (
     admin,
     auth,
     feedback,
@@ -33,7 +33,7 @@ from .routes import (
 # Initialize monitoring
 if settings.monitoring_enabled:
     try:
-        from ..monitoring import init_apm, init_metrics, init_sentry
+        from monitoring import init_apm, init_metrics, init_sentry
 
         # Initialize Sentry for error tracking
         if settings.sentry_dsn:

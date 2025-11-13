@@ -12,9 +12,9 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
-from ...models.plan import PlanCatalog
-from ..auth_dependencies import DBSession, OptionalUser
-from ..schemas.common import PaginatedResponse
+from models.plan import PlanCatalog
+from api.auth_dependencies import DBSession, OptionalUser
+from api.schemas.common import PaginatedResponse
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

@@ -13,16 +13,16 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 
-from ...config.database import get_db
-from ...models.user import User
-from ..auth.jwt import (
+from config.database import get_db
+from models.user import User
+from api.auth.jwt import (
     create_access_token,
     create_refresh_token,
     decode_jwt,
     get_password_hash,
     verify_password,
 )
-from ..auth_dependencies import CurrentUser, DBSession
+from api.auth_dependencies import CurrentUser, DBSession
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

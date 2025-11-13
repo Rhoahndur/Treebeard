@@ -9,7 +9,7 @@ from typing import List
 
 from fastapi import HTTPException, status
 
-from ...models.user import User
+from models.user import User
 
 
 class Permission(str, Enum):
