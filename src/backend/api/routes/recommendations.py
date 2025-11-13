@@ -171,6 +171,15 @@ async def generate_recommendations(
         from schemas.savings_schemas import SavingsAnalysis
         from decimal import Decimal
 
+        # Calculate current plan annual cost once (needed for risk detection)
+        current_annual_cost = None
+        if request.current_plan:
+            current_annual_cost = (
+                Decimal(str(request.current_plan.current_rate))
+                * Decimal(str(usage_profile.projection.projected_annual_kwh))
+                / Decimal("100")  # Convert cents to dollars
+            )
+
         savings_analyses = []
         for ranked_plan in recommendation_result.top_plans:
             # Calculate savings if current plan exists
@@ -179,14 +188,7 @@ async def generate_recommendations(
             savings_pct = Decimal("0")
             break_even = None
 
-            if request.current_plan:
-                # Calculate current plan annual cost
-                current_annual_cost = (
-                    Decimal(str(request.current_plan.current_rate))
-                    * Decimal(str(usage_profile.projection.projected_annual_kwh))
-                    / Decimal("100")  # Convert cents to dollars
-                )
-
+            if request.current_plan and current_annual_cost:
                 # Use projected costs from ranked plan
                 annual_savings = current_annual_cost - ranked_plan.projected_annual_cost
 
