@@ -67,9 +67,10 @@ export default defineConfig({
 
   // Preview/Production server configuration
   preview: {
-    port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
+    port: 8080,
     host: '0.0.0.0',
     strictPort: false,
+    allowedHosts: ['.railway.app', 'localhost'],
     headers: {
       // Cache control headers
       'Cache-Control': 'public, max-age=300',  // 5 minutes for HTML
