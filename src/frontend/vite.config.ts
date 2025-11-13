@@ -67,8 +67,9 @@ export default defineConfig({
 
   // Preview/Production server configuration
   preview: {
-    port: 3000,
-    host: true,
+    port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
+    host: '0.0.0.0',
+    strictPort: false,
     headers: {
       // Cache control headers
       'Cache-Control': 'public, max-age=300',  // 5 minutes for HTML
