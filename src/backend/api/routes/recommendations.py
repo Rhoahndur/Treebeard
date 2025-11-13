@@ -28,7 +28,7 @@ from ...services.risk_detection import (
 from ...services.savings_calculator import SavingsCalculatorService
 from ...services.usage_analysis import UsageAnalysisService
 from ..auth.rbac import Permission, require_permission
-from ..auth_dependencies import CurrentActiveUser, CurrentUser, DBSession
+from ..auth_dependencies import CurrentActiveUser, CurrentUser, DBSession, OptionalUser
 from ..schemas.common import MessageResponse
 from ..schemas.recommendation_requests import (
     GenerateRecommendationRequest,
@@ -66,14 +66,14 @@ logger = logging.getLogger(__name__)
 async def generate_recommendations(
     request: GenerateRecommendationRequest,
     db: DBSession,
-    current_user: CurrentActiveUser,
+    current_user: OptionalUser = None,
 ):
     """
     Generate plan recommendations for a user.
 
     Args:
         request: Recommendation request with usage data and preferences
-        current_user: Authenticated user
+        current_user: Optional authenticated user (creates guest if not authenticated)
         db: Database session
 
     Returns:
@@ -83,7 +83,12 @@ async def generate_recommendations(
         HTTPException: If generation fails
     """
     try:
-        user_id = current_user.id
+        # Create or get user ID - use guest user if not authenticated
+        if current_user:
+            user_id = current_user.id
+        else:
+            # Create a guest user ID for anonymous recommendations
+            user_id = uuid4()
         logger.info(
             f"Generating recommendations for user {user_id}",
             extra={"user_id": str(user_id)},
@@ -394,18 +399,21 @@ async def generate_recommendations(
             )
             plan_responses.append(plan_response)
 
-        # Create recommendation record in database
+        # Create recommendation record in database (only for authenticated users)
         recommendation_id = uuid4()
         generated_at = datetime.utcnow()
-        db_recommendation = Recommendation(
-            id=recommendation_id,
-            user_id=user_id,
-            usage_profile=usage_profile.to_dict(),
-            generated_at=generated_at,
-            expires_at=generated_at + timedelta(hours=24),  # Recommendations expire after 24 hours
-        )
-        db.add(db_recommendation)
-        db.commit()
+
+        # Only save to database if user is authenticated (not a guest)
+        if current_user:
+            db_recommendation = Recommendation(
+                id=recommendation_id,
+                user_id=user_id,
+                usage_profile=usage_profile.to_dict(),
+                generated_at=generated_at,
+                expires_at=generated_at + timedelta(hours=24),  # Recommendations expire after 24 hours
+            )
+            db.add(db_recommendation)
+            db.commit()
 
         # Build stay recommendation response
         stay_rec_response = None
@@ -456,7 +464,7 @@ async def generate_recommendations(
         logger.error(
             f"Failed to generate recommendations: {exc}",
             exc_info=True,
-            extra={"user_id": str(current_user.id)},
+            extra={"user_id": str(user_id) if 'user_id' in locals() else 'unknown'},
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { OnboardingPage } from '@/pages/OnboardingPage';
 import { ResultsPage } from '@/pages/ResultsPage';
-import { LoginPage } from '@/pages/LoginPage';
 import { RequireAdmin } from '@/components/auth/RequireAdmin';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Dashboard } from '@/pages/admin/Dashboard';
@@ -25,8 +24,7 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<Navigate to="/onboarding" replace />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/results" element={<ResultsPageWrapper />} />
 
