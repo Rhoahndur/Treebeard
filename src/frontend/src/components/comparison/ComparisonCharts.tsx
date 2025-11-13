@@ -207,7 +207,7 @@ export const ComparisonCharts: React.FC<ComparisonChartsProps> = ({ plans }) => 
             <Tooltip
               content={
                 <ChartTooltip
-                  formatter={(value, name, props: any) => {
+                  formatter={(value) => {
                     const months = Number(value);
                     return months === 0 ? 'Month-to-month' : `${months} months`;
                   }}

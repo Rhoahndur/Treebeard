@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useAdminPlans } from '@/hooks/useAdminPlans';
 import { DataTable } from '@/components/admin/DataTable';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
-import { JsonEditor } from '@/components/admin/JsonEditor';
 import { Badge } from '@/components/design-system/Badge';
 import { Button } from '@/components/design-system/Button';
 import { Input } from '@/components/design-system/Input';

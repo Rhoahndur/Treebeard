@@ -21,7 +21,6 @@ import {
   clearOnboardingData,
   hasSavedData,
 } from '@/utils/localStorage';
-import { apiClient } from '@/api/client';
 import { recommendationsApi } from '@/api/recommendations';
 import type { GenerateRecommendationRequest } from '@/types/api';
 

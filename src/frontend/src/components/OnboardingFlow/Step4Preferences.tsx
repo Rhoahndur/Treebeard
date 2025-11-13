@@ -15,14 +15,13 @@ export const Step4Preferences: React.FC<Step4PreferencesProps> = ({
   onBack,
   isSubmitting = false,
 }) => {
-  const [preferences, setPreferences] = useState<Preferences>(
-    initialData || {
-      cost_priority: 25,
-      flexibility_priority: 25,
-      renewable_priority: 25,
-      rating_priority: 25,
-    }
-  );
+  const [preferences, setPreferences] = useState<Preferences>({
+    cost_priority: 25,
+    flexibility_priority: 25,
+    renewable_priority: 25,
+    rating_priority: 25,
+    ...initialData,
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

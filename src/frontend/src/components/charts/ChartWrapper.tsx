@@ -5,7 +5,7 @@ import { AlertCircle } from 'lucide-react';
 export interface ChartWrapperProps {
   title?: string;
   subtitle?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   isLoading?: boolean;
   error?: string | null;
   height?: number;

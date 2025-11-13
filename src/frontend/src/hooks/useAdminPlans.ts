@@ -99,9 +99,23 @@ export const useAdminPlans = () => {
 
       const newPlan: AdminPlan = {
         id: `plan-${mockPlans.length + 1}`,
-        ...data,
+        plan_name: data.plan_name,
+        supplier_name: data.supplier_name,
+        plan_type: data.plan_type,
+        base_rate: data.base_rate,
+        contract_length_months: data.contract_length_months,
+        early_termination_fee: data.early_termination_fee,
+        renewable_percentage: data.renewable_percentage,
+        regions: data.regions,
+        available_from: data.available_from,
+        supplier_rating: data.supplier_rating,
+        customer_service_rating: data.customer_service_rating,
         tiered_rates: data.tiered_rates ? JSON.parse(data.tiered_rates) : undefined,
         time_of_use_rates: data.time_of_use_rates ? JSON.parse(data.time_of_use_rates) : undefined,
+        min_usage_kwh: data.min_usage_kwh,
+        max_usage_kwh: data.max_usage_kwh,
+        monthly_fee: data.monthly_fee,
+        description: data.description,
         available_to: data.available_to || null,
         status: 'active',
         created_at: new Date().toISOString(),
@@ -125,12 +139,19 @@ export const useAdminPlans = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
+      const updates: Partial<AdminPlan> = {
+        ...data,
+        tiered_rates: data.tiered_rates ? JSON.parse(data.tiered_rates) : undefined,
+        time_of_use_rates: data.time_of_use_rates ? JSON.parse(data.time_of_use_rates) : undefined,
+        updated_at: new Date().toISOString(),
+      };
+
       const index = mockPlans.findIndex((p) => p.id === planId);
       if (index !== -1) {
-        mockPlans[index] = { ...mockPlans[index], ...data, updated_at: new Date().toISOString() };
+        mockPlans[index] = { ...mockPlans[index], ...updates };
       }
 
-      setPlans((prev) => prev.map((p) => (p.id === planId ? { ...p, ...data } : p)));
+      setPlans((prev) => prev.map((p) => (p.id === planId ? { ...p, ...updates } : p)));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update plan';
       setError(errorMessage);

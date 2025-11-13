@@ -42,7 +42,7 @@ export const RateStructureChart: React.FC<RateStructureChartProps> = ({
       >
         <div className="flex flex-col items-center justify-center h-full">
           <div className="text-center">
-            <Badge variant="primary" size="lg" className="mb-4">
+            <Badge variant="info" size="lg" className="mb-4">
               Fixed Rate Plan
             </Badge>
             <div className="text-4xl font-bold text-gray-900 mb-2">

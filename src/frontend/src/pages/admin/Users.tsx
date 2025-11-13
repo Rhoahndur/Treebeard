@@ -3,7 +3,6 @@ import { useAdminUsers } from '@/hooks/useAdminUsers';
 import { DataTable } from '@/components/admin/DataTable';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { Badge } from '@/components/design-system/Badge';
-import { Button } from '@/components/design-system/Button';
 import { Input } from '@/components/design-system/Input';
 import type { AdminUser, UserDetails, UserFilters } from '@/types/admin';
 import type { ColumnDef } from '@/types/admin';
