@@ -23,7 +23,7 @@ try:
 except ImportError:
     REDIS_AVAILABLE = False
 
-from ..schemas.usage_analysis import UsageProfile, MonthlyUsage
+from schemas.usage_analysis import UsageProfile, MonthlyUsage
 
 
 class CacheService:

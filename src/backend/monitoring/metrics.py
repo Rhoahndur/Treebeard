@@ -20,7 +20,7 @@ from contextlib import contextmanager
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from ..config.settings import settings
+from config.settings import settings
 
 logger = logging.getLogger(__name__)
 

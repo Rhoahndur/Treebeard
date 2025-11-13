@@ -21,7 +21,7 @@ import calendar
 import numpy as np
 from scipy import stats
 
-from ..schemas.usage_analysis import (
+from schemas.usage_analysis import (
     MonthlyUsage,
     UsageProfile,
     UserProfileType,

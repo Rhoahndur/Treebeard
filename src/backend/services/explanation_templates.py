@@ -8,7 +8,7 @@ Uses rule-based logic to generate personalized explanations.
 from decimal import Decimal
 from typing import List, Optional, Dict, Any
 
-from ..schemas.explanation_schemas import (
+from schemas.explanation_schemas import (
     RankedPlan,
     UserPreferences,
     CurrentPlan,

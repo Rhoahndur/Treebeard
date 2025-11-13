@@ -21,7 +21,7 @@ import httpx
 # Import OpenAI service
 from .explanation_service_openai import OpenAIExplanationService
 
-from ..schemas.explanation_schemas import (
+from schemas.explanation_schemas import (
     RankedPlan,
     UserPreferences,
     CurrentPlan,

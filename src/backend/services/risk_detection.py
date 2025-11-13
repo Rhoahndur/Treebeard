@@ -14,8 +14,8 @@ from decimal import Decimal
 from typing import List, Optional, Tuple
 from uuid import UUID
 
-from ..schemas.recommendation_schemas import RankedPlan, UserPreferences
-from ..schemas.risk_schemas import (
+from schemas.recommendation_schemas import RankedPlan, UserPreferences
+from schemas.risk_schemas import (
     EnhancedRecommendationResult,
     PlanRiskAnalysis,
     RiskCategory,
@@ -28,8 +28,8 @@ from ..schemas.risk_schemas import (
     StayRecommendation,
     StayRecommendationTrigger,
 )
-from ..schemas.savings_schemas import SavingsAnalysis
-from ..schemas.usage_analysis import DataQualityMetrics, UsageProfile
+from schemas.savings_schemas import SavingsAnalysis
+from schemas.usage_analysis import DataQualityMetrics, UsageProfile
 
 logger = logging.getLogger(__name__)
 

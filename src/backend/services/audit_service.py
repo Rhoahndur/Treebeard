@@ -11,9 +11,9 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session, selectinload
 
-from ..models.audit_log import AuditLog
-from ..models.user import User
-from ..schemas.audit_schemas import (
+from models.audit_log import AuditLog
+from models.user import User
+from schemas.audit_schemas import (
     AuditLogCreate,
     AuditLogFilter,
     AuditLogListResponse,

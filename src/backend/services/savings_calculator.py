@@ -17,8 +17,8 @@ from decimal import Decimal
 from typing import Any, Optional
 from uuid import UUID, uuid4
 
-from ..schemas.plan import PlanCatalogResponse
-from ..schemas.savings_schemas import (
+from schemas.plan import PlanCatalogResponse
+from schemas.savings_schemas import (
     ComparisonPlan,
     CostRange,
     MonthlyCost,
@@ -29,8 +29,8 @@ from ..schemas.savings_schemas import (
     SavingsAnalysis,
     TradeOffNote,
 )
-from ..schemas.user import CurrentPlanResponse
-from ..schemas.usage_analysis import UsageProjection
+from schemas.user import CurrentPlanResponse
+from schemas.usage_analysis import UsageProjection
 
 
 class SavingsCalculatorService:

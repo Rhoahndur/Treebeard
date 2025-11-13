@@ -19,7 +19,7 @@ import time
 from contextlib import contextmanager
 from typing import Any, Callable, Dict, Optional
 
-from ..config.settings import settings
+from config.settings import settings
 
 logger = logging.getLogger(__name__)
 

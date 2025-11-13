@@ -17,9 +17,9 @@ import logging
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, any_
 
-from ..models.plan import PlanCatalog, Supplier
-from ..models.user import User, UserPreference, CurrentPlan
-from ..schemas.recommendation_schemas import (
+from models.plan import PlanCatalog, Supplier
+from models.user import User, UserPreference, CurrentPlan
+from schemas.recommendation_schemas import (
     RankedPlan,
     RecommendationResult,
     EnhancedRecommendationResult,
@@ -32,8 +32,8 @@ from ..schemas.recommendation_schemas import (
     SwitchingAnalysis,
     PlanFilter
 )
-from ..schemas.usage_analysis import UsageProjection
-from .scoring_service import score_plan
+from schemas.usage_analysis import UsageProjection
+from services.scoring_service import score_plan
 
 logger = logging.getLogger(__name__)
 

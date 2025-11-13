@@ -19,8 +19,8 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 
-from .cache_optimization import OptimizedCacheService, get_optimized_cache
-from ..config.database import SessionLocal
+from services.cache_optimization import OptimizedCacheService, get_optimized_cache
+from config.database import SessionLocal
 
 logger = logging.getLogger(__name__)
 

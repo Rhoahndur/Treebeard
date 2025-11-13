@@ -19,7 +19,7 @@ from typing import List, Optional, Dict, Any
 import httpx
 from openai import AsyncOpenAI
 
-from ..schemas.explanation_schemas import (
+from schemas.explanation_schemas import (
     RankedPlan,
     UserPreferences,
     CurrentPlan,

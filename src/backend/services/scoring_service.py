@@ -15,8 +15,8 @@ from decimal import Decimal
 from typing import Dict, Any, Optional
 import math
 
-from ..schemas.recommendation_schemas import PlanScores, UserPreferences
-from ..schemas.usage_analysis import UsageProjection
+from schemas.recommendation_schemas import PlanScores, UserPreferences
+from schemas.usage_analysis import UsageProjection
 
 
 # ============================================================================

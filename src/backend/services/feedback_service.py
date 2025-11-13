@@ -16,10 +16,10 @@ from uuid import UUID
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
-from ..models.feedback import Feedback
-from ..models.plan import PlanCatalog
-from ..models.recommendation import RecommendationPlan
-from ..schemas.feedback_schemas import (
+from models.feedback import Feedback
+from models.plan import PlanCatalog
+from models.recommendation import RecommendationPlan
+from schemas.feedback_schemas import (
     FeedbackAnalyticsResponse,
     FeedbackResponse,
     FeedbackSearchParams,

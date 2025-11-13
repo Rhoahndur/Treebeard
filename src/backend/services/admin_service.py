@@ -11,11 +11,11 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from ..models.feedback import Feedback
-from ..models.plan import PlanCatalog, Supplier
-from ..models.recommendation import Recommendation, RecommendationPlan
-from ..models.user import User
-from ..schemas.admin_schemas import (
+from models.feedback import Feedback
+from models.plan import PlanCatalog, Supplier
+from models.recommendation import Recommendation, RecommendationPlan
+from models.user import User
+from schemas.admin_schemas import (
     PaginationParams,
     PlanCatalogCreate,
     PlanCatalogResponse,
@@ -156,7 +156,7 @@ async def get_user_detail(
     last_feedback = last_feedback_result.scalar_one_or_none()
 
     # Count usage data points
-    from ..models.usage import UsageHistory
+    from models.usage import UsageHistory
     usage_count_query = select(func.count()).select_from(UsageHistory).where(UsageHistory.user_id == user_id)
     usage_count_result = await db.execute(usage_count_query)
     usage_data_points = usage_count_result.scalar() or 0
