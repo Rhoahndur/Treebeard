@@ -211,7 +211,7 @@ async def update_profile(
     """
     # Check if email is being changed to existing email
     if request.email and request.email != current_user.email:
-        from ...models.user import User
+        from models.user import User
 
         existing = db.query(User).filter(User.email == request.email).first()
         if existing:
@@ -268,7 +268,7 @@ async def delete_user(
     """
     from uuid import UUID
 
-    from ...models.user import User
+    from models.user import User
 
     user = db.query(User).filter(User.id == UUID(user_id)).first()
 

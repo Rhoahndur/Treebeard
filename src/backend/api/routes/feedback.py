@@ -426,8 +426,8 @@ async def export_feedback_csv(
 
         from fastapi.responses import StreamingResponse
 
-        from ...models.feedback import Feedback
-        from ...models.plan import Plan
+        from models.feedback import Feedback
+        from models.plan import Plan
 
         # Query all feedback with plan details
         feedbacks = (

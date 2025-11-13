@@ -114,7 +114,7 @@ async def generate_recommendations(
         )
 
         # Step 2: Get recommendations (Story 2.2)
-        from ...schemas.explanation_schemas import UserPreferences
+        from schemas.explanation_schemas import UserPreferences
 
         preferences = UserPreferences(
             cost_priority=request.preferences.cost_priority,
@@ -126,7 +126,7 @@ async def generate_recommendations(
         # Get current plan if provided
         current_plan = None
         if request.current_plan:
-            from ...models.user import CurrentPlan
+            from models.user import CurrentPlan
 
             current_plan = CurrentPlan(
                 plan_name=request.current_plan.plan_name,
@@ -160,7 +160,7 @@ async def generate_recommendations(
         plan_responses = []
 
         # Step 4: Generate explanations (Story 2.7)
-        from ...config.settings import settings
+        from config.settings import settings
 
         explanation_service = create_explanation_service(
             api_key=settings.openai_api_key,
@@ -168,7 +168,7 @@ async def generate_recommendations(
         )
 
         # Step 3.5: Calculate savings for all plans (needed for risk detection)
-        from ...schemas.savings_schemas import SavingsAnalysis
+        from schemas.savings_schemas import SavingsAnalysis
         from decimal import Decimal
 
         savings_analyses = []
@@ -209,7 +209,7 @@ async def generate_recommendations(
 
                 # Create SavingsAnalysis for risk detection
                 # Generate monthly breakdown (required by schema)
-                from ...schemas.savings_schemas import MonthlyCost
+                from schemas.savings_schemas import MonthlyCost
                 from datetime import datetime
 
                 monthly_breakdown = []
