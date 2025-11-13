@@ -789,6 +789,8 @@ def seed_admin_user(db):
         name="Admin User",
         hashed_password=get_password_hash("admin123"),  # CHANGE IN PRODUCTION!
         zip_code="78701",
+        property_type="residential",
+        consent_given=True,
         is_admin=True,
         is_active=True,
         created_at=datetime.utcnow(),
@@ -817,6 +819,8 @@ def seed_demo_user(db):
         name="Demo User",
         hashed_password=get_password_hash("user123"),
         zip_code="78701",
+        property_type="residential",
+        consent_given=True,
         is_admin=False,
         is_active=True,
         created_at=datetime.utcnow(),
