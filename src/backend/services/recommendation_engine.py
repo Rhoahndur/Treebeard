@@ -142,7 +142,10 @@ def _calculate_tiered_cost(rate_structure: Dict[str, Any], annual_kwh: float) ->
     remaining_kwh = annual_kwh
 
     for tier in tiers:
-        max_kwh = tier.get('max_kwh', float('inf'))
+        max_kwh = tier.get('max_kwh')
+        # Handle None as infinity (unlimited tier)
+        if max_kwh is None:
+            max_kwh = float('inf')
         rate_per_kwh = Decimal(str(tier.get('rate_per_kwh', 0)))
 
         # Calculate kWh in this tier
