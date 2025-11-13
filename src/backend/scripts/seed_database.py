@@ -21,10 +21,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.config.settings import settings
-from backend.models.plan import Supplier, PlanCatalog
-from backend.models.user import User
-from backend.api.auth.jwt import get_password_hash
+from config.settings import settings
+from models.plan import Supplier, PlanCatalog
+from models.user import User
+from api.auth.jwt import get_password_hash
 
 
 # Texas ZIP codes to cover (major cities)
