@@ -1,0 +1,7 @@
+# Railway ignore file for frontend
+node_modules
+.env.local
+.DS_Store
+dist
+coverage
+*.log
