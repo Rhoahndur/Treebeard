@@ -13,6 +13,7 @@ Cache Strategy:
 
 import json
 import hashlib
+import os
 from typing import Optional, List
 from datetime import timedelta
 
@@ -38,6 +39,7 @@ class CacheService:
 
     def __init__(
         self,
+        redis_url: Optional[str] = None,
         redis_host: str = "localhost",
         redis_port: int = 6379,
         redis_db: int = 0,
@@ -48,10 +50,11 @@ class CacheService:
         Initialize cache service.
 
         Args:
-            redis_host: Redis server hostname
-            redis_port: Redis server port
-            redis_db: Redis database number
-            redis_password: Redis password (if required)
+            redis_url: Redis connection URL (takes precedence if provided)
+            redis_host: Redis server hostname (used if redis_url not provided)
+            redis_port: Redis server port (used if redis_url not provided)
+            redis_db: Redis database number (used if redis_url not provided)
+            redis_password: Redis password (used if redis_url not provided)
             enabled: Whether caching is enabled (set to False for testing)
         """
         self.enabled = enabled and REDIS_AVAILABLE
@@ -59,15 +62,28 @@ class CacheService:
 
         if self.enabled:
             try:
-                self._client = redis.Redis(
-                    host=redis_host,
-                    port=redis_port,
-                    db=redis_db,
-                    password=redis_password,
-                    decode_responses=True,
-                    socket_connect_timeout=2,
-                    socket_timeout=2,
-                )
+                # Check for REDIS_URL environment variable first, then redis_url parameter
+                redis_connection_url = redis_url or os.getenv("REDIS_URL")
+
+                if redis_connection_url:
+                    # Use from_url if a URL is provided
+                    self._client = redis.from_url(
+                        redis_connection_url,
+                        decode_responses=True,
+                        socket_connect_timeout=2,
+                        socket_timeout=2,
+                    )
+                else:
+                    # Fall back to individual parameters
+                    self._client = redis.Redis(
+                        host=redis_host,
+                        port=redis_port,
+                        db=redis_db,
+                        password=redis_password,
+                        decode_responses=True,
+                        socket_connect_timeout=2,
+                        socket_timeout=2,
+                    )
                 # Test connection
                 self._client.ping()
             except Exception as e:
