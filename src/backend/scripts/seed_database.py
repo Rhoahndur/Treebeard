@@ -721,14 +721,33 @@ def seed_plans(db, suppliers):
 
     plans = []
     for data in plans_data:
-        # Create rate tiers based on structure
-        rate_tiers = None
+        # Create rate_structure JSON based on plan type
         if data["rate_structure"] == "tiered":
-            rate_tiers = [
-                {"min_kwh": 0, "max_kwh": 500, "rate": float(data["base_rate"]) - 1.0},
-                {"min_kwh": 501, "max_kwh": 1000, "rate": float(data["base_rate"])},
-                {"min_kwh": 1001, "max_kwh": None, "rate": float(data["base_rate"]) + 1.0},
-            ]
+            rate_structure = {
+                "type": "tiered",
+                "tiers": [
+                    {"min_kwh": 0, "max_kwh": 500, "rate": float(data["base_rate"]) - 1.0},
+                    {"min_kwh": 501, "max_kwh": 1000, "rate": float(data["base_rate"])},
+                    {"min_kwh": 1001, "max_kwh": None, "rate": float(data["base_rate"]) + 1.0},
+                ]
+            }
+        elif data["rate_structure"] == "fixed":
+            rate_structure = {
+                "type": "fixed",
+                "rate": float(data["base_rate"])
+            }
+        elif data["rate_structure"] == "variable":
+            rate_structure = {
+                "type": "variable",
+                "base_rate": float(data["base_rate"]),
+                "adjustment_factor": 0.1
+            }
+        else:
+            # Default to fixed
+            rate_structure = {
+                "type": data["rate_structure"],
+                "rate": float(data["base_rate"])
+            }
 
         plan = PlanCatalog(
             id=uuid4(),
@@ -736,17 +755,14 @@ def seed_plans(db, suppliers):
             plan_name=data["supplier_name"],  # Note: using "supplier_name" key due to global replace
             plan_type=data["plan_type"],
             contract_length_months=data["contract_length_months"],
-            rate_structure=data["rate_structure"],
-            base_rate=data["base_rate"],
-            rate_tiers=rate_tiers,
+            rate_structure=rate_structure,
             renewable_percentage=data["renewable_percentage"],
             monthly_fee=data["monthly_fee"],
             early_termination_fee=data["early_termination_fee"],
             connection_fee=Decimal("0"),
-            description=data["description"],
+            plan_description=data["description"],
             available_regions=data["regions"],
             is_active=True,
-            effective_date=date.today(),
             created_at=datetime.utcnow(),
         )
         db.add(plan)
