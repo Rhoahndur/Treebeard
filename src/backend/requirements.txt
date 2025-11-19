@@ -38,6 +38,7 @@ python-dateutil==2.8.2
 # AI Services
 openai==1.54.0
 textstat==0.7.3
+setuptools>=65.0.0  # Required by textstat for pkg_resources
 
 # Testing
 pytest==7.4.4
