@@ -32,7 +32,7 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header title="Generating Recommendations" showLogout={true} />
+        <Header title="Generating Recommendations" showLogout={false} />
         <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
@@ -62,7 +62,7 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header title="Error" showLogout={true} />
+        <Header title="Error" showLogout={false} />
         <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
           <div 
@@ -94,7 +94,7 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
   if (!recommendation || !recommendation.top_plans || recommendation.top_plans.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header title="No Results" showLogout={true} />
+        <Header title="No Results" showLogout={false} />
         <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
           <div className="bg-white rounded-lg shadow-card p-8 text-center">
@@ -123,7 +123,7 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Your Recommendations" showLogout={true} />
+      <Header title="Your Recommendations" showLogout={false} />
       <div className="py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}

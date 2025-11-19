@@ -150,8 +150,8 @@ class OpenAIExplanationService:
                     explanation, plan, user_profile, preferences, current_plan
                 )
 
-            self.metrics.generations += 1
-            self.metrics.total_generation_time_ms += explanation.generation_time_ms
+            self.metrics.total_generated += 1
+            self.metrics.api_calls += 1
 
             return explanation
 

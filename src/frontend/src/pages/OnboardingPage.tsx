@@ -164,7 +164,7 @@ export const OnboardingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header showBack={false} showHome={false} showLogout={true} />
+      <Header showBack={false} showHome={false} showLogout={false} />
 
       <div className="py-8">
       {/* Restore prompt */}
