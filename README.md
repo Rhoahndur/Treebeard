@@ -1,68 +1,110 @@
 # TreeBeard - AI Energy Plan Recommendation Agent
-**Organization:** [COMPANY]
-**Project Type:** Greenfield Software
-**Methodology:** BMad Method (Parallelized Multi-Agent Development)
+
+TreeBeard helps customers in deregulated energy markets find the best energy plans. It analyzes usage patterns, applies user preferences, and delivers personalized top-3 plan recommendations with AI-generated explanations, risk warnings, and savings projections.
 
 ---
 
-## Project Overview
+## Key Features
 
-The AI Energy Plan Recommendation Agent helps customers in deregulated energy markets find the best energy plans by analyzing usage patterns, preferences, and plan options to provide personalized top-3 recommendations with clear explanations.
-
-**Key Features:**
-- Analyzes 12 months of usage data
-- Matches against 50+ energy plans
-- AI-powered personalized explanations (openAI API)
-- Risk detection and warnings
-- Cost projections and savings calculations
-- Mobile-responsive React frontend
-- FastAPI backend with PostgreSQL
+- **Usage Analysis** - Ingests 3-24 months of consumption data, detects seasonal patterns, classifies user profiles, and projects annual usage
+- **Multi-Factor Plan Scoring** - Scores plans across cost, flexibility, renewable percentage, and supplier rating, weighted by user preferences
+- **Savings Calculations** - Annual/monthly savings projections, break-even analysis for switching costs, and total cost of ownership comparisons
+- **AI Explanations** - Claude/OpenAI-powered natural language explanations personalized to user context
+- **Risk Detection** - Flags high termination fees, low-savings situations, data quality issues, variable rate volatility, and contract timing risks
+- **Admin Dashboard** - Plan/supplier management, user administration, audit logs, system statistics
+- **Feedback System** - User feedback collection with sentiment analysis and analytics
 
 ---
 
-## Documentation Structure
+## Technology Stack
 
-### Planning Documents
-- **[architecture.md](architecture.md)** - System architecture with diagrams
+### Frontend
+| Component | Technology |
+|-----------|-----------|
+| Framework | React 18.3 + TypeScript 5.3 |
+| Build Tool | Vite 5.0 |
+| Styling | Tailwind CSS 3.4 |
+| Charts | Recharts 2.10 |
+| Forms | React Hook Form 7.66 + Zod validation |
+| HTTP | Axios 1.6 |
+| Routing | React Router 6.21 |
+| UI Components | Radix UI, Lucide React |
+| Testing | Vitest, React Testing Library |
+| Component Dev | Storybook 7.6 |
 
-### Execution Documents
-- **[docs/execution-plan.md](docs/execution-plan.md)** - Epic and story breakdown optimized for parallelization
-- **[docs/sprint-plan.md](docs/sprint-plan.md)** - 14-sprint schedule with agent assignments
-- **[docs/agent-coordination-guide.md](docs/agent-coordination-guide.md)** - Multi-agent coordination playbook
-- **[docs/bmm-workflow-status.yaml](docs/bmm-workflow-status.yaml)** - BMM workflow tracking
+### Backend
+| Component | Technology |
+|-----------|-----------|
+| Framework | FastAPI 0.115 + Uvicorn |
+| Language | Python 3.11+ |
+| ORM | SQLAlchemy 2.0 |
+| Migrations | Alembic 1.14 |
+| Validation | Pydantic 2.9 |
+| Data Processing | Pandas, NumPy, SciPy |
+| Auth | JWT (python-jose) + bcrypt |
+| AI | OpenAI API (gpt-4o-mini), Claude API support |
+
+### Infrastructure
+| Component | Technology |
+|-----------|-----------|
+| Database | PostgreSQL 15+ |
+| Cache | Redis 7+ |
+| Deployment | Railway.app (Nixpacks) |
+| Error Tracking | Sentry |
+| APM | DataDog |
+| Alerting | PagerDuty, Slack |
 
 ---
 
 ## Quick Start
 
-### Current Status
-✅ **PRD Complete:** 14 PRs defined
-✅ **Architecture Complete:** Full system design with diagrams
-🎯 **Next Step:** Solutioning Gate Check → Sprint Planning
+### Prerequisites
+- Python 3.11+
+- Node.js 18+
+- PostgreSQL 15+
+- Redis 7+ (optional, graceful fallback)
 
-### Next Actions
+### Backend Setup
+```bash
+cd src/backend
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
 
-1. **Review Planning Documents** (if needed)
-   - Review PRD.md for product requirements
-   - Review architecture.md for technical design
-   - Review execution-plan.md for implementation approach
+# Configure environment
+cp .env.example .env            # Edit with your database URL, API keys, etc.
 
-2. **Run Solutioning Gate Check**
-   ```bash
-   # Load the Architect agent
-   # Run: /bmad:bmm:workflows:solutioning-gate-check
-   ```
+# Initialize database
+alembic upgrade head
 
-3. **Begin Sprint Planning**
-   ```bash
-   # Load the Scrum Master agent
-   # Run: /bmad:bmm:workflows:sprint-planning
-   ```
+# Run server
+uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
-4. **Start Multi-Agent Development**
-   - Follow the sprint-plan.md for agent assignments
-   - Use agent-coordination-guide.md for collaboration protocols
-   - Track progress in bmm-workflow-status.yaml
+### Frontend Setup
+```bash
+cd src/frontend
+npm install
+
+# Configure environment
+cp .env.example .env            # Set VITE_API_BASE_URL
+
+# Run dev server
+npm run dev                     # Starts on http://localhost:3000
+```
+
+### Other Commands
+```bash
+# Frontend
+npm run build                   # Production build → dist/
+npm run preview                 # Preview production build on :8080
+npm run test                    # Run Vitest tests
+npm run storybook               # Component library on :6006
+
+# Backend
+pytest                          # Run test suite
+alembic revision --autogenerate -m "description"  # Create migration
+```
 
 ---
 
@@ -70,208 +112,201 @@ The AI Energy Plan Recommendation Agent helps customers in deregulated energy ma
 
 ```
 TreeBeard/
-├── README.md                        # This file
-├── PRD.md                           # Product Requirements
-├── architecture.md                  # System Architecture
-├── Tasklist.md                      # Detailed Tasks
-├── docs/
-│   ├── execution-plan.md            # Parallelized Epic/Story Plan
-│   ├── sprint-plan.md               # 14-Sprint Schedule
-│   ├── agent-coordination-guide.md  # Multi-Agent Playbook
-│   ├── bmm-workflow-status.yaml     # Workflow Tracking
-│   └── contracts/                   # Interface Contracts (to be created)
-├── src/                             # Source code (to be created)
-├── tests/                           # Tests (to be created)
-└── .bmad/                           # BMad Method configuration
+├── src/
+│   ├── backend/
+│   │   ├── api/
+│   │   │   ├── main.py                 # FastAPI app entry point
+│   │   │   ├── routes/                 # API route handlers
+│   │   │   │   ├── auth.py             # Authentication (login, register, refresh)
+│   │   │   │   ├── users.py            # User profiles & preferences
+│   │   │   │   ├── recommendations.py  # Recommendation generation
+│   │   │   │   ├── plans.py            # Plan catalog browsing
+│   │   │   │   ├── usage.py            # Usage data upload/retrieval
+│   │   │   │   ├── feedback.py         # Feedback submission
+│   │   │   │   ├── admin.py            # Admin operations
+│   │   │   │   └── health.py           # Health checks
+│   │   │   ├── middleware/             # Request pipeline middleware
+│   │   │   │   ├── request_id.py       # X-Request-ID tracing
+│   │   │   │   ├── logging.py          # Request/response logging
+│   │   │   │   ├── audit_middleware.py  # Admin action auditing
+│   │   │   │   ├── cache.py            # HTTP response caching
+│   │   │   │   ├── rate_limit.py       # Per-user/IP rate limiting
+│   │   │   │   ├── error_handler.py    # Global error handling
+│   │   │   │   └── analytics.py        # Event tracking
+│   │   │   └── auth/                   # JWT + RBAC implementation
+│   │   ├── services/                   # Business logic
+│   │   │   ├── recommendation_engine.py  # Plan matching & ranking
+│   │   │   ├── usage_analysis.py         # Usage pattern profiling
+│   │   │   ├── savings_calculator.py     # Cost projections & savings
+│   │   │   ├── risk_detection.py         # Risk flagging & warnings
+│   │   │   ├── explanation_service.py    # AI explanation generation (Claude)
+│   │   │   ├── explanation_service_openai.py  # OpenAI fallback
+│   │   │   ├── scoring_service.py        # Plan scoring algorithm
+│   │   │   ├── feedback_service.py       # Feedback aggregation
+│   │   │   ├── cache_service.py          # Redis caching layer
+│   │   │   ├── cache_warming.py          # Cache pre-warming
+│   │   │   ├── cache_optimization.py     # Cache strategy tuning
+│   │   │   ├── analytics_service.py      # Usage tracking
+│   │   │   ├── audit_service.py          # Audit logging
+│   │   │   └── admin_service.py          # Admin operations
+│   │   ├── models/                     # SQLAlchemy ORM models
+│   │   ├── config/
+│   │   │   ├── settings.py             # Pydantic Settings (env vars)
+│   │   │   └── database.py             # Connection pooling & setup
+│   │   ├── alembic/                    # Database migrations
+│   │   └── requirements.txt
+│   └── frontend/
+│       ├── src/
+│       │   ├── App.tsx                 # Root component + routing
+│       │   ├── api/                    # HTTP client & API services
+│       │   ├── components/
+│       │   │   ├── design-system/      # Reusable UI (Button, Card, Badge, etc.)
+│       │   │   ├── PlanCard/           # Recommendation card display
+│       │   │   ├── OnboardingFlow/     # Registration wizard
+│       │   │   ├── FileUpload/         # CSV data upload
+│       │   │   ├── PreferenceSliders/  # Preference weight selectors
+│       │   │   ├── CostBreakdown/      # Cost analysis visualization
+│       │   │   ├── charts/             # 7+ chart types (usage, cost, savings, etc.)
+│       │   │   ├── comparison/         # Plan comparison view
+│       │   │   ├── FeedbackWidget/     # In-app feedback
+│       │   │   ├── admin/              # Admin panel components
+│       │   │   ├── auth/               # Login/signup flows
+│       │   │   ├── scenarios/          # What-if analysis
+│       │   │   └── export/             # PDF/CSV export
+│       │   ├── hooks/                  # Custom React hooks
+│       │   ├── pages/                  # Page components
+│       │   ├── types/                  # TypeScript type definitions
+│       │   └── utils/                  # Formatters, validation, analytics
+│       ├── package.json
+│       ├── vite.config.ts
+│       ├── tailwind.config.js
+│       └── tsconfig.json
+├── tests/
+│   ├── backend/                        # pytest test suite
+│   │   ├── test_recommendation_engine.py
+│   │   ├── test_usage_analysis.py
+│   │   ├── test_savings_calculator.py
+│   │   ├── test_risk_detection.py
+│   │   ├── test_explanation_service.py
+│   │   ├── test_feedback_api.py
+│   │   ├── test_admin_api.py
+│   │   ├── test_audit_logging.py
+│   │   └── test_scoring_standalone.py
+│   └── frontend/                       # Vitest component tests
+├── docs/                               # Technical documentation
+│   ├── contracts/                      # Interface contracts (12 files)
+│   ├── runbooks/                       # Incident response (5 runbooks)
+│   ├── execution-plan.md
+│   ├── database-schema.md
+│   ├── caching-strategy.md
+│   ├── monitoring-setup.md
+│   ├── analytics-setup.md
+│   ├── performance-optimization.md
+│   ├── EXPLANATION_SERVICE.md
+│   └── ...
+├── infrastructure/                     # Monitoring & CDN configs
+│   ├── monitoring-config.yml
+│   ├── alerting-config.yml
+│   └── cdn-config.yml
+├── dashboards/                         # Grafana dashboard JSON
+├── migrations/                         # SQL performance indexes
+├── scripts/                            # Utility scripts
+├── architecture.md                     # System architecture diagrams
+├── Procfile                            # Railway process config
+└── .bmad/                              # BMad Method agent/workflow config
 ```
 
 ---
 
-## Development Strategy
+## API Overview
 
-### Parallelization Approach
+All endpoints are prefixed with `/api/v1`.
 
-The project is structured for **maximum parallel development** across multiple AI agents and human developers:
-
-**Wave 1 (Weeks 1-5):** 2 concurrent streams
-→ Foundation: Database + Usage Analysis
-
-**Wave 2 (Weeks 6-13):** 3 concurrent streams
-→ Core: Recommendation Engine + Savings + AI Explanations
-
-**Wave 3 (Weeks 14-19):** 3 concurrent streams
-→ API + Frontend Results + Frontend Onboarding (fully parallel)
-
-**Wave 4 (Weeks 20-24):** 4 concurrent streams (PEAK)
-→ Risk Detection + Performance + Analytics + Monitoring
-
-**Wave 5 (Weeks 25-28):** 3 concurrent streams (Optional)
-→ Feedback + Admin + Visualizations
-
-### Agent Types Needed
-
-| Agent Type | Peak Count | Primary Sprints |
-|------------|------------|-----------------|
-| Backend Dev | 2-3 | All |
-| Frontend Dev | 2-3 | Sprints 8-14 |
-| DevOps | 1-2 | Sprints 4-5, 7, 11-12 |
-| ML Engineer | 1 | Sprint 6 |
-| Data Analyst | 1 | Sprints 11-12 |
+| Group | Endpoints | Description |
+|-------|-----------|-------------|
+| **Auth** | `POST /auth/register`, `/login`, `/refresh`, `GET /auth/me` | User registration, JWT authentication |
+| **Users** | `POST /users/preferences`, `GET /users/preferences`, `PUT /users/profile` | Profile and preference management |
+| **Recommendations** | `POST /recommendations/generate`, `GET /recommendations/{user_id}` | Core recommendation engine |
+| **Plans** | `GET /plans/catalog`, `GET /plans/{plan_id}` | Plan catalog with filtering |
+| **Usage** | `POST /usage/upload`, `GET /usage/history` | Usage data ingestion |
+| **Feedback** | `POST /feedback/plan`, `POST /feedback/recommendation`, `GET /feedback/analytics` | Feedback collection |
+| **Admin** | User CRUD, plan CRUD, statistics, audit logs, cache management | Admin-only operations |
+| **Health** | `GET /health` | Health check with DB/Redis status |
 
 ---
 
-## Technology Stack
+## Database Schema
 
-### Frontend
-- **Framework:** React 18+ with TypeScript
-- **Styling:** Tailwind CSS
-- **State:** Redux Toolkit or Zustand
-- **Testing:** Jest, React Testing Library, Cypress
+10 tables with PostgreSQL + JSONB for flexible rate structures:
 
-### Backend
-- **Framework:** FastAPI (Python 3.11+)
-- **Database:** PostgreSQL 15+
-- **Cache:** Redis 7+
-- **AI:** Claude API (Anthropic)
+- **users** - Profiles, auth, consent tracking
+- **user_preferences** - Cost/flexibility/renewable/rating weights (0-10)
+- **current_plans** - User's current energy plan details
+- **usage_history** - Daily kWh consumption records
+- **suppliers** - Energy company info and ratings
+- **plan_catalog** - Available plans with JSONB rate structures (fixed/tiered/TOU/variable)
+- **recommendations** - Recommendation sessions
+- **recommendation_plans** - Top 3 plans per recommendation with scores
+- **feedback** - User ratings and comments
+- **audit_logs** - Admin action trail
 
-### Infrastructure
-- **Cloud:** AWS or GCP
-- **Orchestration:** Kubernetes (EKS/GKE)
-- **CDN:** CloudFront or Cloud CDN
-- **Monitoring:** DataDog or New Relic
+See [docs/database-schema.md](docs/database-schema.md) for full schema documentation.
 
 ---
 
-## Key Metrics & Goals
+## Recommendation Engine Flow
 
-### Business Goals
-- **Conversion Rate:** +20% increase in plan sign-ups
-- **Customer Satisfaction:** +10 point NPS improvement
-- **Support Efficiency:** 30% reduction in plan selection inquiries
-- **User Engagement:** 15% increase in tool interaction time
-
-### Technical Goals
-- **API Response Time:** <2 seconds (P95)
-- **Page Load Time:** <1 second
-- **Concurrent Users:** 10,000+
-- **Uptime:** 99.9% SLA
-- **Test Coverage:** >80%
+1. **Usage Analysis** - Analyze 3-24 months of data, detect seasonal patterns, classify user profile, project annual consumption
+2. **Plan Matching** - Filter plan catalog by region/ZIP code, calculate cost per plan based on rate structure type
+3. **Multi-Factor Scoring** - Score each plan on cost, flexibility, renewable %, and supplier rating, then apply user preference weights
+4. **Savings Calculation** - Compare against current plan, calculate annual savings, monthly breakdown, break-even timeline
+5. **Risk Detection** - Flag high ETF, low savings, data quality issues, contract timing risks; recommend staying if risks outweigh benefits
+6. **AI Explanations** - Generate personalized natural language explanations via Claude/OpenAI with template fallback
 
 ---
 
-## Project Timeline
+## Deployment
 
-### P0 Features (Must-Have) - 20 weeks
-**Sprints 1-10:** Core functionality (data → recommendations → UI)
+The application deploys to **Railway.app** using Nixpacks:
 
-### P1 Features (Should-Have) - 4 weeks
-**Sprints 11-12:** Performance optimization, monitoring, security
+- **Backend**: `src/backend/railway.toml` - FastAPI on port 8000
+- **Frontend**: `src/frontend/railway.toml` - Vite preview on port 8080
+- **Database**: Railway PostgreSQL service
+- **Cache**: Railway Redis service (optional)
 
-### P2 Features (Nice-to-Have) - 4 weeks [Optional]
-**Sprints 13-14:** User feedback, admin tools, visualizations
-
-**Total Timeline:** 20-28 weeks (depending on scope)
+See `.env.production.example` for required environment variables.
 
 ---
 
-## Multi-Agent Coordination
+## Documentation
 
-### Communication Channels
-- **Daily Standups:** Async in #treebeard-daily (9 AM)
-- **Integration Sync:** Wednesday mid-sprint (30 min)
-- **Sprint Planning:** Bi-weekly Monday (2 hours)
-- **Blockers:** Real-time in #treebeard-blockers
-
-### Key Protocols
-1. **Interface Contracts:** Publish schemas before dependent work starts
-2. **Handoff Documents:** Template for passing work between agents
-3. **Integration Testing:** Joint testing at handoff points
-4. **Conflict Resolution:** Escalation path for schema conflicts
-
-See [agent-coordination-guide.md](docs/agent-coordination-guide.md) for full details.
-
----
-
-## Risk Management
-
-### High-Risk Areas
-1. **Epic 2 Integration (Sprint 5):** Multiple streams converging
-   - Mitigation: Interface contracts published early, mid-sprint checkpoints
-
-2. **Frontend-Backend Integration (Sprint 10):** Potential mismatches
-   - Mitigation: API spec locked in Sprint 8, contract tests
-
-3. **Performance at Scale (Sprint 11):** May discover issues late
-   - Mitigation: Continuous monitoring from Sprint 7, early load testing
+| Document | Description |
+|----------|-------------|
+| [architecture.md](architecture.md) | System architecture with Mermaid diagrams |
+| [docs/execution-plan.md](docs/execution-plan.md) | Epic/story breakdown and parallelization strategy |
+| [docs/database-schema.md](docs/database-schema.md) | Complete database schema documentation |
+| [docs/caching-strategy.md](docs/caching-strategy.md) | Redis caching design and TTL policies |
+| [docs/monitoring-setup.md](docs/monitoring-setup.md) | Sentry, DataDog, and metrics setup |
+| [docs/EXPLANATION_SERVICE.md](docs/EXPLANATION_SERVICE.md) | AI explanation service integration guide |
+| [docs/analytics-setup.md](docs/analytics-setup.md) | Event tracking and analytics |
+| [docs/performance-optimization.md](docs/performance-optimization.md) | Performance tuning guide |
+| [docs/agent-coordination-guide.md](docs/agent-coordination-guide.md) | Multi-agent development coordination |
+| [docs/contracts/](docs/contracts/) | 12 interface contracts for cross-component boundaries |
+| [docs/runbooks/](docs/runbooks/) | 5 operational incident runbooks |
 
 ---
 
-## Getting Help
+## Performance Targets
 
-### For Technical Questions
-- Post in #treebeard-questions
-- Review docs/contracts/ for interface specs
-- Check execution-plan.md for dependencies
-
-### For Blockers
-- Post in #treebeard-blockers with @mention
-- Escalate to SM if not resolved in 2 hours
-- Use mock implementations to unblock
-
-### For Process Questions
-- Review agent-coordination-guide.md
-- Ask SM in #treebeard-general
-- Review BMM workflows in .bmad/bmm/
+| Metric | Target |
+|--------|--------|
+| API Response Time | < 2 seconds (P95) |
+| Page Load Time | < 1 second |
+| Cache Hit Rate | > 80% |
+| Database Query Time | < 100ms (P95) |
+| Concurrent Users | 10,000+ |
+| Uptime SLA | 99.9% |
 
 ---
 
-## Contributing
-
-### For AI Agents
-1. Read the coordination guide
-2. Review your assigned epic in execution-plan.md
-3. Check dependencies and interface contracts
-4. Post daily standups
-5. Publish contracts when completing stories
-6. Write integration tests
-
-### For Human Developers
-Same as above, plus:
-- Follow conventional commits (feat:, fix:, docs:, etc.)
-- Request PR reviews from relevant stream agents
-- Attend sprint ceremonies
-- Update documentation when making changes
-
----
-
-## License
-
-[To be determined]
-
----
-
-## Contact
-
-**Project Lead:** [To be assigned]
-**Technical Lead:** [To be assigned]
-**Scrum Master:** [To be assigned]
-
----
-
-## Appendix: Document Quick Links
-
-### Must-Read Documents
-1. [PRD.md](PRD.md) - What we're building
-2. [architecture.md](architecture.md) - How we're building it
-3. [docs/execution-plan.md](docs/execution-plan.md) - Work breakdown & parallelization
-4. [docs/agent-coordination-guide.md](docs/agent-coordination-guide.md) - How to work together
-
-### Reference Documents
-- [Tasklist.md](Tasklist.md) - Granular task lists
-- [docs/sprint-plan.md](docs/sprint-plan.md) - Sprint-by-sprint schedule
-- [docs/bmm-workflow-status.yaml](docs/bmm-workflow-status.yaml) - Workflow progress
-
----
-
-**Last Updated:** 2025-11-10
-**Status:** Planning Complete, Ready for Implementation
+**Status:** MVP in active development
