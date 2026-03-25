@@ -4,32 +4,23 @@ Tests for Feedback API endpoints.
 Story 8.2: Feedback API Endpoints
 """
 
-import pytest
-from datetime import datetime
 from uuid import uuid4
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-
-from src.backend.api.main import app
-from src.backend.models.feedback import Feedback
-from src.backend.models.plan import Plan
+from src.backend.models.plan import PlanCatalog, Supplier
 from src.backend.models.user import User
 
 
 @pytest.fixture
-def client():
-    """Create test client."""
-    return TestClient(app)
-
-
-@pytest.fixture
 def test_user(db: Session):
-    """Create test user."""
+    """Create a non-admin test user for feedback tests."""
     user = User(
         id=uuid4(),
         email="test@example.com",
         name="Test User",
+        hashed_password="hashed_password",
         zip_code="10001",
         property_type="residential",
         is_active=True,
@@ -41,34 +32,27 @@ def test_user(db: Session):
 
 
 @pytest.fixture
-def admin_user(db: Session):
-    """Create admin user."""
-    user = User(
-        id=uuid4(),
-        email="admin@example.com",
-        name="Admin User",
-        zip_code="10001",
-        property_type="residential",
-        is_active=True,
-        is_admin=True,
-    )
-    db.add(user)
-    db.commit()
-    return user
-
-
-@pytest.fixture
 def test_plan(db: Session):
-    """Create test plan."""
-    plan = Plan(
+    """Create a test supplier + plan for feedback tests."""
+    supplier = Supplier(
         id=uuid4(),
-        plan_name="Test Plan",
         supplier_name="Test Supplier",
+        is_active=True,
+    )
+    db.add(supplier)
+    db.flush()
+
+    plan = PlanCatalog(
+        id=uuid4(),
+        supplier_id=supplier.id,
+        plan_name="Test Plan",
         plan_type="fixed",
-        base_rate=10.5,
-        renewable_percentage=50.0,
+        rate_structure={"type": "fixed", "rate_per_kwh": 0.105},
         contract_length_months=12,
         early_termination_fee=100.0,
+        renewable_percentage=50.0,
+        available_regions=["10001"],
+        is_active=True,
     )
     db.add(plan)
     db.commit()
@@ -79,7 +63,7 @@ class TestSubmitPlanFeedback:
     """Tests for POST /api/v1/feedback/plan endpoint."""
 
     def test_submit_plan_feedback_authenticated(
-        self, client: TestClient, test_user: User, test_plan: Plan, auth_headers
+        self, client: TestClient, test_user: User, test_plan: PlanCatalog, auth_headers
     ):
         """Test submitting plan feedback as authenticated user."""
         feedback_data = {
@@ -102,7 +86,7 @@ class TestSubmitPlanFeedback:
         assert data["message"] == "Thank you for your feedback!"
 
     def test_submit_plan_feedback_anonymous(
-        self, client: TestClient, test_plan: Plan
+        self, client: TestClient, test_plan: PlanCatalog
     ):
         """Test submitting plan feedback anonymously."""
         feedback_data = {
@@ -131,7 +115,7 @@ class TestSubmitPlanFeedback:
         assert response.status_code == 422
 
     def test_submit_plan_feedback_text_too_long(
-        self, client: TestClient, test_plan: Plan
+        self, client: TestClient, test_plan: PlanCatalog
     ):
         """Test validation error on text exceeding character limit."""
         feedback_data = {
@@ -218,7 +202,7 @@ class TestSearchFeedback:
     """Tests for GET /api/v1/admin/feedback/search endpoint."""
 
     def test_search_feedback_with_filters(
-        self, client: TestClient, admin_user: User, test_plan: Plan, auth_headers
+        self, client: TestClient, admin_user: User, test_plan: PlanCatalog, auth_headers
     ):
         """Test searching feedback with filters."""
         response = client.get(
@@ -254,7 +238,7 @@ class TestRateLimiting:
     """Tests for rate limiting on feedback endpoints."""
 
     def test_rate_limit_enforcement(
-        self, client: TestClient, test_user: User, test_plan: Plan, auth_headers
+        self, client: TestClient, test_user: User, test_plan: PlanCatalog, auth_headers
     ):
         """Test that rate limiting is enforced (10 per day)."""
         feedback_data = {
@@ -279,13 +263,3 @@ class TestRateLimiting:
                 assert "Rate limit exceeded" in response.json()["detail"]
 
 
-@pytest.fixture
-def auth_headers():
-    """Generate auth headers for test user."""
-
-    def _auth_headers(user: User):
-        # In a real test, you'd generate a proper JWT token
-        # For now, this is a placeholder
-        return {"Authorization": f"Bearer test-token-{user.id}"}
-
-    return _auth_headers
