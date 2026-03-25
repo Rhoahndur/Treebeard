@@ -10,13 +10,14 @@ Optimized configuration for:
 """
 
 import logging
+import sqlite3
 import time
-from typing import Generator
+from collections.abc import Generator
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import QueuePool
 
 from .settings import settings
@@ -59,7 +60,7 @@ engine = create_engine(
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_conn, connection_record):
     """Enable foreign key support for SQLite connections."""
-    if "sqlite" in settings.database_url:
+    if isinstance(dbapi_conn, sqlite3.Connection):
         cursor = dbapi_conn.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
