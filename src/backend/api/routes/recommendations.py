@@ -7,28 +7,12 @@ Story 6.3: Enhanced to include risk detection and stay recommendations.
 """
 
 import logging
-from datetime import datetime, timedelta
-from typing import List
+from datetime import timedelta
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
-from config.database import get_db
-from models.plan import Supplier
-from models.recommendation import Recommendation
-from models.user import User
-from schemas.usage_analysis import MonthlyUsage
-from services.explanation_service import create_explanation_service
-from services.recommendation_engine import get_enhanced_recommendations
-from services.risk_detection import (
-    CurrentPlan as RiskCurrentPlan,
-    create_risk_detection_service,
-)
-from services.savings_calculator import SavingsCalculatorService
-from services.usage_analysis import UsageAnalysisService
-from api.auth.rbac import Permission, require_permission
-from api.auth_dependencies import CurrentActiveUser, CurrentUser, DBSession, OptionalUser
+from api.auth_dependencies import CurrentUser, DBSession, OptionalUser
 from api.schemas.common import MessageResponse
 from api.schemas.recommendation_requests import (
     GenerateRecommendationRequest,
@@ -40,6 +24,19 @@ from api.schemas.recommendation_requests import (
     StayRecommendationResponse,
     UsageProfileSummary,
 )
+from models.plan import Supplier
+from models.recommendation import Recommendation
+from schemas.usage_analysis import MonthlyUsage
+from services.explanation_service import create_explanation_service
+from services.recommendation_engine import get_enhanced_recommendations
+from services.risk_detection import (
+    CurrentPlan as RiskCurrentPlan,
+)
+from services.risk_detection import (
+    create_risk_detection_service,
+)
+from services.savings_calculator import SavingsCalculatorService
+from services.usage_analysis import UsageAnalysisService
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -168,8 +165,9 @@ async def generate_recommendations(
         )
 
         # Step 3.5: Calculate savings for all plans (needed for risk detection)
-        from schemas.savings_schemas import SavingsAnalysis
         from decimal import Decimal
+
+        from schemas.savings_schemas import SavingsAnalysis
 
         # Calculate current plan annual cost once (needed for risk detection)
         current_annual_cost = None
@@ -211,8 +209,9 @@ async def generate_recommendations(
 
                 # Create SavingsAnalysis for risk detection
                 # Generate monthly breakdown (required by schema)
-                from schemas.savings_schemas import MonthlyCost
                 from datetime import datetime
+
+                from schemas.savings_schemas import MonthlyCost
 
                 monthly_breakdown = []
                 current_date = datetime.now()
@@ -453,7 +452,7 @@ async def generate_recommendations(
         )
 
         logger.info(
-            f"Successfully generated recommendations",
+            "Successfully generated recommendations",
             extra={
                 "recommendation_id": str(recommendation_id),
                 "num_plans": len(plan_responses),
@@ -476,7 +475,7 @@ async def generate_recommendations(
 
 @router.get(
     "/{user_id}",
-    response_model=List[GenerateRecommendationResponse],
+    response_model=list[GenerateRecommendationResponse],
     summary="Get User Recommendations",
     description="Retrieve saved recommendations for a user.",
 )
