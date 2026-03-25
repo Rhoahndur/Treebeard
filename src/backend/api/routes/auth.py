@@ -11,10 +11,7 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr, Field
-from sqlalchemy.orm import Session
 
-from config.database import get_db
-from models.user import User
 from api.auth.jwt import (
     create_access_token,
     create_refresh_token,
@@ -23,6 +20,7 @@ from api.auth.jwt import (
     verify_password,
 )
 from api.auth_dependencies import CurrentUser, DBSession
+from models.user import User
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -224,7 +222,7 @@ async def refresh_token(refresh_token: str, db: DBSession):
             expires_in=60 * 24 * 60,
         )
 
-    except Exception as exc:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",

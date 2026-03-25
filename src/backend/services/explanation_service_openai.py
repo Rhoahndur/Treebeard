@@ -14,22 +14,21 @@ import json
 import logging
 import time
 from decimal import Decimal
-from typing import List, Optional, Dict, Any
+from typing import Any
 
-import httpx
 from openai import AsyncOpenAI
 
 from schemas.explanation_schemas import (
+    CurrentPlan,
+    ExplanationMetrics,
+    PersonaType,
+    PlanExplanation,
     RankedPlan,
     UserPreferences,
-    CurrentPlan,
-    PlanExplanation,
-    PersonaType,
-    ExplanationMetrics,
 )
+
 from .explanation_templates import (
     TemplateExplanationGenerator,
-    get_context_aware_message,
 )
 
 logger = logging.getLogger(__name__)
@@ -51,7 +50,7 @@ class OpenAIExplanationService:
     def __init__(
         self,
         api_key: str,
-        redis_client: Optional[Any] = None,
+        redis_client: Any | None = None,
         model: str = "gpt-4o-mini",  # Fast and cost-effective
         max_tokens: int = 300,
         temperature: float = 0.7,
@@ -93,9 +92,9 @@ class OpenAIExplanationService:
     async def generate_explanation(
         self,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-        current_plan: Optional[CurrentPlan] = None,
+        current_plan: CurrentPlan | None = None,
         force_regenerate: bool = False,
     ) -> PlanExplanation:
         """
@@ -178,11 +177,11 @@ class OpenAIExplanationService:
 
     async def generate_batch(
         self,
-        plans: List[RankedPlan],
-        user_profile: Dict[str, Any],
+        plans: list[RankedPlan],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-        current_plan: Optional[CurrentPlan] = None,
-    ) -> List[PlanExplanation]:
+        current_plan: CurrentPlan | None = None,
+    ) -> list[PlanExplanation]:
         """
         Generate explanations for multiple plans concurrently.
 
@@ -204,9 +203,9 @@ class OpenAIExplanationService:
     async def _generate_with_openai(
         self,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-        current_plan: Optional[CurrentPlan] = None,
+        current_plan: CurrentPlan | None = None,
     ) -> str:
         """
         Generate explanation using OpenAI API with retry logic.
@@ -265,9 +264,9 @@ class OpenAIExplanationService:
     def _build_prompt(
         self,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-        current_plan: Optional[CurrentPlan] = None,
+        current_plan: CurrentPlan | None = None,
     ) -> str:
         """
         Build OpenAI API prompt with all context.
@@ -353,7 +352,7 @@ Generate the explanation now (just the explanation text, no labels):"""
 
         return prompt
 
-    def _describe_rate_structure(self, rate_structure: Dict[str, Any]) -> str:
+    def _describe_rate_structure(self, rate_structure: dict[str, Any]) -> str:
         """Describe rate structure in plain language."""
         rate_type = rate_structure.get("type", "unknown")
 
@@ -401,9 +400,9 @@ Generate the explanation now (just the explanation text, no labels):"""
     def _generate_cache_key(
         self,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-        current_plan: Optional[CurrentPlan] = None,
+        current_plan: CurrentPlan | None = None,
     ) -> str:
         """Generate deterministic cache key."""
         key_data = {
@@ -427,10 +426,10 @@ Generate the explanation now (just the explanation text, no labels):"""
     async def _get_cached_explanation(
         self,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-        current_plan: Optional[CurrentPlan] = None,
-    ) -> Optional[PlanExplanation]:
+        current_plan: CurrentPlan | None = None,
+    ) -> PlanExplanation | None:
         """Retrieve cached explanation if available."""
         try:
             cache_key = self._generate_cache_key(
@@ -451,9 +450,9 @@ Generate the explanation now (just the explanation text, no labels):"""
         self,
         explanation: PlanExplanation,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-        current_plan: Optional[CurrentPlan] = None,
+        current_plan: CurrentPlan | None = None,
     ):
         """Cache explanation for future use."""
         try:

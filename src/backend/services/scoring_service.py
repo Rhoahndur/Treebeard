@@ -12,12 +12,10 @@ All scores are normalized to 0-100 range, where higher is better.
 """
 
 from decimal import Decimal
-from typing import Dict, Any, Optional
-import math
+from typing import Any
 
 from schemas.recommendation_schemas import PlanScores, UserPreferences
 from schemas.usage_analysis import UsageProjection
-
 
 # ============================================================================
 # SCORING CONSTANTS
@@ -53,7 +51,7 @@ RATING_MAX = 5.0  # Best rating = 100
 def calculate_cost_score(
     projected_annual_cost: Decimal,
     projected_usage: UsageProjection,
-    all_plan_costs: Optional[list[Decimal]] = None
+    all_plan_costs: list[Decimal] | None = None
 ) -> float:
     """
     Calculate cost score for a plan (0-100, higher is better).
@@ -211,7 +209,7 @@ def calculate_renewable_score(renewable_percentage: Decimal) -> float:
 # ============================================================================
 
 def calculate_rating_score(
-    supplier_rating: Optional[Decimal],
+    supplier_rating: Decimal | None,
     review_count: int = 0
 ) -> float:
     """
@@ -339,12 +337,12 @@ def calculate_composite_score(
 # ============================================================================
 
 def score_plan(
-    plan: Dict[str, Any],
-    supplier: Dict[str, Any],
+    plan: dict[str, Any],
+    supplier: dict[str, Any],
     projected_annual_cost: Decimal,
     projected_usage: UsageProjection,
     preferences: UserPreferences,
-    all_plan_costs: Optional[list[Decimal]] = None
+    all_plan_costs: list[Decimal] | None = None
 ) -> PlanScores:
     """
     Calculate all scores for a plan.

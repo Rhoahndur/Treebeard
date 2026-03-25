@@ -10,9 +10,7 @@ publishes the official database schema contract from Story 1.1.
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from enum import Enum
-from typing import List, Optional, Dict, Any
-from decimal import Decimal
-
+from typing import Any
 
 # ============================================================================
 # INPUT SCHEMAS (Mock - Will be replaced by Story 1.1 contract)
@@ -74,8 +72,8 @@ class SeasonalAnalysis:
     Complete seasonal pattern analysis results.
     """
     has_seasonal_pattern: bool
-    dominant_season: Optional[SeasonType]
-    patterns: List[SeasonalPattern]
+    dominant_season: SeasonType | None
+    patterns: list[SeasonalPattern]
     summer_to_winter_ratio: float  # Ratio of summer avg to winter avg
     peak_to_avg_ratio: float  # Ratio of peak month to annual average
     confidence_score: float  # 0.0 to 1.0
@@ -88,8 +86,8 @@ class PeakOffPeakAnalysis:
     This is a simplified version assuming monthly granularity.
     For time-of-use analysis, hourly data would be needed.
     """
-    peak_months: List[str]  # Months with above-average usage
-    off_peak_months: List[str]  # Months with below-average usage
+    peak_months: list[str]  # Months with above-average usage
+    off_peak_months: list[str]  # Months with below-average usage
     peak_avg_kwh: float
     off_peak_avg_kwh: float
     peak_to_offpeak_ratio: float
@@ -101,8 +99,8 @@ class OutlierDetection:
     Anomalous usage detection results.
     """
     has_outliers: bool
-    outlier_months: List[str]  # Months with anomalous usage
-    outlier_values: List[float]  # Corresponding kWh values
+    outlier_months: list[str]  # Months with anomalous usage
+    outlier_values: list[float]  # Corresponding kWh values
     method: str  # Detection method used (e.g., "IQR", "Z-score")
 
 
@@ -124,13 +122,13 @@ class UsageProjection:
     """
     12-month forward usage projection with confidence intervals.
     """
-    projected_monthly_kwh: List[float]  # 12 months of projected usage
+    projected_monthly_kwh: list[float]  # 12 months of projected usage
     projected_annual_kwh: float
-    confidence_lower: List[float]  # Lower bound (95% CI)
-    confidence_upper: List[float]  # Upper bound (95% CI)
+    confidence_lower: list[float]  # Lower bound (95% CI)
+    confidence_upper: list[float]  # Upper bound (95% CI)
     confidence_score: float  # Overall projection confidence (0.0 to 1.0)
     method: str  # Projection method used
-    assumptions: List[str]  # Key assumptions made
+    assumptions: list[str]  # Key assumptions made
 
 
 @dataclass
@@ -153,7 +151,7 @@ class UsageProfile:
     Complete usage pattern analysis profile.
     This is the primary output of the analysis service.
     """
-    user_id: Optional[str]  # User identifier (if available)
+    user_id: str | None  # User identifier (if available)
     profile_type: UserProfileType
 
     # Statistical analysis
@@ -178,9 +176,9 @@ class UsageProfile:
 
     # Overall confidence
     overall_confidence: float  # Weighted average of all confidence scores
-    warnings: List[str] = field(default_factory=list)  # Analysis warnings
+    warnings: list[str] = field(default_factory=list)  # Analysis warnings
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "user_id": self.user_id,

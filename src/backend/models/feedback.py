@@ -46,7 +46,7 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
         comment="Reference to the recommendation session"
     )
 
-    recommended_plan_id: Mapped[Optional[UUID]] = mapped_column(
+    recommended_plan_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True),
         ForeignKey("recommendation_plans.id", ondelete="SET NULL"),
         nullable=True,
@@ -54,7 +54,7 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
         comment="Reference to the specific recommended plan (if applicable)"
     )
 
-    plan_id: Mapped[Optional[UUID]] = mapped_column(
+    plan_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True),
         ForeignKey("plan_catalog.id", ondelete="SET NULL"),
         nullable=True,
@@ -68,7 +68,7 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
         comment="Numeric rating: 1-5 stars or thumbs up/down (1=down, 5=up)"
     )
 
-    feedback_text: Mapped[Optional[str]] = mapped_column(
+    feedback_text: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
         comment="Optional text feedback from user"
@@ -80,7 +80,7 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
         comment="Type: helpful, not_helpful, selected, did_not_select, other"
     )
 
-    sentiment_score: Mapped[Optional[Decimal]] = mapped_column(
+    sentiment_score: Mapped[Decimal | None] = mapped_column(
         nullable=True,
         comment="Automated sentiment analysis score (-1.0 to 1.0)"
     )

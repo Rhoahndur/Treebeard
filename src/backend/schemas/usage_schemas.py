@@ -4,11 +4,9 @@ Pydantic schemas for usage history and analysis.
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
-
 
 # UsageHistory Schemas
 
@@ -21,7 +19,7 @@ class UsageHistoryBase(BaseModel):
         default="upload",
         description="Source: upload, api, manual"
     )
-    data_quality: Optional[str] = Field(
+    data_quality: str | None = Field(
         None,
         description="Quality flag: complete, estimated, partial"
     )
@@ -86,10 +84,10 @@ class UsageStatistics(BaseModel):
 class PeakUsageAnalysis(BaseModel):
     """Peak vs off-peak usage analysis (if time-of-use data available)."""
 
-    peak_percentage: Optional[Decimal] = Field(None, description="Percentage of usage during peak hours")
-    off_peak_percentage: Optional[Decimal] = Field(None, description="Percentage of usage during off-peak hours")
-    peak_avg_kwh: Optional[Decimal] = Field(None, description="Average daily peak kWh")
-    off_peak_avg_kwh: Optional[Decimal] = Field(None, description="Average daily off-peak kWh")
+    peak_percentage: Decimal | None = Field(None, description="Percentage of usage during peak hours")
+    off_peak_percentage: Decimal | None = Field(None, description="Percentage of usage during off-peak hours")
+    peak_avg_kwh: Decimal | None = Field(None, description="Average daily peak kWh")
+    off_peak_avg_kwh: Decimal | None = Field(None, description="Average daily off-peak kWh")
 
 
 class DataQualityMetrics(BaseModel):
@@ -130,7 +128,7 @@ class UsageProfile(BaseModel):
     )
 
     # Peak/off-peak (if available)
-    peak_analysis: Optional[PeakUsageAnalysis] = None
+    peak_analysis: PeakUsageAnalysis | None = None
 
     # Projections
     projected_annual_kwh: Decimal = Field(..., description="Projected 12-month consumption")
@@ -163,8 +161,8 @@ class UsageSummary(BaseModel):
 
     user_id: UUID
     total_records: int
-    date_range_start: Optional[date] = None
-    date_range_end: Optional[date] = None
+    date_range_start: date | None = None
+    date_range_end: date | None = None
     total_kwh: Decimal
     avg_monthly_kwh: Decimal
     data_completeness: Decimal = Field(..., description="Percentage (0-100)")

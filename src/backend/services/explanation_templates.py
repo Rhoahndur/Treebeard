@@ -5,14 +5,13 @@ This module provides fallback explanations when Claude API is unavailable.
 Uses rule-based logic to generate personalized explanations.
 """
 
-from decimal import Decimal
-from typing import List, Optional, Dict, Any
+from typing import Any
 
 from schemas.explanation_schemas import (
-    RankedPlan,
-    UserPreferences,
     CurrentPlan,
     PersonaType,
+    RankedPlan,
+    UserPreferences,
 )
 
 
@@ -22,9 +21,9 @@ class TemplateExplanationGenerator:
     def generate_explanation(
         self,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-        current_plan: Optional[CurrentPlan] = None,
+        current_plan: CurrentPlan | None = None,
     ) -> str:
         """
         Generate a template-based explanation.
@@ -58,17 +57,17 @@ class TemplateExplanationGenerator:
         """Get personalized intro based on persona."""
         intros = {
             PersonaType.BUDGET_CONSCIOUS: (
-                f"This plan offers the best value for your money."
+                "This plan offers the best value for your money."
             ),
             PersonaType.ECO_CONSCIOUS: (
                 f"This plan aligns with your environmental priorities with "
                 f"{plan.renewable_percentage:.0f}% renewable energy."
             ),
             PersonaType.FLEXIBILITY_FOCUSED: (
-                f"This plan gives you the flexibility you're looking for."
+                "This plan gives you the flexibility you're looking for."
             ),
             PersonaType.BALANCED: (
-                f"This plan provides the best overall match for your needs."
+                "This plan provides the best overall match for your needs."
             ),
         }
         return intros.get(persona, intros[PersonaType.BALANCED])
@@ -77,8 +76,8 @@ class TemplateExplanationGenerator:
         self,
         plan: RankedPlan,
         preferences: UserPreferences,
-        user_profile: Dict[str, Any],
-        current_plan: Optional[CurrentPlan],
+        user_profile: dict[str, Any],
+        current_plan: CurrentPlan | None,
     ) -> str:
         """Get specific benefits based on preferences."""
         benefits = []
@@ -147,7 +146,7 @@ class TemplateExplanationGenerator:
     def _get_tradeoff(
         self,
         plan: RankedPlan,
-        current_plan: Optional[CurrentPlan],
+        current_plan: CurrentPlan | None,
     ) -> str:
         """Get trade-off explanation if significant."""
         tradeoffs = []
@@ -198,8 +197,8 @@ class TemplateExplanationGenerator:
     def identify_key_differentiators(
         self,
         plan: RankedPlan,
-        all_plans: Optional[List[RankedPlan]] = None,
-    ) -> List[str]:
+        all_plans: list[RankedPlan] | None = None,
+    ) -> list[str]:
         """
         Identify what makes this plan stand out.
 
@@ -256,8 +255,8 @@ class TemplateExplanationGenerator:
     def identify_trade_offs(
         self,
         plan: RankedPlan,
-        current_plan: Optional[CurrentPlan] = None,
-    ) -> List[str]:
+        current_plan: CurrentPlan | None = None,
+    ) -> list[str]:
         """
         Identify important trade-offs for this plan.
 
@@ -305,7 +304,7 @@ class TemplateExplanationGenerator:
 
 def get_context_aware_message(
     plan: RankedPlan,
-    current_plan: Optional[CurrentPlan] = None,
+    current_plan: CurrentPlan | None = None,
     stay_with_current: bool = False,
 ) -> str:
     """

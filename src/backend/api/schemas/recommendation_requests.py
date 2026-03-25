@@ -6,11 +6,9 @@ Enhanced in Story 6.3 to include risk warnings and stay recommendations.
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-
 
 # Request Schemas
 
@@ -59,19 +57,19 @@ class CurrentPlanRequest(BaseModel):
     Current plan information.
     """
 
-    plan_name: Optional[str] = Field(None, description="Current plan name")
-    supplier_name: Optional[str] = Field(None, description="Current supplier name")
-    current_rate: Optional[Decimal] = Field(
+    plan_name: str | None = Field(None, description="Current plan name")
+    supplier_name: str | None = Field(None, description="Current supplier name")
+    current_rate: Decimal | None = Field(
         None, ge=0, description="Current rate (cents per kWh)"
     )
-    contract_end_date: Optional[date] = Field(None, description="Contract end date")
-    early_termination_fee: Optional[Decimal] = Field(
+    contract_end_date: date | None = Field(None, description="Contract end date")
+    early_termination_fee: Decimal | None = Field(
         None, ge=0, description="Early termination fee"
     )
-    annual_cost: Optional[Decimal] = Field(
+    annual_cost: Decimal | None = Field(
         None, ge=0, description="Annual cost of current plan"
     )
-    contract_start_date: Optional[date] = Field(None, description="Contract start date")
+    contract_start_date: date | None = Field(None, description="Contract start date")
 
 
 class GenerateRecommendationRequest(BaseModel):
@@ -82,11 +80,11 @@ class GenerateRecommendationRequest(BaseModel):
     """
 
     user_data: UserDataRequest = Field(..., description="User location and property data")
-    usage_data: List[MonthlyUsageData] = Field(
+    usage_data: list[MonthlyUsageData] = Field(
         ..., min_items=3, max_items=24, description="12 months of usage data (3-24 months)"
     )
     preferences: UserPreferencesRequest = Field(..., description="User preferences")
-    current_plan: Optional[CurrentPlanRequest] = Field(None, description="Current plan")
+    current_plan: CurrentPlanRequest | None = Field(None, description="Current plan")
     include_risks: bool = Field(True, description="Include risk analysis (Story 6.1)")
 
     class Config:
@@ -161,7 +159,7 @@ class SavingsResponse(BaseModel):
     annual_savings: Decimal = Field(..., description="Annual savings vs current plan")
     savings_percentage: Decimal = Field(..., description="Savings percentage")
     monthly_savings: Decimal = Field(..., description="Average monthly savings")
-    break_even_months: Optional[int] = Field(
+    break_even_months: int | None = Field(
         None, description="Months to break even (if ETF exists)"
     )
 
@@ -178,7 +176,7 @@ class RiskWarningResponse(BaseModel):
     category: str = Field(..., description="Risk category")
     title: str = Field(..., description="Risk title")
     message: str = Field(..., description="Risk explanation")
-    mitigation: Optional[str] = Field(None, description="Suggested mitigation")
+    mitigation: str | None = Field(None, description="Suggested mitigation")
 
 
 class PlanRecommendationResponse(BaseModel):
@@ -192,8 +190,8 @@ class PlanRecommendationResponse(BaseModel):
     plan_id: UUID = Field(..., description="Plan ID")
     plan_name: str = Field(..., description="Plan name")
     supplier_name: str = Field(..., description="Supplier name")
-    supplier_website: Optional[str] = Field(None, description="Supplier website URL")
-    supplier_logo_url: Optional[str] = Field(None, description="Supplier logo URL")
+    supplier_website: str | None = Field(None, description="Supplier website URL")
+    supplier_logo_url: str | None = Field(None, description="Supplier logo URL")
     plan_type: str = Field(..., description="Plan type")
 
     # Scores
@@ -205,25 +203,25 @@ class PlanRecommendationResponse(BaseModel):
     average_rate_per_kwh: Decimal = Field(..., description="Average rate (cents per kWh)")
 
     # Savings (if current plan provided)
-    savings: Optional[SavingsResponse] = Field(None, description="Savings vs current plan")
+    savings: SavingsResponse | None = Field(None, description="Savings vs current plan")
 
     # Plan details
     contract_length_months: int = Field(..., description="Contract length (0 = month-to-month)")
     early_termination_fee: Decimal = Field(..., description="Early termination fee")
     renewable_percentage: Decimal = Field(..., description="Renewable energy percentage")
-    monthly_fee: Optional[Decimal] = Field(None, description="Monthly base fee")
+    monthly_fee: Decimal | None = Field(None, description="Monthly base fee")
 
     # AI Explanation
     explanation: str = Field(..., description="AI-generated explanation")
-    key_differentiators: List[str] = Field(..., description="Key differentiating factors")
-    trade_offs: List[str] = Field(..., description="Important trade-offs")
+    key_differentiators: list[str] = Field(..., description="Key differentiating factors")
+    trade_offs: list[str] = Field(..., description="Important trade-offs")
 
     # Risk warnings (Story 6.1)
-    risk_warnings: List[RiskWarningResponse] = Field(
+    risk_warnings: list[RiskWarningResponse] = Field(
         default_factory=list, description="Risk warnings for this plan"
     )
     risk_count: int = Field(default=0, description="Total risk count")
-    highest_risk_severity: Optional[str] = Field(None, description="Highest risk severity")
+    highest_risk_severity: str | None = Field(None, description="Highest risk severity")
 
 
 class StayRecommendationResponse(BaseModel):
@@ -235,9 +233,9 @@ class StayRecommendationResponse(BaseModel):
 
     should_stay: bool = Field(..., description="Whether to stay with current plan")
     reasoning: str = Field(..., description="Explanation for stay recommendation")
-    triggers: List[str] = Field(..., description="Reasons for staying")
-    net_annual_savings: Optional[Decimal] = Field(None, description="Net savings after costs")
-    break_even_months: Optional[int] = Field(None, description="Break-even period")
+    triggers: list[str] = Field(..., description="Reasons for staying")
+    net_annual_savings: Decimal | None = Field(None, description="Net savings after costs")
+    break_even_months: int | None = Field(None, description="Break-even period")
     confidence: Decimal = Field(..., description="Confidence in recommendation (0-1)")
 
 
@@ -250,12 +248,12 @@ class GenerateRecommendationResponse(BaseModel):
 
     recommendation_id: UUID = Field(..., description="Unique recommendation ID")
     user_profile: UsageProfileSummary = Field(..., description="User usage profile summary")
-    top_plans: List[PlanRecommendationResponse] = Field(
+    top_plans: list[PlanRecommendationResponse] = Field(
         ..., description="Top 3 recommended plans"
     )
     generated_at: datetime = Field(..., description="Generation timestamp")
     total_plans_analyzed: int = Field(..., description="Number of plans analyzed")
-    warnings: List[str] = Field(default_factory=list, description="Any warnings or notes")
+    warnings: list[str] = Field(default_factory=list, description="Any warnings or notes")
 
     # Risk analysis (Story 6.1)
     overall_risk_level: str = Field(
@@ -268,7 +266,7 @@ class GenerateRecommendationResponse(BaseModel):
     should_stay: bool = Field(
         default=False, description="Whether staying with current plan is recommended"
     )
-    stay_recommendation: Optional[StayRecommendationResponse] = Field(
+    stay_recommendation: StayRecommendationResponse | None = Field(
         None, description="Stay recommendation details"
     )
 

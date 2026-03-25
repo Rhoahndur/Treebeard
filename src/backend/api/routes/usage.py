@@ -7,14 +7,13 @@ Upload and manage usage data.
 import logging
 from datetime import date
 from decimal import Decimal
-from typing import List
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
-from models.usage import UsageHistory
 from api.auth_dependencies import CurrentUser, DBSession
 from api.schemas.common import MessageResponse
+from models.usage import UsageHistory
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -33,7 +32,7 @@ class UsageDataPoint(BaseModel):
 class UploadUsageRequest(BaseModel):
     """Upload usage data request."""
 
-    usage_data: List[UsageDataPoint] = Field(
+    usage_data: list[UsageDataPoint] = Field(
         ..., min_items=1, max_items=24, description="Usage data (1-24 months)"
     )
 
@@ -108,7 +107,7 @@ async def upload_usage(
 
 @router.get(
     "/history",
-    response_model=List[UsageDataPoint],
+    response_model=list[UsageDataPoint],
     summary="Get Usage History",
     description="Get usage history for the authenticated user.",
 )

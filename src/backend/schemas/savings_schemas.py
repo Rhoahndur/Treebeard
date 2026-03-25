@@ -7,11 +7,10 @@ Author: Backend Dev #4
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
-
 
 # Story 2.4: Savings Analysis Schemas
 
@@ -47,7 +46,7 @@ class CostRange(BaseModel):
         le=1,
         description="Confidence level (e.g., 0.95 for 95% confidence interval)"
     )
-    volatility_note: Optional[str] = Field(
+    volatility_note: str | None = Field(
         None,
         description="Explanation of volatility factors"
     )
@@ -116,7 +115,7 @@ class SavingsAnalysis(BaseModel):
     )
 
     # Break-even analysis (if switching cost exists)
-    break_even_months: Optional[int] = Field(
+    break_even_months: int | None = Field(
         None,
         ge=0,
         description="Months until savings offset switching cost (ETF)"
@@ -132,7 +131,7 @@ class SavingsAnalysis(BaseModel):
     )
 
     # Variable rate uncertainty (if applicable)
-    uncertainty_range: Optional[CostRange] = Field(
+    uncertainty_range: CostRange | None = Field(
         None,
         description="Cost range for variable rate plans"
     )
@@ -201,10 +200,10 @@ class ComparisonPlan(BaseModel):
     # Plan attributes
     renewable_percentage: Decimal = Field(..., ge=0, le=100, description="Renewable energy %")
     plan_type: str = Field(..., description="fixed, variable, tiered, time_of_use")
-    rate_per_kwh: Optional[Decimal] = Field(None, description="Rate (for fixed plans)")
+    rate_per_kwh: Decimal | None = Field(None, description="Rate (for fixed plans)")
 
     # Supplier rating
-    supplier_rating: Optional[Decimal] = Field(None, ge=0, le=5, description="Supplier rating (0-5)")
+    supplier_rating: Decimal | None = Field(None, ge=0, le=5, description="Supplier rating (0-5)")
 
     # Savings vs current
     savings_vs_current_annual: Decimal = Field(
@@ -217,8 +216,8 @@ class ComparisonPlan(BaseModel):
     )
 
     # Rank and scores (from Story 2.2)
-    rank: Optional[int] = Field(None, ge=1, description="Recommendation rank")
-    composite_score: Optional[Decimal] = Field(None, ge=0, le=1, description="Overall score (0-1)")
+    rank: int | None = Field(None, ge=1, description="Recommendation rank")
+    composite_score: Decimal | None = Field(None, ge=0, le=1, description="Overall score (0-1)")
 
     # Comparison indicators
     is_current_plan: bool = Field(default=False, description="Whether this is user's current plan")
@@ -347,7 +346,7 @@ class SavingsSummary(BaseModel):
     plan_id: UUID
     annual_savings: Decimal
     savings_percentage: Decimal
-    break_even_months: Optional[int] = None
+    break_even_months: int | None = None
     is_variable_rate: bool = False
     confidence: str = Field(default="high", description="Confidence level: high, medium, low")
 

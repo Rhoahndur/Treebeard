@@ -2,8 +2,8 @@
 Fix PostgreSQL database permissions for treebeard user.
 """
 
-import sys
 import os
+import sys
 
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -48,7 +48,7 @@ if not connected:
     print("\n2. If you have Homebrew PostgreSQL:")
     print("   psql -U postgres -d treebeard_dev")
     print("\n3. Or connect as your macOS user:")
-    print(f"   psql -U aleksandrgaun -d treebeard_dev")
+    print("   psql -U aleksandrgaun -d treebeard_dev")
     print("\nThen run these SQL commands:")
     print("   GRANT ALL ON SCHEMA public TO treebeard;")
     print("   GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO treebeard;")

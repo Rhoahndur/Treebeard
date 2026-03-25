@@ -5,7 +5,7 @@ Adds unique request ID to all requests for tracing and correlation.
 """
 
 import uuid
-from typing import Callable
+from collections.abc import Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware

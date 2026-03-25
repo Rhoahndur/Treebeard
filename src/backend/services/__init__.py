@@ -2,8 +2,8 @@
 Backend Services
 """
 
+from .cache_service import CacheService, configure_cache, get_cache_service
 from .usage_analysis import UsageAnalysisService
-from .cache_service import CacheService, get_cache_service, configure_cache
 
 __all__ = [
     "UsageAnalysisService",

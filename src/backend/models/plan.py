@@ -4,11 +4,12 @@ Plan catalog and supplier models.
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import ARRAY, Boolean, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -34,7 +35,7 @@ class Supplier(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         comment="Official name of the energy supplier"
     )
 
-    average_rating: Mapped[Optional[Decimal]] = mapped_column(
+    average_rating: Mapped[Decimal | None] = mapped_column(
         Numeric(3, 2),
         nullable=True,
         comment="Average customer rating (0.00-5.00)"
@@ -47,19 +48,19 @@ class Supplier(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         comment="Total number of customer reviews"
     )
 
-    website: Mapped[Optional[str]] = mapped_column(
+    website: Mapped[str | None] = mapped_column(
         String(500),
         nullable=True,
         comment="Supplier's official website URL"
     )
 
-    logo_url: Mapped[Optional[str]] = mapped_column(
+    logo_url: Mapped[str | None] = mapped_column(
         String(500),
         nullable=True,
         comment="URL to supplier's logo image"
     )
 
-    customer_service_phone: Mapped[Optional[str]] = mapped_column(
+    customer_service_phone: Mapped[str | None] = mapped_column(
         String(20),
         nullable=True,
         comment="Customer service phone number"
@@ -159,13 +160,13 @@ class PlanCatalog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         comment="Percentage of renewable energy (0.00-100.00)"
     )
 
-    monthly_fee: Mapped[Optional[Decimal]] = mapped_column(
+    monthly_fee: Mapped[Decimal | None] = mapped_column(
         Numeric(10, 2),
         nullable=True,
         comment="Monthly base fee in dollars"
     )
 
-    connection_fee: Mapped[Optional[Decimal]] = mapped_column(
+    connection_fee: Mapped[Decimal | None] = mapped_column(
         Numeric(10, 2),
         nullable=True,
         comment="One-time connection/activation fee in dollars"
@@ -185,13 +186,13 @@ class PlanCatalog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         comment="Whether plan is currently available"
     )
 
-    plan_description: Mapped[Optional[str]] = mapped_column(
+    plan_description: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
         comment="Marketing description of the plan"
     )
 
-    terms_url: Mapped[Optional[str]] = mapped_column(
+    terms_url: Mapped[str | None] = mapped_column(
         String(500),
         nullable=True,
         comment="URL to full terms and conditions"

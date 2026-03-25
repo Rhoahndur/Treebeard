@@ -11,11 +11,9 @@ Author: Backend Dev #7
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
-
 
 # ============================================================================
 # ENUMS
@@ -75,18 +73,18 @@ class RiskWarning(BaseModel):
 
     title: str = Field(..., max_length=100, description="Short risk title")
     message: str = Field(..., max_length=500, description="Detailed risk explanation")
-    mitigation: Optional[str] = Field(
+    mitigation: str | None = Field(
         None,
         max_length=300,
         description="Suggested mitigation or alternative action",
     )
 
-    affected_plan_ids: List[UUID] = Field(
+    affected_plan_ids: list[UUID] = Field(
         ..., description="Plan IDs affected by this risk"
     )
 
     # Risk-specific data (optional structured data)
-    risk_data: Optional[dict] = Field(
+    risk_data: dict | None = Field(
         None, description="Additional structured data about the risk"
     )
 
@@ -164,7 +162,7 @@ class StayRecommendation(BaseModel):
         ..., description="Whether staying with current plan is recommended"
     )
 
-    triggers: List[StayRecommendationTrigger] = Field(
+    triggers: list[StayRecommendationTrigger] = Field(
         default_factory=list, description="Reasons for stay recommendation"
     )
 
@@ -173,10 +171,10 @@ class StayRecommendation(BaseModel):
     )
 
     # Supporting data
-    net_annual_savings: Optional[Decimal] = Field(
+    net_annual_savings: Decimal | None = Field(
         None, description="Net savings after all costs (can be negative)"
     )
-    break_even_months: Optional[int] = Field(
+    break_even_months: int | None = Field(
         None, ge=0, description="Months to break even (if applicable)"
     )
     critical_risk_count: int = Field(
@@ -184,13 +182,13 @@ class StayRecommendation(BaseModel):
     )
 
     # Current plan quality metrics
-    current_plan_percentile: Optional[float] = Field(
+    current_plan_percentile: float | None = Field(
         None,
         ge=0,
         le=100,
         description="Current plan ranking percentile (e.g., 90 = top 10%)",
     )
-    days_until_contract_end: Optional[int] = Field(
+    days_until_contract_end: int | None = Field(
         None, ge=0, description="Days until current contract ends"
     )
 
@@ -220,12 +218,12 @@ class EnhancedRecommendationResult(BaseModel):
     user_id: UUID = Field(..., description="User ID")
 
     # Top plans (from Story 2.2)
-    top_plans: List = Field(
+    top_plans: list = Field(
         ..., min_length=0, max_length=3, description="Top recommended plans"
     )
 
     # Risk analysis (Story 6.1)
-    risk_warnings: List[RiskWarning] = Field(
+    risk_warnings: list[RiskWarning] = Field(
         default_factory=list, description="All detected risk warnings"
     )
     risk_summary: RiskSummary = Field(
@@ -239,7 +237,7 @@ class EnhancedRecommendationResult(BaseModel):
     should_stay: bool = Field(
         default=False, description="Whether to stay with current plan"
     )
-    stay_recommendation: Optional[StayRecommendation] = Field(
+    stay_recommendation: StayRecommendation | None = Field(
         None, description="Stay recommendation details (if applicable)"
     )
 
@@ -252,10 +250,10 @@ class EnhancedRecommendationResult(BaseModel):
     )
 
     # Warnings and assumptions
-    warnings: List[str] = Field(
+    warnings: list[str] = Field(
         default_factory=list, description="General warnings about the analysis"
     )
-    assumptions: List[str] = Field(
+    assumptions: list[str] = Field(
         default_factory=list, description="Key assumptions made"
     )
 
@@ -353,11 +351,11 @@ class PlanRiskAnalysis(BaseModel):
     plan_id: UUID = Field(..., description="Plan ID")
     plan_name: str = Field(..., description="Plan name")
 
-    risks: List[RiskWarning] = Field(
+    risks: list[RiskWarning] = Field(
         default_factory=list, description="Risks for this plan"
     )
     risk_count: int = Field(default=0, ge=0, description="Total risk count")
-    highest_severity: Optional[RiskSeverity] = Field(
+    highest_severity: RiskSeverity | None = Field(
         None, description="Highest severity risk for this plan"
     )
 

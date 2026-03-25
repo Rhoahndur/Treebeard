@@ -9,18 +9,14 @@ Author: Backend Dev #7
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional, Tuple
-from uuid import UUID
 
 from schemas.recommendation_schemas import RankedPlan, UserPreferences
 from schemas.risk_schemas import (
-    EnhancedRecommendationResult,
     PlanRiskAnalysis,
     RiskCategory,
     RiskDetectionConfig,
-    RiskMetrics,
     RiskSeverity,
     RiskSummary,
     RiskType,
@@ -29,7 +25,7 @@ from schemas.risk_schemas import (
     StayRecommendationTrigger,
 )
 from schemas.savings_schemas import SavingsAnalysis
-from schemas.usage_analysis import DataQualityMetrics, UsageProfile
+from schemas.usage_analysis import UsageProfile
 
 logger = logging.getLogger(__name__)
 
@@ -50,10 +46,10 @@ class CurrentPlan:
         plan_name: str,
         supplier_name: str,
         current_rate: Decimal,
-        contract_end_date: Optional[datetime] = None,
+        contract_end_date: datetime | None = None,
         early_termination_fee: Decimal = Decimal("0.00"),
-        annual_cost: Optional[Decimal] = None,
-        contract_start_date: Optional[datetime] = None,
+        annual_cost: Decimal | None = None,
+        contract_start_date: datetime | None = None,
     ):
         self.plan_name = plan_name
         self.supplier_name = supplier_name
@@ -77,7 +73,7 @@ class RiskDetectionService:
     Story 6.2: Implements "stay with current plan" logic
     """
 
-    def __init__(self, config: Optional[RiskDetectionConfig] = None):
+    def __init__(self, config: RiskDetectionConfig | None = None):
         """
         Initialize risk detection service.
 
@@ -89,12 +85,12 @@ class RiskDetectionService:
 
     def detect_risks(
         self,
-        plans: List[RankedPlan],
-        current_plan: Optional[CurrentPlan],
-        savings_analyses: Optional[List[SavingsAnalysis]],
-        usage_profile: Optional[UsageProfile],
-        preferences: Optional[UserPreferences],
-    ) -> List[RiskWarning]:
+        plans: list[RankedPlan],
+        current_plan: CurrentPlan | None,
+        savings_analyses: list[SavingsAnalysis] | None,
+        usage_profile: UsageProfile | None,
+        preferences: UserPreferences | None,
+    ) -> list[RiskWarning]:
         """
         Detect all risks across recommended plans.
 
@@ -140,11 +136,11 @@ class RiskDetectionService:
     def _detect_plan_risks(
         self,
         plan: RankedPlan,
-        current_plan: Optional[CurrentPlan],
-        savings: Optional[SavingsAnalysis],
-        usage_profile: Optional[UsageProfile],
-        preferences: Optional[UserPreferences],
-    ) -> List[RiskWarning]:
+        current_plan: CurrentPlan | None,
+        savings: SavingsAnalysis | None,
+        usage_profile: UsageProfile | None,
+        preferences: UserPreferences | None,
+    ) -> list[RiskWarning]:
         """
         Detect all risks for a single plan.
 
@@ -208,7 +204,7 @@ class RiskDetectionService:
     # RISK DETECTION RULES (Story 6.1)
     # ========================================================================
 
-    def _check_high_etf(self, plan: RankedPlan) -> Optional[RiskWarning]:
+    def _check_high_etf(self, plan: RankedPlan) -> RiskWarning | None:
         """
         Rule 1: High Early Termination Fee Warning.
 
@@ -249,7 +245,7 @@ class RiskDetectionService:
 
     def _check_low_savings(
         self, plan: RankedPlan, savings: SavingsAnalysis
-    ) -> Optional[RiskWarning]:
+    ) -> RiskWarning | None:
         """
         Rule 2: Low Savings Warning.
 
@@ -297,7 +293,7 @@ class RiskDetectionService:
 
     def _check_data_quality(
         self, plan: RankedPlan, usage_profile: UsageProfile
-    ) -> Optional[RiskWarning]:
+    ) -> RiskWarning | None:
         """
         Rule 3: Data Quality Issues.
 
@@ -347,7 +343,7 @@ class RiskDetectionService:
 
     def _check_variable_rate_volatility(
         self, plan: RankedPlan
-    ) -> Optional[RiskWarning]:
+    ) -> RiskWarning | None:
         """
         Rule 4: Variable Rate Volatility Warning.
 
@@ -374,7 +370,7 @@ class RiskDetectionService:
 
     def _check_contract_length_mismatch(
         self, plan: RankedPlan, preferences: UserPreferences
-    ) -> Optional[RiskWarning]:
+    ) -> RiskWarning | None:
         """
         Rule 5: Contract Length Mismatch.
 
@@ -403,7 +399,7 @@ class RiskDetectionService:
 
         return None
 
-    def _check_supplier_reliability(self, plan: RankedPlan) -> Optional[RiskWarning]:
+    def _check_supplier_reliability(self, plan: RankedPlan) -> RiskWarning | None:
         """
         Rule 6: Supplier Reliability Warning.
 
@@ -420,7 +416,7 @@ class RiskDetectionService:
 
     def _check_break_even(
         self, plan: RankedPlan, savings: SavingsAnalysis
-    ) -> Optional[RiskWarning]:
+    ) -> RiskWarning | None:
         """
         Rule 7: Break-Even Too Long.
 
@@ -470,7 +466,7 @@ class RiskDetectionService:
 
     def _check_negative_savings(
         self, plan: RankedPlan, savings: SavingsAnalysis
-    ) -> Optional[RiskWarning]:
+    ) -> RiskWarning | None:
         """
         Additional Rule 8: Negative Savings.
 
@@ -494,7 +490,7 @@ class RiskDetectionService:
 
         return None
 
-    def _check_high_upfront_costs(self, plan: RankedPlan) -> Optional[RiskWarning]:
+    def _check_high_upfront_costs(self, plan: RankedPlan) -> RiskWarning | None:
         """
         Additional Rule 9: High Upfront Costs.
 
@@ -529,9 +525,9 @@ class RiskDetectionService:
         current_plan: CurrentPlan,
         top_plan: RankedPlan,
         savings: SavingsAnalysis,
-        risks: List[RiskWarning],
+        risks: list[RiskWarning],
         all_plans_count: int = 0,
-    ) -> Tuple[bool, Optional[StayRecommendation]]:
+    ) -> tuple[bool, StayRecommendation | None]:
         """
         Determine if user should stay with current plan.
 
@@ -619,11 +615,11 @@ class RiskDetectionService:
 
     def _generate_stay_reasoning(
         self,
-        triggers: List[StayRecommendationTrigger],
+        triggers: list[StayRecommendationTrigger],
         net_savings: Decimal,
-        break_even: Optional[int],
-        critical_risks: List[RiskWarning],
-        days_until_end: Optional[int],
+        break_even: int | None,
+        critical_risks: list[RiskWarning],
+        days_until_end: int | None,
     ) -> str:
         """Generate plain-language reasoning for stay recommendation."""
         reasons = []
@@ -670,7 +666,7 @@ class RiskDetectionService:
     # ========================================================================
 
     def calculate_risk_summary(
-        self, risks: List[RiskWarning], plans: List[RankedPlan]
+        self, risks: list[RiskWarning], plans: list[RankedPlan]
     ) -> RiskSummary:
         """
         Calculate aggregate risk summary.
@@ -708,8 +704,8 @@ class RiskDetectionService:
         )
 
     def group_risks_by_plan(
-        self, risks: List[RiskWarning], plans: List[RankedPlan]
-    ) -> List[PlanRiskAnalysis]:
+        self, risks: list[RiskWarning], plans: list[RankedPlan]
+    ) -> list[PlanRiskAnalysis]:
         """
         Group risks by plan for easier frontend consumption.
 
@@ -755,7 +751,7 @@ class RiskDetectionService:
 
 
 def create_risk_detection_service(
-    config: Optional[RiskDetectionConfig] = None,
+    config: RiskDetectionConfig | None = None,
 ) -> RiskDetectionService:
     """
     Factory function to create RiskDetectionService.

@@ -13,10 +13,11 @@ Target: >80% cache hit rate
 
 import logging
 import time
-from typing import Optional, Dict, Any, List, Callable
-from datetime import datetime, timedelta
-from dataclasses import dataclass, field
 from collections import defaultdict
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any
 
 try:
     import redis
@@ -56,7 +57,7 @@ class CacheStats:
             return 0.0
         return (self.errors / self.total_requests) * 100
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert stats to dictionary."""
         return {
             "total_requests": self.total_requests,
@@ -77,7 +78,7 @@ class CacheKeyStats:
     hits: int = 0
     misses: int = 0
     avg_ttl: float = 0.0
-    last_accessed: Optional[datetime] = None
+    last_accessed: datetime | None = None
 
     @property
     def hit_rate(self) -> float:
@@ -123,7 +124,7 @@ class OptimizedCacheService:
         redis_host: str = "localhost",
         redis_port: int = 6379,
         redis_db: int = 0,
-        redis_password: Optional[str] = None,
+        redis_password: str | None = None,
         enabled: bool = True,
         stats_interval: int = 300,  # 5 minutes
     ):
@@ -139,9 +140,9 @@ class OptimizedCacheService:
             stats_interval: Interval for stats aggregation (seconds)
         """
         self.enabled = enabled and REDIS_AVAILABLE
-        self._client: Optional[Redis] = None
+        self._client: Redis | None = None
         self.stats = CacheStats()
-        self.key_stats: Dict[str, CacheKeyStats] = defaultdict(
+        self.key_stats: dict[str, CacheKeyStats] = defaultdict(
             lambda: CacheKeyStats(pattern="unknown")
         )
         self.stats_interval = stats_interval
@@ -172,8 +173,8 @@ class OptimizedCacheService:
         self,
         key: str,
         default: Any = None,
-        deserializer: Optional[Callable] = None,
-    ) -> Optional[Any]:
+        deserializer: Callable | None = None,
+    ) -> Any | None:
         """
         Get value from cache with statistics tracking.
 
@@ -218,8 +219,8 @@ class OptimizedCacheService:
         self,
         key: str,
         value: Any,
-        ttl: Optional[int] = None,
-        serializer: Optional[Callable] = None,
+        ttl: int | None = None,
+        serializer: Callable | None = None,
     ) -> bool:
         """
         Set value in cache with automatic TTL optimization.
@@ -374,7 +375,7 @@ class OptimizedCacheService:
         logger.info(f"Invalidated {count} cache entries for user {user_id}")
         return count
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """
         Get comprehensive cache statistics.
 
@@ -398,7 +399,7 @@ class OptimizedCacheService:
         stats_dict["enabled"] = self.enabled
         return stats_dict
 
-    def get_key_stats(self) -> List[Dict[str, Any]]:
+    def get_key_stats(self) -> list[dict[str, Any]]:
         """
         Get statistics for individual key patterns.
 
@@ -423,7 +424,7 @@ class OptimizedCacheService:
         self.key_stats.clear()
         logger.info("Cache statistics reset")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """
         Perform health check on cache service.
 
@@ -515,7 +516,7 @@ class OptimizedCacheService:
 
 
 # Singleton instance
-_optimized_cache_instance: Optional[OptimizedCacheService] = None
+_optimized_cache_instance: OptimizedCacheService | None = None
 
 
 def get_optimized_cache() -> OptimizedCacheService:
@@ -535,7 +536,7 @@ def configure_optimized_cache(
     redis_host: str = "localhost",
     redis_port: int = 6379,
     redis_db: int = 0,
-    redis_password: Optional[str] = None,
+    redis_password: str | None = None,
     enabled: bool = True,
 ) -> OptimizedCacheService:
     """

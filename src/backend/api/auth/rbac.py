@@ -5,7 +5,6 @@ Implements permission checking and role-based authorization.
 """
 
 from enum import Enum
-from typing import List
 
 from fastapi import HTTPException, status
 
@@ -68,7 +67,7 @@ ROLE_PERMISSIONS = {
 }
 
 
-def get_user_permissions(user: User) -> List[Permission]:
+def get_user_permissions(user: User) -> list[Permission]:
     """
     Get all permissions for a user based on their role.
 
@@ -116,7 +115,7 @@ def require_permission(user: User, permission: Permission) -> None:
         )
 
 
-def require_permissions(user: User, permissions: List[Permission]) -> None:
+def require_permissions(user: User, permissions: list[Permission]) -> None:
     """
     Require multiple permissions, raise exception if any are missing.
 

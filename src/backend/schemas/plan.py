@@ -4,11 +4,10 @@ Pydantic schemas for plan catalog and suppliers.
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator
-
 
 # Rate Structure Schemas
 
@@ -56,15 +55,15 @@ class SupplierBase(BaseModel):
     """Base schema for Supplier."""
 
     supplier_name: str = Field(..., max_length=255, description="Supplier name")
-    average_rating: Optional[Decimal] = Field(
+    average_rating: Decimal | None = Field(
         None,
         ge=0,
         le=5,
         description="Average rating (0.00-5.00)"
     )
     review_count: int = Field(default=0, ge=0, description="Number of reviews")
-    website: Optional[HttpUrl] = Field(None, description="Supplier website URL")
-    customer_service_phone: Optional[str] = Field(
+    website: HttpUrl | None = Field(None, description="Supplier website URL")
+    customer_service_phone: str | None = Field(
         None,
         max_length=20,
         description="Customer service phone"
@@ -80,12 +79,12 @@ class SupplierCreate(SupplierBase):
 class SupplierUpdate(BaseModel):
     """Schema for updating supplier information."""
 
-    supplier_name: Optional[str] = Field(None, max_length=255)
-    average_rating: Optional[Decimal] = Field(None, ge=0, le=5)
-    review_count: Optional[int] = Field(None, ge=0)
-    website: Optional[HttpUrl] = None
-    customer_service_phone: Optional[str] = Field(None, max_length=20)
-    is_active: Optional[bool] = None
+    supplier_name: str | None = Field(None, max_length=255)
+    average_rating: Decimal | None = Field(None, ge=0, le=5)
+    review_count: int | None = Field(None, ge=0)
+    website: HttpUrl | None = None
+    customer_service_phone: str | None = Field(None, max_length=20)
+    is_active: bool | None = None
 
 
 class SupplierResponse(SupplierBase):
@@ -119,11 +118,11 @@ class PlanCatalogBase(BaseModel):
         le=100,
         description="Renewable energy percentage"
     )
-    monthly_fee: Optional[Decimal] = Field(None, ge=0, description="Monthly base fee")
-    connection_fee: Optional[Decimal] = Field(None, ge=0, description="Connection fee")
+    monthly_fee: Decimal | None = Field(None, ge=0, description="Monthly base fee")
+    connection_fee: Decimal | None = Field(None, ge=0, description="Connection fee")
     available_regions: list[str] = Field(..., description="List of ZIP codes/regions")
-    plan_description: Optional[str] = Field(None, description="Plan description")
-    terms_url: Optional[HttpUrl] = Field(None, description="Terms and conditions URL")
+    plan_description: str | None = Field(None, description="Plan description")
+    terms_url: HttpUrl | None = Field(None, description="Terms and conditions URL")
 
     @field_validator("plan_type")
     @classmethod
@@ -155,18 +154,18 @@ class PlanCatalogCreate(PlanCatalogBase):
 class PlanCatalogUpdate(BaseModel):
     """Schema for updating plan information."""
 
-    plan_name: Optional[str] = Field(None, max_length=255)
-    plan_type: Optional[str] = None
-    rate_structure: Optional[RateStructure] = None
-    contract_length_months: Optional[int] = Field(None, ge=0)
-    early_termination_fee: Optional[Decimal] = Field(None, ge=0)
-    renewable_percentage: Optional[Decimal] = Field(None, ge=0, le=100)
-    monthly_fee: Optional[Decimal] = Field(None, ge=0)
-    connection_fee: Optional[Decimal] = Field(None, ge=0)
-    available_regions: Optional[list[str]] = None
-    is_active: Optional[bool] = None
-    plan_description: Optional[str] = None
-    terms_url: Optional[HttpUrl] = None
+    plan_name: str | None = Field(None, max_length=255)
+    plan_type: str | None = None
+    rate_structure: RateStructure | None = None
+    contract_length_months: int | None = Field(None, ge=0)
+    early_termination_fee: Decimal | None = Field(None, ge=0)
+    renewable_percentage: Decimal | None = Field(None, ge=0, le=100)
+    monthly_fee: Decimal | None = Field(None, ge=0)
+    connection_fee: Decimal | None = Field(None, ge=0)
+    available_regions: list[str] | None = None
+    is_active: bool | None = None
+    plan_description: str | None = None
+    terms_url: HttpUrl | None = None
 
 
 class PlanCatalogResponse(PlanCatalogBase):
@@ -180,7 +179,7 @@ class PlanCatalogResponse(PlanCatalogBase):
     updated_at: datetime
 
     # Include supplier information
-    supplier: Optional[SupplierResponse] = None
+    supplier: SupplierResponse | None = None
 
     model_config = {"from_attributes": True}
 
@@ -204,9 +203,9 @@ class PlanCatalogSummary(BaseModel):
 class PlanFilterParams(BaseModel):
     """Parameters for filtering plans."""
 
-    zip_code: Optional[str] = Field(None, description="Filter by ZIP code availability")
-    plan_type: Optional[str] = Field(None, description="Filter by plan type")
-    max_contract_length: Optional[int] = Field(None, ge=0, description="Max contract length")
-    min_renewable_percentage: Optional[Decimal] = Field(None, ge=0, le=100)
+    zip_code: str | None = Field(None, description="Filter by ZIP code availability")
+    plan_type: str | None = Field(None, description="Filter by plan type")
+    max_contract_length: int | None = Field(None, ge=0, description="Max contract length")
+    min_renewable_percentage: Decimal | None = Field(None, ge=0, le=100)
     is_active: bool = Field(default=True, description="Filter active plans only")
-    supplier_id: Optional[UUID] = Field(None, description="Filter by supplier")
+    supplier_id: UUID | None = Field(None, description="Filter by supplier")

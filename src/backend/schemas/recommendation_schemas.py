@@ -6,13 +6,12 @@ This module defines the data models for the recommendation engine,
 including scoring, ranking, and switching optimization.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Dict, List, Optional, Any
+from typing import Any
 from uuid import UUID
-
 
 # ============================================================================
 # SCORING SCHEMAS (Story 2.1)
@@ -93,7 +92,7 @@ class TimeOfUseRate:
     """Time-of-use rate structure."""
     peak_rate: Decimal  # Rate during peak hours (cents per kWh)
     off_peak_rate: Decimal  # Rate during off-peak hours (cents per kWh)
-    peak_hours: List[int]  # Hours considered peak (0-23)
+    peak_hours: list[int]  # Hours considered peak (0-23)
     peak_pct: float = 0.5  # Percentage of usage during peak (default 50%)
 
 
@@ -127,13 +126,13 @@ class RankedPlan:
     cost_breakdown: CostBreakdown
 
     # Additional details
-    rate_structure: Dict[str, Any]  # Original rate structure from DB
-    monthly_fee: Optional[Decimal] = None
-    connection_fee: Optional[Decimal] = None
+    rate_structure: dict[str, Any]  # Original rate structure from DB
+    monthly_fee: Decimal | None = None
+    connection_fee: Decimal | None = None
 
     # Savings vs current plan (populated when current_plan is provided)
-    projected_annual_savings: Optional[Decimal] = None
-    break_even_months: Optional[int] = None
+    projected_annual_savings: Decimal | None = None
+    break_even_months: int | None = None
 
 
 @dataclass
@@ -143,11 +142,11 @@ class RecommendationResult:
     This is the main output contract for Story 2.2.
     """
     user_id: UUID
-    top_plans: List[RankedPlan]  # Top 3 plans (or fewer if <3 available)
+    top_plans: list[RankedPlan]  # Top 3 plans (or fewer if <3 available)
 
     # Metadata
     generated_at: datetime
-    usage_profile_summary: Dict[str, Any]  # Summary from Story 1.4 UsageProfile
+    usage_profile_summary: dict[str, Any]  # Summary from Story 1.4 UsageProfile
 
     # Total plans analyzed
     total_plans_analyzed: int
@@ -170,7 +169,7 @@ class SwitchingAnalysis:
 
     # Break-even analysis
     monthly_savings: Decimal  # Per-month savings vs current plan
-    break_even_months: Optional[int]  # Months to recoup ETF (None if negative savings)
+    break_even_months: int | None  # Months to recoup ETF (None if negative savings)
 
     # Recommendation
     should_wait: bool  # True if staying with current plan is better
@@ -184,9 +183,9 @@ class EnhancedRecommendationResult(RecommendationResult):
     Enhanced recommendation result with switching analysis (Story 2.3).
     Extends the base RecommendationResult from Story 2.2.
     """
-    switching_analysis: Optional[SwitchingAnalysis] = None
+    switching_analysis: SwitchingAnalysis | None = None
     stay_with_current: bool = False  # True if current plan is better than all recommendations
-    stay_reason: Optional[str] = None  # Explanation why staying is recommended
+    stay_reason: str | None = None  # Explanation why staying is recommended
 
 
 # ============================================================================
@@ -200,9 +199,9 @@ class PlanFilter:
     """
     zip_code: str  # Required: user's location
     is_active: bool = True  # Only active plans
-    max_contract_length: Optional[int] = None  # Max contract length in months
-    min_renewable_percentage: Optional[Decimal] = None  # Minimum renewable %
-    plan_types: Optional[List[str]] = None  # Filter by plan types
+    max_contract_length: int | None = None  # Max contract length in months
+    min_renewable_percentage: Decimal | None = None  # Minimum renewable %
+    plan_types: list[str] | None = None  # Filter by plan types
 
 
 # ============================================================================
@@ -215,7 +214,7 @@ class UsageProjection:
     12-month forward usage projection.
     Re-exported from Story 1.4 for convenience.
     """
-    projected_monthly_kwh: List[float]  # 12 months
+    projected_monthly_kwh: list[float]  # 12 months
     projected_annual_kwh: float
     confidence_score: float  # 0.0 to 1.0
 

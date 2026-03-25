@@ -4,17 +4,15 @@ Audit logging service for tracking admin actions and system events.
 
 import logging
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session, selectinload
 
 from models.audit_log import AuditLog
-from models.user import User
 from schemas.audit_schemas import (
-    AuditLogCreate,
     AuditLogFilter,
     AuditLogListResponse,
     AuditLogResponse,
@@ -29,10 +27,10 @@ async def log_admin_action(
     admin_user_id: UUID,
     action: str,
     resource_type: str,
-    resource_id: Optional[UUID] = None,
-    details: Optional[dict[str, Any]] = None,
-    ip_address: Optional[str] = None,
-    user_agent: Optional[str] = None,
+    resource_id: UUID | None = None,
+    details: dict[str, Any] | None = None,
+    ip_address: str | None = None,
+    user_agent: str | None = None,
 ) -> AuditLog:
     """
     Log an admin action to the audit log.
@@ -92,10 +90,10 @@ def log_admin_action_sync(
     admin_user_id: UUID,
     action: str,
     resource_type: str,
-    resource_id: Optional[UUID] = None,
-    details: Optional[dict[str, Any]] = None,
-    ip_address: Optional[str] = None,
-    user_agent: Optional[str] = None,
+    resource_id: UUID | None = None,
+    details: dict[str, Any] | None = None,
+    ip_address: str | None = None,
+    user_agent: str | None = None,
 ) -> AuditLog:
     """
     Synchronous version of log_admin_action.
@@ -213,7 +211,7 @@ async def get_audit_logs(
 async def get_audit_log_by_id(
     db: AsyncSession,
     audit_log_id: UUID,
-) -> Optional[AuditLog]:
+) -> AuditLog | None:
     """
     Get a single audit log entry by ID.
 

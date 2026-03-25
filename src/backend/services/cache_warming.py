@@ -11,16 +11,15 @@ Pre-caches frequently accessed data to maximize cache hit rate:
 Target: >80% cache hit rate through strategic warming
 """
 
-import logging
 import asyncio
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+import logging
+from datetime import datetime
+from typing import Any
 
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
 
-from services.cache_optimization import OptimizedCacheService, get_optimized_cache
 from config.database import SessionLocal
+from services.cache_optimization import OptimizedCacheService, get_optimized_cache
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +35,7 @@ class CacheWarmingService:
     4. Event-based warming: Warm cache before expected traffic spikes
     """
 
-    def __init__(self, cache_service: Optional[OptimizedCacheService] = None):
+    def __init__(self, cache_service: OptimizedCacheService | None = None):
         """
         Initialize cache warming service.
 
@@ -280,7 +279,7 @@ class CacheWarmingService:
                 logger.error(f"Error in periodic warming: {e}")
                 self.warming_stats["errors"] += 1
 
-    def get_warming_stats(self) -> Dict[str, Any]:
+    def get_warming_stats(self) -> dict[str, Any]:
         """
         Get cache warming statistics.
 
@@ -305,7 +304,7 @@ class CacheWarmingService:
     # PRIVATE HELPER METHODS
     # ========================================================================
 
-    def _get_popular_plan_ids(self, db: Session, limit: int) -> List[str]:
+    def _get_popular_plan_ids(self, db: Session, limit: int) -> list[str]:
         """
         Get IDs of most popular plans.
 
@@ -327,7 +326,7 @@ class CacheWarmingService:
         # For demonstration, return placeholder IDs
         return [f"plan_{i}" for i in range(min(limit, 10))]
 
-    def _get_plan_data(self, db: Session, plan_id: str) -> Optional[str]:
+    def _get_plan_data(self, db: Session, plan_id: str) -> str | None:
         """
         Get plan data for caching.
 
@@ -350,7 +349,7 @@ class CacheWarmingService:
 
     def _get_active_user_ids(
         self, db: Session, days: int, limit: int
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Get IDs of recently active users.
 
@@ -372,7 +371,7 @@ class CacheWarmingService:
 
         return [f"user_{i}" for i in range(min(limit, 10))]
 
-    def _get_user_profile_data(self, db: Session, user_id: str) -> Optional[str]:
+    def _get_user_profile_data(self, db: Session, user_id: str) -> str | None:
         """
         Get user profile data for caching.
 
@@ -394,7 +393,7 @@ class CacheWarmingService:
 
     def _get_recent_recommendation_ids(
         self, db: Session, days: int, limit: int
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Get IDs of recent recommendations.
 
@@ -409,7 +408,7 @@ class CacheWarmingService:
         # Placeholder implementation
         return [f"rec_{i}" for i in range(min(limit, 10))]
 
-    def _get_recommendation_data(self, db: Session, rec_id: str) -> Optional[Dict]:
+    def _get_recommendation_data(self, db: Session, rec_id: str) -> dict | None:
         """
         Get recommendation data for caching.
 
@@ -430,7 +429,7 @@ class CacheWarmingService:
 
 
 # Singleton instance
-_cache_warming_instance: Optional[CacheWarmingService] = None
+_cache_warming_instance: CacheWarmingService | None = None
 
 
 def get_cache_warming_service() -> CacheWarmingService:

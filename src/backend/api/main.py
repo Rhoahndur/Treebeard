@@ -5,14 +5,12 @@ Main application entry point with middleware, routes, and configuration.
 """
 
 import logging
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
-from config.settings import settings
 from api.middleware.audit_middleware import AuditMiddleware
 from api.middleware.cache import CacheMiddleware
 from api.middleware.error_handler import ErrorHandlerMiddleware
@@ -29,6 +27,7 @@ from api.routes import (
     usage,
     users,
 )
+from config.settings import settings
 
 # Initialize monitoring
 if settings.monitoring_enabled:

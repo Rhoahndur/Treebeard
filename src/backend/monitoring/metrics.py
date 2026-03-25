@@ -18,7 +18,7 @@ import logging
 import time
 from contextlib import contextmanager
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from config.settings import settings
 
@@ -53,7 +53,7 @@ class MetricsCollector:
         """
         self.backend = backend.lower()
         self.enabled = settings.environment != "test"
-        self._client: Optional[Any] = None
+        self._client: Any | None = None
 
         if self.enabled:
             self._initialize_backend()
@@ -109,7 +109,7 @@ class MetricsCollector:
         self,
         metric_name: str,
         value: float = 1,
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
         sample_rate: float = 1.0,
     ) -> None:
         """
@@ -136,7 +136,7 @@ class MetricsCollector:
             logger.error(f"Failed to increment metric {metric_name}: {e}")
 
     def gauge(
-        self, metric_name: str, value: float, tags: Optional[List[str]] = None, sample_rate: float = 1.0
+        self, metric_name: str, value: float, tags: list[str] | None = None, sample_rate: float = 1.0
     ) -> None:
         """
         Set a gauge metric.
@@ -162,7 +162,7 @@ class MetricsCollector:
             logger.error(f"Failed to set gauge {metric_name}: {e}")
 
     def histogram(
-        self, metric_name: str, value: float, tags: Optional[List[str]] = None, sample_rate: float = 1.0
+        self, metric_name: str, value: float, tags: list[str] | None = None, sample_rate: float = 1.0
     ) -> None:
         """
         Record a histogram value.
@@ -191,7 +191,7 @@ class MetricsCollector:
         self,
         metric_name: str,
         value: float,
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
         sample_rate: float = 1.0,
     ) -> None:
         """
@@ -218,7 +218,7 @@ class MetricsCollector:
             logger.error(f"Failed to record timing {metric_name}: {e}")
 
     @contextmanager
-    def timed(self, metric_name: str, tags: Optional[List[str]] = None):
+    def timed(self, metric_name: str, tags: list[str] | None = None):
         """
         Context manager for timing operations.
 
@@ -237,7 +237,7 @@ class MetricsCollector:
             duration_ms = (time.time() - start_time) * 1000
             self.timing(metric_name, duration_ms, tags=tags)
 
-    def set(self, metric_name: str, value: float, tags: Optional[List[str]] = None) -> None:
+    def set(self, metric_name: str, value: float, tags: list[str] | None = None) -> None:
         """
         Set a metric value (similar to gauge but for unique values).
 
@@ -259,7 +259,7 @@ class MetricsCollector:
 
 
 # Global metrics collector instance
-_metrics_collector: Optional[MetricsCollector] = None
+_metrics_collector: MetricsCollector | None = None
 
 
 def init_metrics(backend: str = "datadog") -> MetricsCollector:
@@ -298,7 +298,7 @@ def track_api_request(
     method: str,
     status_code: int,
     duration_ms: float,
-    user_id: Optional[str] = None,
+    user_id: str | None = None,
 ) -> None:
     """
     Track an API request.
@@ -333,7 +333,7 @@ def track_api_request(
 
 
 def track_cache_operation(
-    operation: str, key_pattern: str, hit: bool, duration_ms: Optional[float] = None
+    operation: str, key_pattern: str, hit: bool, duration_ms: float | None = None
 ) -> None:
     """
     Track a cache operation.
@@ -387,7 +387,7 @@ def track_database_query(query_type: str, table: str, duration_ms: float, succes
 
 
 def track_external_api_call(
-    api_name: str, endpoint: str, duration_ms: float, status_code: Optional[int] = None, success: bool = True
+    api_name: str, endpoint: str, duration_ms: float, status_code: int | None = None, success: bool = True
 ) -> None:
     """
     Track an external API call.
@@ -443,7 +443,7 @@ def track_recommendation(
     metrics.histogram("recommendations.count", num_recommendations, tags=tags)
 
 
-def track_user_activity(activity_type: str, user_id: Optional[str] = None) -> None:
+def track_user_activity(activity_type: str, user_id: str | None = None) -> None:
     """
     Track user activity.
 
@@ -460,7 +460,7 @@ def track_user_activity(activity_type: str, user_id: Optional[str] = None) -> No
     metrics.increment("user.activity", tags=tags)
 
 
-def track_error(error_type: str, endpoint: Optional[str] = None, severity: str = "error") -> None:
+def track_error(error_type: str, endpoint: str | None = None, severity: str = "error") -> None:
     """
     Track an error.
 

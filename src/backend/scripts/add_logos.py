@@ -3,6 +3,7 @@ Simple script to add logo URLs to suppliers.
 Run from backend directory: python scripts/add_logos.py
 """
 import os
+
 from sqlalchemy import create_engine, text
 
 # Get database URL from environment or use default

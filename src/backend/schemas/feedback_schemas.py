@@ -6,11 +6,9 @@ Story 8.2: Feedback API Endpoints
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Dict, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
-
 
 # Base Schemas
 
@@ -23,7 +21,7 @@ class FeedbackBase(BaseModel):
         le=5,
         description="Rating: 1 (thumbs down) to 5 (thumbs up)"
     )
-    feedback_text: Optional[str] = Field(
+    feedback_text: str | None = Field(
         None,
         max_length=500,
         description="Optional text feedback from user"
@@ -35,7 +33,7 @@ class FeedbackBase(BaseModel):
 
     @field_validator("feedback_text")
     @classmethod
-    def validate_feedback_text_length(cls, v: Optional[str]) -> Optional[str]:
+    def validate_feedback_text_length(cls, v: str | None) -> str | None:
         """Ensure feedback text is within character limit."""
         if v and len(v) > 500:
             raise ValueError("Feedback text must be 500 characters or less")
@@ -57,7 +55,7 @@ class PlanFeedbackCreate(FeedbackBase):
     """Schema for creating feedback on a specific plan."""
 
     plan_id: UUID = Field(..., description="ID of the plan being reviewed")
-    recommendation_id: Optional[UUID] = Field(
+    recommendation_id: UUID | None = Field(
         None,
         description="Optional recommendation session ID"
     )
@@ -70,7 +68,7 @@ class RecommendationFeedbackCreate(FeedbackBase):
         ...,
         description="ID of the recommendation session"
     )
-    plan_id: Optional[UUID] = Field(
+    plan_id: UUID | None = Field(
         None,
         description="Optional specific plan ID within the recommendation"
     )
@@ -82,13 +80,13 @@ class FeedbackResponse(BaseModel):
     """Schema for feedback response."""
 
     id: UUID
-    user_id: Optional[UUID]
-    recommendation_id: Optional[UUID]
-    plan_id: Optional[UUID]
+    user_id: UUID | None
+    recommendation_id: UUID | None
+    plan_id: UUID | None
     rating: int
-    feedback_text: Optional[str]
+    feedback_text: str | None
     feedback_type: str
-    sentiment_score: Optional[Decimal]
+    sentiment_score: Decimal | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -131,7 +129,7 @@ class FeedbackStats(BaseModel):
         ...,
         description="Number of feedback submissions with text"
     )
-    sentiment_breakdown: Dict[str, int] = Field(
+    sentiment_breakdown: dict[str, int] = Field(
         default_factory=dict,
         description="Sentiment distribution (positive, neutral, negative)"
     )
@@ -147,7 +145,7 @@ class PlanFeedbackAggregation(BaseModel):
     average_rating: float
     thumbs_up_count: int
     thumbs_down_count: int
-    most_recent_feedback: Optional[datetime]
+    most_recent_feedback: datetime | None
 
 
 class FeedbackTimeSeriesPoint(BaseModel):
@@ -162,15 +160,15 @@ class FeedbackAnalyticsResponse(BaseModel):
     """Schema for comprehensive feedback analytics."""
 
     stats: FeedbackStats
-    time_series: List[FeedbackTimeSeriesPoint] = Field(
+    time_series: list[FeedbackTimeSeriesPoint] = Field(
         ...,
         description="Daily feedback volume for last 30 days"
     )
-    top_plans: List[PlanFeedbackAggregation] = Field(
+    top_plans: list[PlanFeedbackAggregation] = Field(
         ...,
         description="Top 10 most-reviewed plans"
     )
-    recent_text_feedback: List[FeedbackResponse] = Field(
+    recent_text_feedback: list[FeedbackResponse] = Field(
         default_factory=list,
         description="Recent feedback with text comments"
     )
@@ -179,22 +177,22 @@ class FeedbackAnalyticsResponse(BaseModel):
 class FeedbackSearchParams(BaseModel):
     """Schema for feedback search/filter parameters."""
 
-    plan_id: Optional[UUID] = None
-    min_rating: Optional[int] = Field(None, ge=1, le=5)
-    max_rating: Optional[int] = Field(None, ge=1, le=5)
-    has_text: Optional[bool] = None
-    sentiment: Optional[str] = Field(
+    plan_id: UUID | None = None
+    min_rating: int | None = Field(None, ge=1, le=5)
+    max_rating: int | None = Field(None, ge=1, le=5)
+    has_text: bool | None = None
+    sentiment: str | None = Field(
         None,
         description="Filter by sentiment: positive, neutral, negative"
     )
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
+    start_date: datetime | None = None
+    end_date: datetime | None = None
     limit: int = Field(default=100, ge=1, le=1000)
     offset: int = Field(default=0, ge=0)
 
     @field_validator("sentiment")
     @classmethod
-    def validate_sentiment(cls, v: Optional[str]) -> Optional[str]:
+    def validate_sentiment(cls, v: str | None) -> str | None:
         """Ensure sentiment is valid."""
         if v and v not in {"positive", "neutral", "negative"}:
             raise ValueError("Sentiment must be one of: positive, neutral, negative")
@@ -204,7 +202,7 @@ class FeedbackSearchParams(BaseModel):
 class FeedbackSearchResponse(BaseModel):
     """Schema for feedback search results."""
 
-    results: List[FeedbackResponse]
+    results: list[FeedbackResponse]
     total_count: int
     limit: int
     offset: int

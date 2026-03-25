@@ -4,14 +4,12 @@ Pydantic schemas for recommendations.
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from .usage_schemas import UsageProfile
 from .plan import PlanCatalogResponse
-
 
 # Score component schemas
 
@@ -30,23 +28,23 @@ class PlanScores(BaseModel):
 class RiskFlags(BaseModel):
     """Risk warnings for a recommended plan."""
 
-    high_etf: Optional[dict[str, Any]] = Field(
+    high_etf: dict[str, Any] | None = Field(
         None,
         description="High early termination fee warning"
     )
-    low_savings: Optional[dict[str, Any]] = Field(
+    low_savings: dict[str, Any] | None = Field(
         None,
         description="Low savings warning"
     )
-    data_quality: Optional[dict[str, Any]] = Field(
+    data_quality: dict[str, Any] | None = Field(
         None,
         description="Data quality issues warning"
     )
-    variable_rate: Optional[dict[str, Any]] = Field(
+    variable_rate: dict[str, Any] | None = Field(
         None,
         description="Variable rate volatility warning"
     )
-    contract_mismatch: Optional[dict[str, Any]] = Field(
+    contract_mismatch: dict[str, Any] | None = Field(
         None,
         description="Contract timing mismatch warning"
     )
@@ -79,7 +77,7 @@ class RecommendationPlanResponse(BaseModel):
     # Projections
     projected_annual_cost: Decimal = Field(..., description="Projected annual cost in dollars")
     projected_annual_savings: Decimal = Field(..., description="Savings vs current plan in dollars")
-    break_even_months: Optional[int] = Field(
+    break_even_months: int | None = Field(
         None,
         description="Months to break even if switching costs apply"
     )
@@ -88,7 +86,7 @@ class RecommendationPlanResponse(BaseModel):
     explanation: str = Field(..., description="Plain-language explanation")
 
     # Warnings
-    risk_flags: Optional[dict[str, Any]] = Field(None, description="Risk warnings")
+    risk_flags: dict[str, Any] | None = Field(None, description="Risk warnings")
 
     model_config = {"from_attributes": True}
 
@@ -123,7 +121,7 @@ class RecommendationResponse(BaseModel):
         default=False,
         description="Whether staying with current plan is recommended"
     )
-    stay_reason: Optional[str] = Field(
+    stay_reason: str | None = Field(
         None,
         description="Reason for recommending to stay with current plan"
     )
@@ -139,8 +137,8 @@ class RecommendationSummary(BaseModel):
     generated_at: datetime
     expires_at: datetime
     num_recommendations: int = Field(..., description="Number of plans recommended")
-    top_plan_id: Optional[UUID] = Field(None, description="ID of top recommended plan")
-    top_plan_name: Optional[str] = Field(None, description="Name of top plan")
-    projected_savings: Optional[Decimal] = Field(None, description="Savings from top plan")
+    top_plan_id: UUID | None = Field(None, description="ID of top recommended plan")
+    top_plan_name: str | None = Field(None, description="Name of top plan")
+    projected_savings: Decimal | None = Field(None, description="Savings from top plan")
 
     model_config = {"from_attributes": True}

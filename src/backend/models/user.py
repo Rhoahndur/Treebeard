@@ -2,12 +2,12 @@
 User-related models including profiles, preferences, and current plans.
 """
 
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Index, Numeric, String, func
+from sqlalchemy import Boolean, Date, ForeignKey, Index, Numeric, String
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -213,7 +213,7 @@ class CurrentPlan(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         comment="Name of current energy supplier"
     )
 
-    plan_name: Mapped[Optional[str]] = mapped_column(
+    plan_name: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
         comment="Name of current plan (if available)"
@@ -225,7 +225,7 @@ class CurrentPlan(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         comment="Current rate in cents per kWh"
     )
 
-    contract_start_date: Mapped[Optional[date]] = mapped_column(
+    contract_start_date: Mapped[date | None] = mapped_column(
         Date,
         nullable=True,
         comment="Date when current contract started"
@@ -245,7 +245,7 @@ class CurrentPlan(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         comment="Early termination fee in dollars"
     )
 
-    monthly_fee: Mapped[Optional[Decimal]] = mapped_column(
+    monthly_fee: Mapped[Decimal | None] = mapped_column(
         Numeric(10, 2),
         nullable=True,
         comment="Monthly base fee in dollars (if applicable)"

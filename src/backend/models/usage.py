@@ -4,7 +4,6 @@ Usage history model for tracking energy consumption patterns.
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional
 from uuid import UUID
 
 from sqlalchemy import Date, DateTime, ForeignKey, Index, Numeric, String, func
@@ -57,7 +56,7 @@ class UsageHistory(Base, UUIDPrimaryKeyMixin):
         comment="Source of data: upload, api, manual"
     )
 
-    data_quality: Mapped[Optional[str]] = mapped_column(
+    data_quality: Mapped[str | None] = mapped_column(
         String(50),
         nullable=True,
         comment="Data quality flag: complete, estimated, partial"

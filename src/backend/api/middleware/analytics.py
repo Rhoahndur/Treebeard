@@ -4,12 +4,13 @@ Analytics Middleware for FastAPI
 Automatically tracks all API requests with timing, status codes, and errors.
 """
 
+import logging
 import time
-from typing import Callable
+from collections.abc import Callable
+
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
-import logging
 
 from services.analytics_service import get_analytics_service
 

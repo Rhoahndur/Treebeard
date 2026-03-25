@@ -4,7 +4,6 @@ Admin service for managing users, plans, and system operations.
 
 import logging
 from datetime import datetime
-from typing import Optional
 from uuid import UUID, uuid4
 
 from sqlalchemy import func, select
@@ -39,8 +38,8 @@ logger = logging.getLogger(__name__)
 async def get_users(
     db: AsyncSession,
     pagination: PaginationParams,
-    is_active: Optional[bool] = None,
-    is_admin: Optional[bool] = None,
+    is_active: bool | None = None,
+    is_admin: bool | None = None,
 ) -> UserListResponse:
     """
     Get paginated list of users with optional filtering.
@@ -105,7 +104,7 @@ async def get_users(
 async def get_user_detail(
     db: AsyncSession,
     user_id: UUID,
-) -> Optional[UserDetailResponse]:
+) -> UserDetailResponse | None:
     """
     Get detailed information about a user.
 
@@ -188,7 +187,7 @@ async def update_user_role(
     db: AsyncSession,
     user_id: UUID,
     is_admin: bool,
-) -> Optional[User]:
+) -> User | None:
     """
     Update a user's admin role.
 
@@ -227,7 +226,7 @@ async def update_user_role(
 async def soft_delete_user(
     db: AsyncSession,
     user_id: UUID,
-) -> Optional[User]:
+) -> User | None:
     """
     Soft delete a user account.
 
@@ -267,8 +266,8 @@ async def soft_delete_user(
 async def get_plans(
     db: AsyncSession,
     pagination: PaginationParams,
-    supplier_id: Optional[UUID] = None,
-    is_active: Optional[bool] = None,
+    supplier_id: UUID | None = None,
+    is_active: bool | None = None,
 ) -> PlanListResponse:
     """
     Get paginated list of plans with optional filtering.
@@ -398,7 +397,7 @@ async def update_plan(
     db: AsyncSession,
     plan_id: UUID,
     plan_data: PlanCatalogUpdate,
-) -> Optional[PlanCatalog]:
+) -> PlanCatalog | None:
     """
     Update an existing plan.
 
@@ -440,7 +439,7 @@ async def update_plan(
 async def soft_delete_plan(
     db: AsyncSession,
     plan_id: UUID,
-) -> Optional[PlanCatalog]:
+) -> PlanCatalog | None:
     """
     Soft delete a plan.
 
@@ -480,9 +479,9 @@ async def soft_delete_plan(
 async def get_recommendations(
     db: AsyncSession,
     pagination: PaginationParams,
-    user_id: Optional[UUID] = None,
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    user_id: UUID | None = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
 ) -> RecommendationListResponse:
     """
     Get paginated list of recommendations with optional filtering.

@@ -5,15 +5,13 @@ Tracks backend events for business metrics and monitoring.
 Supports multiple analytics backends (Mixpanel, custom logging, etc.)
 """
 
-import asyncio
 import hashlib
-import time
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
-from uuid import UUID
-import json
 import logging
+import time
+from datetime import datetime
 from enum import Enum
+from typing import Any
+from uuid import UUID
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -68,7 +66,7 @@ class AnalyticsService:
     def __init__(
         self,
         backend: AnalyticsBackend = AnalyticsBackend.LOGGING,
-        mixpanel_token: Optional[str] = None,
+        mixpanel_token: str | None = None,
         batch_size: int = 100,
         flush_interval: int = 60,
         enabled: bool = True
@@ -79,7 +77,7 @@ class AnalyticsService:
         self.flush_interval = flush_interval
         self.enabled = enabled
 
-        self.event_queue: List[Dict[str, Any]] = []
+        self.event_queue: list[dict[str, Any]] = []
         self.last_flush_time = time.time()
 
         # Initialize backend
@@ -99,8 +97,8 @@ class AnalyticsService:
     async def track_event(
         self,
         event_type: EventType,
-        properties: Dict[str, Any],
-        user_id: Optional[UUID] = None
+        properties: dict[str, Any],
+        user_id: UUID | None = None
     ):
         """
         Track an analytics event.
@@ -131,9 +129,7 @@ class AnalyticsService:
         self.event_queue.append(event)
 
         # Check if we should flush
-        if len(self.event_queue) >= self.batch_size:
-            await self._flush_events()
-        elif time.time() - self.last_flush_time >= self.flush_interval:
+        if len(self.event_queue) >= self.batch_size or time.time() - self.last_flush_time >= self.flush_interval:
             await self._flush_events()
 
     async def _flush_events(self):
@@ -153,7 +149,7 @@ class AnalyticsService:
         elif self.backend == AnalyticsBackend.DATABASE:
             await self._send_to_database(events_to_send)
 
-    async def _send_to_mixpanel(self, events: List[Dict[str, Any]]):
+    async def _send_to_mixpanel(self, events: list[dict[str, Any]]):
         """Send events to Mixpanel"""
         try:
             for event in events:
@@ -165,7 +161,7 @@ class AnalyticsService:
         except Exception as e:
             logger.error(f"Failed to send events to Mixpanel: {e}")
 
-    async def _send_to_logging(self, events: List[Dict[str, Any]]):
+    async def _send_to_logging(self, events: list[dict[str, Any]]):
         """Send events to logging"""
         for event in events:
             logger.info(
@@ -173,7 +169,7 @@ class AnalyticsService:
                 extra={"analytics": event}
             )
 
-    async def _send_to_database(self, events: List[Dict[str, Any]]):
+    async def _send_to_database(self, events: list[dict[str, Any]]):
         """Send events to database"""
         # TODO: Implement database storage
         pass
@@ -199,7 +195,7 @@ class AnalyticsService:
         method: str,
         status_code: int,
         duration_ms: float,
-        user_id: Optional[UUID] = None
+        user_id: UUID | None = None
     ):
         """Track API request"""
         await self.track_event(
@@ -219,7 +215,7 @@ class AnalyticsService:
         profile_type: str,
         num_plans: int,
         duration_ms: float,
-        total_savings: Optional[float] = None
+        total_savings: float | None = None
     ):
         """Track recommendation generation"""
         await self.track_event(
@@ -238,8 +234,8 @@ class AnalyticsService:
         endpoint: str,
         error_type: str,
         status_code: int,
-        error_message: Optional[str] = None,
-        user_id: Optional[UUID] = None
+        error_message: str | None = None,
+        user_id: UUID | None = None
     ):
         """Track error occurrence"""
         await self.track_event(
@@ -271,7 +267,7 @@ class AnalyticsService:
         self,
         risk_type: str,
         severity: str,
-        user_id: Optional[UUID] = None
+        user_id: UUID | None = None
     ):
         """Track risk warning triggered"""
         await self.track_event(
@@ -286,8 +282,8 @@ class AnalyticsService:
     async def track_user_created(
         self,
         user_id: UUID,
-        property_type: Optional[str] = None,
-        zip_code: Optional[str] = None
+        property_type: str | None = None,
+        zip_code: str | None = None
     ):
         """Track user creation"""
         await self.track_event(
@@ -302,7 +298,7 @@ class AnalyticsService:
     async def track_preferences_updated(
         self,
         user_id: UUID,
-        preferences: Dict[str, Any]
+        preferences: dict[str, Any]
     ):
         """Track preference updates"""
         await self.track_event(
@@ -319,7 +315,7 @@ class AnalyticsService:
         file_type: str,
         file_size_kb: float,
         success: bool,
-        error_message: Optional[str] = None
+        error_message: str | None = None
     ):
         """Track file upload"""
         event_type = EventType.FILE_UPLOADED if success else EventType.FILE_UPLOAD_FAILED
@@ -339,7 +335,7 @@ class AnalyticsService:
 
 
 # Global analytics instance
-analytics_service: Optional[AnalyticsService] = None
+analytics_service: AnalyticsService | None = None
 
 
 def get_analytics_service() -> AnalyticsService:
@@ -352,7 +348,7 @@ def get_analytics_service() -> AnalyticsService:
 
 def init_analytics(
     backend: AnalyticsBackend = AnalyticsBackend.LOGGING,
-    mixpanel_token: Optional[str] = None,
+    mixpanel_token: str | None = None,
     enabled: bool = True
 ) -> AnalyticsService:
     """

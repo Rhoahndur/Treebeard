@@ -16,15 +16,16 @@ Features:
 import functools
 import logging
 import time
+from collections.abc import Callable
 from contextlib import contextmanager
-from typing import Any, Callable, Dict, Optional
+from typing import Any
 
 from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
 # Global tracer instance
-_tracer: Optional[Any] = None
+_tracer: Any | None = None
 _apm_enabled: bool = False
 _apm_provider: str = "none"
 
@@ -146,7 +147,7 @@ def _init_opentelemetry() -> None:
         raise
 
 
-def get_tracer() -> Optional[Any]:
+def get_tracer() -> Any | None:
     """Get the global tracer instance."""
     return _tracer
 
@@ -154,10 +155,10 @@ def get_tracer() -> Optional[Any]:
 @contextmanager
 def trace_span(
     name: str,
-    service: Optional[str] = None,
-    resource: Optional[str] = None,
-    span_type: Optional[str] = None,
-    tags: Optional[Dict[str, Any]] = None,
+    service: str | None = None,
+    resource: str | None = None,
+    span_type: str | None = None,
+    tags: dict[str, Any] | None = None,
 ):
     """
     Create a traced span context manager.
@@ -206,9 +207,9 @@ def trace_span(
 
 
 def trace_async_function(
-    operation_name: Optional[str] = None,
-    service: Optional[str] = None,
-    resource: Optional[str] = None,
+    operation_name: str | None = None,
+    service: str | None = None,
+    resource: str | None = None,
 ):
     """
     Decorator to trace async functions.
@@ -237,7 +238,7 @@ def trace_async_function(
     return decorator
 
 
-def trace_database_query(query_name: str, table: Optional[str] = None):
+def trace_database_query(query_name: str, table: str | None = None):
     """
     Trace a database query.
 
@@ -262,7 +263,7 @@ def trace_database_query(query_name: str, table: Optional[str] = None):
     )
 
 
-def trace_external_api(api_name: str, endpoint: Optional[str] = None):
+def trace_external_api(api_name: str, endpoint: str | None = None):
     """
     Trace an external API call.
 
@@ -286,7 +287,7 @@ def trace_external_api(api_name: str, endpoint: Optional[str] = None):
 
 
 @contextmanager
-def track_recommendation_generation(user_id: str, profile_type: Optional[str] = None):
+def track_recommendation_generation(user_id: str, profile_type: str | None = None):
     """
     Track recommendation generation process.
 

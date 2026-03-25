@@ -6,15 +6,14 @@ Browse and search available energy plans.
 
 import logging
 from decimal import Decimal
-from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from models.plan import PlanCatalog
 from api.auth_dependencies import DBSession, OptionalUser
 from api.schemas.common import PaginatedResponse
+from models.plan import PlanCatalog
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -33,7 +32,7 @@ class PlanResponse(BaseModel):
     contract_length_months: int
     early_termination_fee: Decimal
     renewable_percentage: Decimal
-    monthly_fee: Optional[Decimal]
+    monthly_fee: Decimal | None
     is_active: bool
     rate_structure: dict
 
@@ -50,12 +49,12 @@ class PlanResponse(BaseModel):
 async def get_plan_catalog(
     db: DBSession,
     user: OptionalUser,
-    zip_code: Optional[str] = Query(None, description="Filter by ZIP code"),
-    plan_type: Optional[str] = Query(None, description="Filter by plan type"),
-    min_renewable: Optional[int] = Query(
+    zip_code: str | None = Query(None, description="Filter by ZIP code"),
+    plan_type: str | None = Query(None, description="Filter by plan type"),
+    min_renewable: int | None = Query(
         None, ge=0, le=100, description="Minimum renewable percentage"
     ),
-    max_contract_length: Optional[int] = Query(
+    max_contract_length: int | None = Query(
         None, ge=0, description="Maximum contract length (months)"
     ),
     page: int = Query(1, ge=1, description="Page number"),

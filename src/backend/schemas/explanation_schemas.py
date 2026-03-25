@@ -7,7 +7,7 @@ used in Stories 2.6, 2.7, and 2.8.
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, List, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -55,11 +55,11 @@ class UserPreferences(BaseModel):
 class CurrentPlan(BaseModel):
     """Current plan information for comparison."""
 
-    plan_name: Optional[str] = Field(None, description="Current plan name")
-    supplier_name: Optional[str] = Field(None, description="Current supplier")
-    annual_cost: Optional[Decimal] = Field(None, description="Current annual cost")
-    contract_end_date: Optional[datetime] = Field(None, description="Contract end date")
-    early_termination_fee: Optional[Decimal] = Field(None, description="Early termination fee")
+    plan_name: str | None = Field(None, description="Current plan name")
+    supplier_name: str | None = Field(None, description="Current supplier")
+    annual_cost: Decimal | None = Field(None, description="Current annual cost")
+    contract_end_date: datetime | None = Field(None, description="Contract end date")
+    early_termination_fee: Decimal | None = Field(None, description="Early termination fee")
 
 
 class RankedPlan(BaseModel):
@@ -80,21 +80,21 @@ class RankedPlan(BaseModel):
 
     # Financial details
     projected_annual_cost: Decimal = Field(..., description="Projected annual cost")
-    projected_annual_savings: Optional[Decimal] = Field(None, description="Savings vs current plan")
-    break_even_months: Optional[int] = Field(None, description="Months to break even")
+    projected_annual_savings: Decimal | None = Field(None, description="Savings vs current plan")
+    break_even_months: int | None = Field(None, description="Months to break even")
 
     # Plan details
     contract_length_months: int = Field(..., description="Contract length (0=month-to-month)")
     early_termination_fee: Decimal = Field(..., description="Early termination fee")
     renewable_percentage: Decimal = Field(..., description="Renewable energy percentage")
-    monthly_fee: Optional[Decimal] = Field(None, description="Monthly base fee")
+    monthly_fee: Decimal | None = Field(None, description="Monthly base fee")
 
     # Rate information
     rate_structure: dict[str, Any] = Field(..., description="Rate structure details")
-    average_rate: Optional[Decimal] = Field(None, description="Average rate per kWh")
+    average_rate: Decimal | None = Field(None, description="Average rate per kWh")
 
     # Risk flags
-    risk_flags: Optional[dict[str, Any]] = Field(None, description="Risk warnings")
+    risk_flags: dict[str, Any] | None = Field(None, description="Risk warnings")
 
 
 class PlanExplanation(BaseModel):
@@ -102,11 +102,11 @@ class PlanExplanation(BaseModel):
 
     plan_id: UUID = Field(..., description="Plan ID")
     explanation_text: str = Field(..., description="Main explanation (2-3 sentences)")
-    key_differentiators: List[str] = Field(
+    key_differentiators: list[str] = Field(
         default_factory=list,
         description="Key features that make this plan stand out"
     )
-    trade_offs: List[str] = Field(
+    trade_offs: list[str] = Field(
         default_factory=list,
         description="Important trade-offs or compromises"
     )
@@ -135,7 +135,7 @@ class ExplanationRequest(BaseModel):
     plan: RankedPlan = Field(..., description="Plan to explain")
     user_profile: dict[str, Any] = Field(..., description="User's usage profile")
     preferences: UserPreferences = Field(..., description="User preferences")
-    current_plan: Optional[CurrentPlan] = Field(None, description="Current plan for comparison")
+    current_plan: CurrentPlan | None = Field(None, description="Current plan for comparison")
     force_regenerate: bool = Field(
         default=False,
         description="Force regeneration even if cached"
@@ -153,16 +153,16 @@ class ExplanationResponse(BaseModel):
 class BulkExplanationRequest(BaseModel):
     """Request to generate explanations for multiple plans."""
 
-    plans: List[RankedPlan] = Field(..., max_length=3, description="Plans to explain (max 3)")
+    plans: list[RankedPlan] = Field(..., max_length=3, description="Plans to explain (max 3)")
     user_profile: dict[str, Any] = Field(..., description="User's usage profile")
     preferences: UserPreferences = Field(..., description="User preferences")
-    current_plan: Optional[CurrentPlan] = Field(None, description="Current plan for comparison")
+    current_plan: CurrentPlan | None = Field(None, description="Current plan for comparison")
 
 
 class BulkExplanationResponse(BaseModel):
     """Response containing multiple explanations."""
 
-    explanations: List[PlanExplanation] = Field(..., description="Generated explanations")
+    explanations: list[PlanExplanation] = Field(..., description="Generated explanations")
     total_generation_time_ms: float = Field(..., description="Total time taken (milliseconds)")
     cache_hits: int = Field(..., description="Number of cache hits")
     api_calls: int = Field(..., description="Number of API calls made")
@@ -195,8 +195,8 @@ class ExplanationMetrics(BaseModel):
 class CacheWarmingRequest(BaseModel):
     """Request to pre-generate explanations for popular combinations."""
 
-    plan_ids: List[UUID] = Field(..., description="Plan IDs to warm cache for")
-    personas: List[str] = Field(
+    plan_ids: list[UUID] = Field(..., description="Plan IDs to warm cache for")
+    personas: list[str] = Field(
         default=[
             PersonaType.BUDGET_CONSCIOUS,
             PersonaType.ECO_CONSCIOUS,

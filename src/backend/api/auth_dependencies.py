@@ -4,15 +4,15 @@ API Dependencies.
 Dependency injection functions for FastAPI routes.
 """
 
-from typing import Annotated, AsyncGenerator, Optional
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 
+from api.auth.jwt import decode_jwt, oauth2_scheme
 from config.database import get_db
 from models.user import User
-from api.auth.jwt import decode_jwt, oauth2_scheme
 
 
 async def get_current_user(
@@ -106,9 +106,9 @@ async def get_current_admin_user(
 
 
 async def get_optional_user(
-    token: Optional[str] = Depends(oauth2_scheme),
+    token: str | None = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
-) -> Optional[User]:
+) -> User | None:
     """
     Get current user if authenticated, None otherwise.
 
@@ -140,7 +140,7 @@ async def get_optional_user(
 
 
 def get_request_id(
-    x_request_id: Annotated[Optional[str], Header()] = None,
+    x_request_id: Annotated[str | None, Header()] = None,
 ) -> str:
     """
     Get request ID from header.
@@ -158,6 +158,6 @@ def get_request_id(
 CurrentUser = Annotated[User, Depends(get_current_user)]
 CurrentActiveUser = Annotated[User, Depends(get_current_active_user)]
 CurrentAdminUser = Annotated[User, Depends(get_current_admin_user)]
-OptionalUser = Annotated[Optional[User], Depends(get_optional_user)]
+OptionalUser = Annotated[User | None, Depends(get_optional_user)]
 DBSession = Annotated[Session, Depends(get_db)]
 RequestID = Annotated[str, Depends(get_request_id)]

@@ -4,11 +4,10 @@ Pydantic schemas for admin operations.
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
-
 
 # User Management Schemas
 
@@ -24,7 +23,7 @@ class UserListItem(BaseModel):
     is_active: bool = Field(..., description="Whether the user account is active")
     is_admin: bool = Field(..., description="Whether the user has admin privileges")
     created_at: datetime = Field(..., description="Account creation timestamp")
-    last_login: Optional[datetime] = Field(None, description="Last login timestamp")
+    last_login: datetime | None = Field(None, description="Last login timestamp")
 
     class Config:
         from_attributes = True
@@ -45,8 +44,8 @@ class UserActivitySummary(BaseModel):
 
     total_recommendations: int = Field(..., description="Total number of recommendations generated")
     total_feedback: int = Field(..., description="Total number of feedback submissions")
-    last_recommendation: Optional[datetime] = Field(None, description="Last recommendation timestamp")
-    last_feedback: Optional[datetime] = Field(None, description="Last feedback timestamp")
+    last_recommendation: datetime | None = Field(None, description="Last recommendation timestamp")
+    last_feedback: datetime | None = Field(None, description="Last feedback timestamp")
     usage_data_points: int = Field(..., description="Number of usage data points")
 
 
@@ -88,11 +87,11 @@ class PlanCatalogCreate(BaseModel):
     contract_length_months: int = Field(..., ge=0, description="Contract length in months (0 for month-to-month)")
     early_termination_fee: Decimal = Field(Decimal("0.00"), ge=0, description="Early termination fee in dollars")
     renewable_percentage: Decimal = Field(Decimal("0.00"), ge=0, le=100, description="Renewable energy percentage")
-    monthly_fee: Optional[Decimal] = Field(None, ge=0, description="Monthly base fee in dollars")
-    connection_fee: Optional[Decimal] = Field(None, ge=0, description="One-time connection fee in dollars")
+    monthly_fee: Decimal | None = Field(None, ge=0, description="Monthly base fee in dollars")
+    connection_fee: Decimal | None = Field(None, ge=0, description="One-time connection fee in dollars")
     available_regions: list[str] = Field(..., min_length=1, description="List of ZIP codes where plan is available")
-    plan_description: Optional[str] = Field(None, description="Marketing description of the plan")
-    terms_url: Optional[str] = Field(None, description="URL to full terms and conditions")
+    plan_description: str | None = Field(None, description="Marketing description of the plan")
+    terms_url: str | None = Field(None, description="URL to full terms and conditions")
 
     @field_validator('plan_type')
     @classmethod
@@ -107,22 +106,22 @@ class PlanCatalogCreate(BaseModel):
 class PlanCatalogUpdate(BaseModel):
     """Schema for updating an existing plan."""
 
-    plan_name: Optional[str] = Field(None, min_length=1, max_length=255, description="Plan name")
-    plan_type: Optional[str] = Field(None, description="Plan type")
-    rate_structure: Optional[dict[str, Any]] = Field(None, description="Rate structure in JSON format")
-    contract_length_months: Optional[int] = Field(None, ge=0, description="Contract length in months")
-    early_termination_fee: Optional[Decimal] = Field(None, ge=0, description="Early termination fee in dollars")
-    renewable_percentage: Optional[Decimal] = Field(None, ge=0, le=100, description="Renewable energy percentage")
-    monthly_fee: Optional[Decimal] = Field(None, ge=0, description="Monthly base fee in dollars")
-    connection_fee: Optional[Decimal] = Field(None, ge=0, description="Connection fee in dollars")
-    available_regions: Optional[list[str]] = Field(None, min_length=1, description="Available regions")
-    is_active: Optional[bool] = Field(None, description="Whether the plan is active")
-    plan_description: Optional[str] = Field(None, description="Plan description")
-    terms_url: Optional[str] = Field(None, description="Terms URL")
+    plan_name: str | None = Field(None, min_length=1, max_length=255, description="Plan name")
+    plan_type: str | None = Field(None, description="Plan type")
+    rate_structure: dict[str, Any] | None = Field(None, description="Rate structure in JSON format")
+    contract_length_months: int | None = Field(None, ge=0, description="Contract length in months")
+    early_termination_fee: Decimal | None = Field(None, ge=0, description="Early termination fee in dollars")
+    renewable_percentage: Decimal | None = Field(None, ge=0, le=100, description="Renewable energy percentage")
+    monthly_fee: Decimal | None = Field(None, ge=0, description="Monthly base fee in dollars")
+    connection_fee: Decimal | None = Field(None, ge=0, description="Connection fee in dollars")
+    available_regions: list[str] | None = Field(None, min_length=1, description="Available regions")
+    is_active: bool | None = Field(None, description="Whether the plan is active")
+    plan_description: str | None = Field(None, description="Plan description")
+    terms_url: str | None = Field(None, description="Terms URL")
 
     @field_validator('plan_type')
     @classmethod
-    def validate_plan_type(cls, v: Optional[str]) -> Optional[str]:
+    def validate_plan_type(cls, v: str | None) -> str | None:
         """Validate plan type."""
         if v is None:
             return v
@@ -144,12 +143,12 @@ class PlanCatalogResponse(BaseModel):
     contract_length_months: int = Field(..., description="Contract length in months")
     early_termination_fee: Decimal = Field(..., description="Early termination fee")
     renewable_percentage: Decimal = Field(..., description="Renewable energy percentage")
-    monthly_fee: Optional[Decimal] = Field(None, description="Monthly base fee")
-    connection_fee: Optional[Decimal] = Field(None, description="Connection fee")
+    monthly_fee: Decimal | None = Field(None, description="Monthly base fee")
+    connection_fee: Decimal | None = Field(None, description="Connection fee")
     available_regions: list[str] = Field(..., description="Available regions")
     is_active: bool = Field(..., description="Whether the plan is active")
-    plan_description: Optional[str] = Field(None, description="Plan description")
-    terms_url: Optional[str] = Field(None, description="Terms URL")
+    plan_description: str | None = Field(None, description="Plan description")
+    terms_url: str | None = Field(None, description="Terms URL")
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime = Field(..., description="Last update timestamp")
     last_updated: datetime = Field(..., description="Last plan details update")
@@ -214,10 +213,10 @@ class SystemStats(BaseModel):
     active_plans: int = Field(..., description="Number of active plans")
     inactive_plans: int = Field(..., description="Number of inactive plans")
     total_suppliers: int = Field(..., description="Total number of suppliers")
-    cache_hit_rate: Optional[float] = Field(None, description="Cache hit rate (0-100)")
-    api_response_time_p50: Optional[float] = Field(None, description="API response time P50 (ms)")
-    api_response_time_p95: Optional[float] = Field(None, description="API response time P95 (ms)")
-    api_response_time_p99: Optional[float] = Field(None, description="API response time P99 (ms)")
+    cache_hit_rate: float | None = Field(None, description="Cache hit rate (0-100)")
+    api_response_time_p50: float | None = Field(None, description="API response time P50 (ms)")
+    api_response_time_p95: float | None = Field(None, description="API response time P95 (ms)")
+    api_response_time_p99: float | None = Field(None, description="API response time P99 (ms)")
 
 
 # Pagination Schemas

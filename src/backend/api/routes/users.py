@@ -6,14 +6,13 @@ User profile and preferences management.
 
 import logging
 from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field
 
-from models.user import UserPreference
 from api.auth_dependencies import CurrentAdminUser, CurrentUser, DBSession
 from api.schemas.common import MessageResponse
+from models.user import UserPreference
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -50,9 +49,9 @@ class UserPreferencesResponse(BaseModel):
 class UpdateUserRequest(BaseModel):
     """User profile update request."""
 
-    name: Optional[str] = Field(None, min_length=1, description="User name")
-    email: Optional[EmailStr] = Field(None, description="User email")
-    zip_code: Optional[str] = Field(
+    name: str | None = Field(None, min_length=1, description="User name")
+    email: EmailStr | None = Field(None, description="User email")
+    zip_code: str | None = Field(
         None, min_length=5, max_length=10, description="ZIP code"
     )
 

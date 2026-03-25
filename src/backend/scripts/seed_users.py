@@ -2,24 +2,25 @@
 Seed users into database.
 """
 
-import sys
 import os
-from uuid import uuid4
+import sys
 from datetime import datetime
 from pathlib import Path
+from uuid import uuid4
 
 # Load .env file explicitly
 from dotenv import load_dotenv
+
 env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(env_path)
 
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
+from backend.api.auth.jwt import get_password_hash
+from backend.models.user import User
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.models.user import User
-from backend.api.auth.jwt import get_password_hash
 
 # Use DATABASE_URL directly from environment
 DATABASE_URL = os.getenv(
@@ -90,7 +91,7 @@ def seed_users():
                     hashed_password = get_password_hash(user_data["password"])
                 except Exception as e:
                     print(f"  ✗ Password hashing failed for {user_data['email']}: {e}")
-                    print(f"    Trying with shorter password...")
+                    print("    Trying with shorter password...")
                     # Try with just "pass123" which is 7 characters
                     hashed_password = get_password_hash("pass123")
 

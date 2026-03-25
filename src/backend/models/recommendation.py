@@ -4,11 +4,12 @@ Recommendation and recommendation_plans models.
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import DateTime, ForeignKey, Index, Integer, Numeric, Text, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, UUIDPrimaryKeyMixin
@@ -172,7 +173,7 @@ class RecommendationPlan(Base, UUIDPrimaryKeyMixin):
         comment="Projected annual savings vs current plan in dollars"
     )
 
-    break_even_months: Mapped[Optional[int]] = mapped_column(
+    break_even_months: Mapped[int | None] = mapped_column(
         Integer,
         nullable=True,
         comment="Months to break even if switching costs apply"
@@ -184,7 +185,7 @@ class RecommendationPlan(Base, UUIDPrimaryKeyMixin):
         comment="Plain-language explanation of why this plan was recommended"
     )
 
-    risk_flags: Mapped[Optional[dict[str, Any]]] = mapped_column(
+    risk_flags: Mapped[dict[str, Any] | None] = mapped_column(
         JSONB,
         nullable=True,
         comment="Risk warnings and alerts for this plan"

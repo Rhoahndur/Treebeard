@@ -7,7 +7,8 @@ from typing import Any, Optional
 from uuid import UUID
 
 from sqlalchemy import DateTime, ForeignKey, Index, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, UUIDPrimaryKeyMixin
@@ -64,26 +65,26 @@ class AuditLog(Base, UUIDPrimaryKeyMixin):
         comment="Type of resource affected (e.g., 'user', 'plan', 'settings')"
     )
 
-    resource_id: Mapped[Optional[UUID]] = mapped_column(
+    resource_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True),
         nullable=True,
         index=True,
         comment="ID of the resource affected (nullable for bulk operations)"
     )
 
-    details: Mapped[Optional[dict[str, Any]]] = mapped_column(
+    details: Mapped[dict[str, Any] | None] = mapped_column(
         JSONB,
         nullable=True,
         comment="Action-specific details in JSON format (e.g., old/new values)"
     )
 
-    ip_address: Mapped[Optional[str]] = mapped_column(
+    ip_address: Mapped[str | None] = mapped_column(
         String(45),
         nullable=True,
         comment="IP address of the admin who performed the action (IPv4 or IPv6)"
     )
 
-    user_agent: Mapped[Optional[str]] = mapped_column(
+    user_agent: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
         comment="User agent string from the HTTP request"

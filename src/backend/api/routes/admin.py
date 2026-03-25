@@ -6,12 +6,13 @@ All endpoints in this module require admin privileges (RBAC enforced).
 
 import logging
 from datetime import datetime
-from typing import Annotated, Optional
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.dependencies.admin import AdminUser
 from config.database import get_db
 from schemas.admin_schemas import (
     PaginationParams,
@@ -43,7 +44,6 @@ from services.admin_service import (
     update_user_role,
 )
 from services.audit_service import get_audit_logs, get_audit_stats, log_admin_action
-from api.dependencies.admin import AdminUser
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -63,8 +63,8 @@ async def list_users(
     db: Annotated[AsyncSession, Depends(get_db)],
     limit: int = Query(50, ge=1, le=100, description="Number of results per page"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
-    is_active: Optional[bool] = Query(None, description="Filter by active status"),
-    is_admin: Optional[bool] = Query(None, description="Filter by admin role"),
+    is_active: bool | None = Query(None, description="Filter by active status"),
+    is_admin: bool | None = Query(None, description="Filter by admin role"),
 ) -> UserListResponse:
     """
     List all users with pagination and filtering.
@@ -281,8 +281,8 @@ async def list_plans(
     db: Annotated[AsyncSession, Depends(get_db)],
     limit: int = Query(50, ge=1, le=100, description="Number of results per page"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
-    supplier_id: Optional[UUID] = Query(None, description="Filter by supplier ID"),
-    is_active: Optional[bool] = Query(None, description="Filter by active status"),
+    supplier_id: UUID | None = Query(None, description="Filter by supplier ID"),
+    is_active: bool | None = Query(None, description="Filter by active status"),
 ) -> PlanListResponse:
     """
     List all plans with pagination and filtering.
@@ -526,9 +526,9 @@ async def list_recommendations(
     db: Annotated[AsyncSession, Depends(get_db)],
     limit: int = Query(50, ge=1, le=100, description="Number of results per page"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
-    user_id: Optional[UUID] = Query(None, description="Filter by user ID"),
-    start_date: Optional[datetime] = Query(None, description="Filter by start date"),
-    end_date: Optional[datetime] = Query(None, description="Filter by end date"),
+    user_id: UUID | None = Query(None, description="Filter by user ID"),
+    start_date: datetime | None = Query(None, description="Filter by start date"),
+    end_date: datetime | None = Query(None, description="Filter by end date"),
 ) -> RecommendationListResponse:
     """
     List all recommendations with pagination and filtering.
@@ -593,12 +593,12 @@ async def list_audit_logs(
     db: Annotated[AsyncSession, Depends(get_db)],
     limit: int = Query(100, ge=1, le=500, description="Number of results per page"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
-    admin_user_id: Optional[UUID] = Query(None, description="Filter by admin user ID"),
-    action: Optional[str] = Query(None, description="Filter by action type"),
-    resource_type: Optional[str] = Query(None, description="Filter by resource type"),
-    resource_id: Optional[UUID] = Query(None, description="Filter by resource ID"),
-    start_date: Optional[datetime] = Query(None, description="Filter by start date"),
-    end_date: Optional[datetime] = Query(None, description="Filter by end date"),
+    admin_user_id: UUID | None = Query(None, description="Filter by admin user ID"),
+    action: str | None = Query(None, description="Filter by action type"),
+    resource_type: str | None = Query(None, description="Filter by resource type"),
+    resource_id: UUID | None = Query(None, description="Filter by resource ID"),
+    start_date: datetime | None = Query(None, description="Filter by start date"),
+    end_date: datetime | None = Query(None, description="Filter by end date"),
 ) -> AuditLogListResponse:
     """
     Get audit logs with filtering and pagination.

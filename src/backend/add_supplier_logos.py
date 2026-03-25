@@ -3,6 +3,7 @@ Script to add logo URLs to suppliers in the database.
 Run from backend directory: python add_supplier_logos.py
 """
 from database.session import SessionLocal
+
 from models.plan import Supplier
 
 # Logo URLs for common Texas energy suppliers

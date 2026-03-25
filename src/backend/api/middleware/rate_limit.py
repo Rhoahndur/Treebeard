@@ -6,7 +6,7 @@ Implements rate limiting to prevent API abuse.
 
 import logging
 import time
-from typing import Callable, Dict, Optional
+from collections.abc import Callable
 
 from fastapi import HTTPException, Request, Response, status
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -33,7 +33,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         app,
         requests_per_minute_per_user: int = 100,
         requests_per_hour_per_ip: int = 1000,
-        custom_limits: Optional[Dict[str, int]] = None,
+        custom_limits: dict[str, int] | None = None,
     ):
         """
         Initialize rate limiter.

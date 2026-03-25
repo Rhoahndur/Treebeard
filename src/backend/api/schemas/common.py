@@ -4,7 +4,7 @@ Common API Schemas.
 Base schemas used across multiple endpoints.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -16,7 +16,7 @@ class MessageResponse(BaseModel):
 
     message: str = Field(..., description="Response message")
     success: bool = Field(True, description="Whether operation was successful")
-    data: Optional[Dict[str, Any]] = Field(None, description="Additional data")
+    data: dict[str, Any] | None = Field(None, description="Additional data")
 
 
 class ErrorResponse(BaseModel):
@@ -26,8 +26,8 @@ class ErrorResponse(BaseModel):
 
     error: str = Field(..., description="Error type")
     message: str = Field(..., description="Error message")
-    details: Optional[Any] = Field(None, description="Error details")
-    request_id: Optional[str] = Field(None, description="Request ID for tracking")
+    details: Any | None = Field(None, description="Error details")
+    request_id: str | None = Field(None, description="Request ID for tracking")
 
 
 class PaginationParams(BaseModel):
@@ -37,8 +37,8 @@ class PaginationParams(BaseModel):
 
     page: int = Field(1, ge=1, description="Page number (1-indexed)")
     page_size: int = Field(20, ge=1, le=100, description="Items per page")
-    sort_by: Optional[str] = Field(None, description="Field to sort by")
-    sort_order: Optional[str] = Field(
+    sort_by: str | None = Field(None, description="Field to sort by")
+    sort_order: str | None = Field(
         "asc", pattern="^(asc|desc)$", description="Sort order (asc or desc)"
     )
 

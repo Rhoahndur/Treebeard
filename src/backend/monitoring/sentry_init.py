@@ -11,7 +11,7 @@ This module provides Sentry error tracking with:
 
 import logging
 import re
-from typing import Any, Dict, Optional
+from typing import Any
 
 from config.settings import settings
 
@@ -43,7 +43,7 @@ SENSITIVE_KEYS = {
 }
 
 
-def sanitize_pii(event: Dict[str, Any], hint: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def sanitize_pii(event: dict[str, Any], hint: dict[str, Any]) -> dict[str, Any] | None:
     """
     Sanitize PII from Sentry events.
 
@@ -92,7 +92,7 @@ def sanitize_pii(event: Dict[str, Any], hint: Dict[str, Any]) -> Optional[Dict[s
         return event
 
 
-def _sanitize_dict(data: Dict[str, Any]) -> Dict[str, Any]:
+def _sanitize_dict(data: dict[str, Any]) -> dict[str, Any]:
     """
     Recursively sanitize a dictionary.
 
@@ -178,7 +178,7 @@ def _hash_value(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()[:8]
 
 
-def init_sentry(dsn: Optional[str] = None, environment: Optional[str] = None) -> None:
+def init_sentry(dsn: str | None = None, environment: str | None = None) -> None:
     """
     Initialize Sentry error tracking.
 
@@ -241,7 +241,7 @@ def init_sentry(dsn: Optional[str] = None, environment: Optional[str] = None) ->
         logger.error(f"Failed to initialize Sentry: {e}")
 
 
-def capture_exception(exception: Exception, context: Optional[Dict[str, Any]] = None) -> None:
+def capture_exception(exception: Exception, context: dict[str, Any] | None = None) -> None:
     """
     Manually capture an exception in Sentry.
 
@@ -266,7 +266,7 @@ def capture_exception(exception: Exception, context: Optional[Dict[str, Any]] = 
         logger.error(f"Failed to capture exception in Sentry: {e}")
 
 
-def capture_message(message: str, level: str = "info", context: Optional[Dict[str, Any]] = None) -> None:
+def capture_message(message: str, level: str = "info", context: dict[str, Any] | None = None) -> None:
     """
     Capture a message in Sentry.
 
@@ -292,7 +292,7 @@ def capture_message(message: str, level: str = "info", context: Optional[Dict[st
         logger.error(f"Failed to capture message in Sentry: {e}")
 
 
-def set_user_context(user_id: str, email: Optional[str] = None, username: Optional[str] = None) -> None:
+def set_user_context(user_id: str, email: str | None = None, username: str | None = None) -> None:
     """
     Set user context for Sentry events.
 
@@ -325,7 +325,7 @@ def add_breadcrumb(
     category: str,
     message: str,
     level: str = "info",
-    data: Optional[Dict[str, Any]] = None,
+    data: dict[str, Any] | None = None,
 ) -> None:
     """
     Add a breadcrumb to Sentry.

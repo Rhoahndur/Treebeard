@@ -5,7 +5,7 @@ Global error handling and standardized error responses.
 """
 
 import logging
-from typing import Callable
+from collections.abc import Callable
 
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError

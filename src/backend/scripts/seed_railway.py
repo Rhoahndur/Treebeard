@@ -5,18 +5,19 @@ This script populates the Railway production database with Texas energy plans.
 Run: python scripts/seed_railway.py
 """
 
-import sys
 import os
+import sys
 
 # Add backend directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from config.settings import settings
 
 # Import seed functions from existing script
-from scripts.seed_database import seed_suppliers, seed_plans, seed_admin_user, seed_demo_user
+from scripts.seed_database import seed_admin_user, seed_demo_user, seed_plans, seed_suppliers
 
 
 def main():
@@ -27,7 +28,7 @@ def main():
 
     # Use DATABASE_URL from environment (Railway sets this automatically)
     db_url = settings.database_url
-    print(f"Connecting to Railway database...")
+    print("Connecting to Railway database...")
 
     engine = create_engine(db_url)
     SessionLocal = sessionmaker(bind=engine)
@@ -50,12 +51,12 @@ def main():
         print("\n" + "="*60)
         print("✓ RAILWAY SEEDING COMPLETE!")
         print("="*60)
-        print(f"\nSummary:")
+        print("\nSummary:")
         print(f"  • Suppliers: {len(suppliers)}")
         print(f"  • Plans: {len(plans)}")
-        print(f"  • Admin user: admin@treebeard.com")
-        print(f"  • Demo user: user@treebeard.com")
-        print(f"\n⚠ Remember to change admin password in production!\n")
+        print("  • Admin user: admin@treebeard.com")
+        print("  • Demo user: user@treebeard.com")
+        print("\n⚠ Remember to change admin password in production!\n")
 
     except Exception as e:
         print(f"\n✗ ERROR during seeding: {e}")

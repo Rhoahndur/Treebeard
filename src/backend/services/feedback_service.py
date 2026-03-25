@@ -7,10 +7,8 @@ Story 8.2: Feedback API Endpoints
 """
 
 import logging
-from collections import defaultdict
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import Dict, List, Optional
 from uuid import UUID
 
 from sqlalchemy import and_, func
@@ -68,11 +66,11 @@ class FeedbackService:
 
     def create_feedback(
         self,
-        user_id: Optional[UUID],
-        recommendation_id: Optional[UUID],
-        plan_id: Optional[UUID],
+        user_id: UUID | None,
+        recommendation_id: UUID | None,
+        plan_id: UUID | None,
         rating: int,
-        feedback_text: Optional[str],
+        feedback_text: str | None,
         feedback_type: str,
     ) -> Feedback:
         """
@@ -252,7 +250,7 @@ class FeedbackService:
             },
         )
 
-    def get_time_series_data(self, days: int = 30) -> List[FeedbackTimeSeriesPoint]:
+    def get_time_series_data(self, days: int = 30) -> list[FeedbackTimeSeriesPoint]:
         """
         Get daily feedback volume for the last N days.
 
@@ -308,7 +306,7 @@ class FeedbackService:
 
     def get_plan_feedback_aggregation(
         self, limit: int = 10
-    ) -> List[PlanFeedbackAggregation]:
+    ) -> list[PlanFeedbackAggregation]:
         """
         Get plan-level feedback aggregation.
 
@@ -455,7 +453,7 @@ class FeedbackService:
             offset=params.offset,
         )
 
-    def check_rate_limit(self, user_id: Optional[UUID], ip_address: str) -> bool:
+    def check_rate_limit(self, user_id: UUID | None, ip_address: str) -> bool:
         """
         Check if user/IP has exceeded rate limit.
 

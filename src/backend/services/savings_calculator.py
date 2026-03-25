@@ -12,9 +12,9 @@ Author: Backend Dev #4
 Dependencies: Story 1.4 (Usage Projection), Story 2.2 (Plan Matching - via mock)
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID, uuid4
 
 from schemas.plan import PlanCatalogResponse
@@ -25,12 +25,11 @@ from schemas.savings_schemas import (
     MultiYearProjection,
     PlanComparison,
     RankedPlan,
-    RecommendationResult,
     SavingsAnalysis,
     TradeOffNote,
 )
-from schemas.user import CurrentPlanResponse
 from schemas.usage_analysis import UsageProjection
+from schemas.user import CurrentPlanResponse
 
 
 class SavingsCalculatorService:
@@ -353,7 +352,7 @@ class SavingsCalculatorService:
         self,
         annual_savings: Decimal,
         switching_cost: Decimal,
-    ) -> Optional[int]:
+    ) -> int | None:
         """
         Calculate months until savings offset switching cost.
 

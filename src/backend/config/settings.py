@@ -5,9 +5,8 @@ Uses Pydantic Settings for environment variable management.
 """
 
 import json
-from typing import Optional
 
-from pydantic import Field, PostgresDsn, field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -71,7 +70,7 @@ class Settings(BaseSettings):
     max_recommendations: int = Field(default=3, description="Maximum number of recommendations to return")
 
     # External APIs
-    openai_api_key: Optional[str] = Field(None, description="OpenAI API key for explanation generation")
+    openai_api_key: str | None = Field(None, description="OpenAI API key for explanation generation")
     openai_model: str = Field(default="gpt-4o-mini", description="OpenAI model to use")
 
     # Data Processing
@@ -95,15 +94,15 @@ class Settings(BaseSettings):
     datadog_agent_port: int = Field(default=8125, description="DataDog agent port")
 
     # Sentry
-    sentry_dsn: Optional[str] = Field(None, description="Sentry DSN for error tracking")
+    sentry_dsn: str | None = Field(None, description="Sentry DSN for error tracking")
     sentry_traces_sample_rate: float = Field(default=1.0, description="Sentry traces sample rate (0.0-1.0)")
     sentry_profiles_sample_rate: float = Field(default=1.0, description="Sentry profiles sample rate (0.0-1.0)")
 
     # Alerting
-    pagerduty_integration_key: Optional[str] = Field(None, description="PagerDuty integration key")
-    pagerduty_routing_key: Optional[str] = Field(None, description="PagerDuty routing key")
-    slack_webhook_url: Optional[str] = Field(None, description="Slack webhook URL for alerts")
-    slack_bot_token: Optional[str] = Field(None, description="Slack bot token")
+    pagerduty_integration_key: str | None = Field(None, description="PagerDuty integration key")
+    pagerduty_routing_key: str | None = Field(None, description="PagerDuty routing key")
+    slack_webhook_url: str | None = Field(None, description="Slack webhook URL for alerts")
+    slack_bot_token: str | None = Field(None, description="Slack bot token")
 
     @field_validator("cors_origins", mode="before")
     @classmethod

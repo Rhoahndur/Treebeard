@@ -14,24 +14,21 @@ import json
 import logging
 import time
 from decimal import Decimal
-from typing import List, Optional, Dict, Any
+from typing import Any
 
-import httpx
+from schemas.explanation_schemas import (
+    CurrentPlan,
+    ExplanationMetrics,
+    PersonaType,
+    PlanExplanation,
+    RankedPlan,
+    UserPreferences,
+)
 
 # Import OpenAI service
 from .explanation_service_openai import OpenAIExplanationService
-
-from schemas.explanation_schemas import (
-    RankedPlan,
-    UserPreferences,
-    CurrentPlan,
-    PlanExplanation,
-    PersonaType,
-    ExplanationMetrics,
-)
 from .explanation_templates import (
     TemplateExplanationGenerator,
-    get_context_aware_message,
 )
 
 logger = logging.getLogger(__name__)
@@ -53,7 +50,7 @@ class ClaudeExplanationService:
     def __init__(
         self,
         api_key: str,
-        redis_client: Optional[Any] = None,
+        redis_client: Any | None = None,
         model: str = "claude-3-5-sonnet-20241022",
         max_tokens: int = 300,
         temperature: float = 0.7,
@@ -95,9 +92,9 @@ class ClaudeExplanationService:
     async def generate_explanation(
         self,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-        current_plan: Optional[CurrentPlan] = None,
+        current_plan: CurrentPlan | None = None,
         force_regenerate: bool = False,
     ) -> PlanExplanation:
         """
@@ -182,11 +179,11 @@ class ClaudeExplanationService:
 
     async def generate_bulk_explanations(
         self,
-        plans: List[RankedPlan],
-        user_profile: Dict[str, Any],
+        plans: list[RankedPlan],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-        current_plan: Optional[CurrentPlan] = None,
-    ) -> List[PlanExplanation]:
+        current_plan: CurrentPlan | None = None,
+    ) -> list[PlanExplanation]:
         """
         Generate explanations for multiple plans efficiently.
 
@@ -208,9 +205,9 @@ class ClaudeExplanationService:
     async def _generate_with_claude(
         self,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-        current_plan: Optional[CurrentPlan] = None,
+        current_plan: CurrentPlan | None = None,
     ) -> str:
         """
         Generate explanation using Claude API with retry logic.
@@ -264,9 +261,9 @@ class ClaudeExplanationService:
     def _build_prompt(
         self,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-        current_plan: Optional[CurrentPlan] = None,
+        current_plan: CurrentPlan | None = None,
     ) -> str:
         """
         Build Claude API prompt with all context.
@@ -356,7 +353,7 @@ Generate the explanation now. Do not include labels or headers, just the explana
 
         return prompt
 
-    def _describe_rate_structure(self, rate_structure: Dict[str, Any]) -> str:
+    def _describe_rate_structure(self, rate_structure: dict[str, Any]) -> str:
         """Describe rate structure in plain language."""
         rate_type = rate_structure.get("type", "unknown")
 
@@ -417,9 +414,9 @@ Generate the explanation now. Do not include labels or headers, just the explana
     async def _get_cached_explanation(
         self,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
-    ) -> Optional[PlanExplanation]:
+    ) -> PlanExplanation | None:
         """Get cached explanation if available."""
         if not self.redis_client:
             return None
@@ -439,7 +436,7 @@ Generate the explanation now. Do not include labels or headers, just the explana
     async def _cache_explanation(
         self,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
         explanation: PlanExplanation,
     ) -> None:
@@ -462,7 +459,7 @@ Generate the explanation now. Do not include labels or headers, just the explana
     def _generate_cache_key(
         self,
         plan: RankedPlan,
-        user_profile: Dict[str, Any],
+        user_profile: dict[str, Any],
         preferences: UserPreferences,
     ) -> str:
         """
@@ -506,7 +503,7 @@ Generate the explanation now. Do not include labels or headers, just the explana
         """Get current metrics."""
         return self.metrics
 
-    async def invalidate_cache(self, plan_id: Optional[str] = None) -> int:
+    async def invalidate_cache(self, plan_id: str | None = None) -> int:
         """
         Invalidate cached explanations.
 
@@ -542,9 +539,9 @@ Generate the explanation now. Do not include labels or headers, just the explana
 
     async def warm_cache(
         self,
-        plans: List[RankedPlan],
-        personas: List[str],
-        mock_profile: Dict[str, Any],
+        plans: list[RankedPlan],
+        personas: list[str],
+        mock_profile: dict[str, Any],
     ) -> int:
         """
         Pre-generate explanations for popular plan/persona combinations.
@@ -606,7 +603,7 @@ Generate the explanation now. Do not include labels or headers, just the explana
 
 def create_explanation_service(
     api_key: str,
-    redis_client: Optional[Any] = None,
+    redis_client: Any | None = None,
     **kwargs,
 ) -> OpenAIExplanationService:
     """

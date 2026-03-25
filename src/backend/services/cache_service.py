@@ -11,10 +11,9 @@ Cache Strategy:
 - Invalidation: On user data updates
 """
 
-import json
 import hashlib
+import json
 import os
-from typing import Optional, List
 from datetime import timedelta
 
 try:
@@ -24,7 +23,7 @@ try:
 except ImportError:
     REDIS_AVAILABLE = False
 
-from schemas.usage_analysis import UsageProfile, MonthlyUsage
+from schemas.usage_analysis import MonthlyUsage, UsageProfile
 
 
 class CacheService:
@@ -39,11 +38,11 @@ class CacheService:
 
     def __init__(
         self,
-        redis_url: Optional[str] = None,
+        redis_url: str | None = None,
         redis_host: str = "localhost",
         redis_port: int = 6379,
         redis_db: int = 0,
-        redis_password: Optional[str] = None,
+        redis_password: str | None = None,
         enabled: bool = True,
     ):
         """
@@ -58,7 +57,7 @@ class CacheService:
             enabled: Whether caching is enabled (set to False for testing)
         """
         self.enabled = enabled and REDIS_AVAILABLE
-        self._client: Optional[Redis] = None
+        self._client: Redis | None = None
 
         if self.enabled:
             try:
@@ -92,7 +91,7 @@ class CacheService:
                 self.enabled = False
                 self._client = None
 
-    def get_profile(self, user_id: str) -> Optional[UsageProfile]:
+    def get_profile(self, user_id: str) -> UsageProfile | None:
         """
         Retrieve cached usage profile.
 
@@ -124,7 +123,7 @@ class CacheService:
             return None
 
     def set_profile(
-        self, user_id: str, profile: UsageProfile, ttl: Optional[int] = None
+        self, user_id: str, profile: UsageProfile, ttl: int | None = None
     ) -> bool:
         """
         Store usage profile in cache.
@@ -177,7 +176,7 @@ class CacheService:
             print(f"Cache invalidate error: {e}")
             return False
 
-    def get_usage_data_hash(self, usage_data: List[MonthlyUsage]) -> str:
+    def get_usage_data_hash(self, usage_data: list[MonthlyUsage]) -> str:
         """
         Generate a hash of usage data for cache validation.
         Can be used to detect if underlying data has changed.
@@ -194,7 +193,7 @@ class CacheService:
 
     def get_profile_with_hash(
         self, user_id: str, usage_data_hash: str
-    ) -> Optional[UsageProfile]:
+    ) -> UsageProfile | None:
         """
         Retrieve cached profile only if the usage data hash matches.
         This ensures we don't return stale profiles.
@@ -311,7 +310,7 @@ class CacheService:
     # GENERIC CACHE METHODS (for middleware)
     # ========================================================================
 
-    async def get(self, key: str) -> Optional[str]:
+    async def get(self, key: str) -> str | None:
         """Get value from cache by key."""
         if not self.enabled or not self._client:
             return None
@@ -320,7 +319,7 @@ class CacheService:
         except Exception:
             return None
 
-    async def set(self, key: str, value: str, ttl: Optional[int] = None) -> None:
+    async def set(self, key: str, value: str, ttl: int | None = None) -> None:
         """Set value with optional TTL."""
         if not self.enabled or not self._client:
             return
@@ -382,7 +381,7 @@ class InMemoryCache:
         """Initialize in-memory cache."""
         self._cache: dict = {}
 
-    def get(self, key: str) -> Optional[str]:
+    def get(self, key: str) -> str | None:
         """Get value from cache."""
         entry = self._cache.get(key)
         if entry:
@@ -399,7 +398,7 @@ class InMemoryCache:
         """Delete key."""
         self._cache.pop(key, None)
 
-    def keys(self, pattern: str) -> List[str]:
+    def keys(self, pattern: str) -> list[str]:
         """Get keys matching pattern."""
         # Simple pattern matching (just prefix)
         prefix = pattern.replace("*", "")
@@ -411,7 +410,7 @@ class InMemoryCache:
 
 
 # Singleton instance (can be configured at application startup)
-_cache_instance: Optional[CacheService] = None
+_cache_instance: CacheService | None = None
 
 
 def get_cache_service() -> CacheService:
@@ -431,7 +430,7 @@ def configure_cache(
     redis_host: str = "localhost",
     redis_port: int = 6379,
     redis_db: int = 0,
-    redis_password: Optional[str] = None,
+    redis_password: str | None = None,
     enabled: bool = True,
 ) -> CacheService:
     """

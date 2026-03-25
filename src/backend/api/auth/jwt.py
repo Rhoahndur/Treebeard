@@ -5,7 +5,7 @@ Handles JWT token creation, validation, and decoding.
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any
 
 from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -52,8 +52,8 @@ def get_password_hash(password: str) -> str:
 
 
 def create_jwt(
-    data: Dict[str, Any],
-    expires_delta: Optional[timedelta] = None,
+    data: dict[str, Any],
+    expires_delta: timedelta | None = None,
 ) -> str:
     """
     Create a JWT token.
@@ -87,7 +87,7 @@ def create_jwt(
     return encoded_jwt
 
 
-def decode_jwt(token: str) -> Dict[str, Any]:
+def decode_jwt(token: str) -> dict[str, Any]:
     """
     Decode and validate a JWT token.
 

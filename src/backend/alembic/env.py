@@ -4,21 +4,15 @@ Alembic environment configuration for database migrations.
 
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
-# Import the Base and all models
-from models.base import Base
-from models.user import User, UserPreference, CurrentPlan
-from models.usage import UsageHistory
-from models.plan import Supplier, PlanCatalog
-from models.recommendation import Recommendation, RecommendationPlan
-from models.feedback import Feedback
-
 # Import settings for database URL
 from config.settings import settings
+
+# Import the Base and all models
+from models.base import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

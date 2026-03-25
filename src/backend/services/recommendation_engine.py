@@ -8,29 +8,26 @@ This service implements:
 - Story 2.3: Contract timing optimization and switching analysis
 """
 
-from datetime import date, datetime, timedelta
-from decimal import Decimal
-from typing import Dict, Any, List, Optional, Tuple
-from uuid import UUID
 import logging
+from datetime import date, datetime
+from decimal import Decimal
+from typing import Any
+from uuid import UUID
 
-from sqlalchemy.orm import Session
 from sqlalchemy import and_, any_
+from sqlalchemy.orm import Session
 
 from models.plan import PlanCatalog, Supplier
-from models.user import User, UserPreference, CurrentPlan
+from models.user import CurrentPlan
 from schemas.recommendation_schemas import (
+    CostBreakdown,
+    EnhancedRecommendationResult,
+    PlanFilter,
+    PlanScores,
     RankedPlan,
     RecommendationResult,
-    EnhancedRecommendationResult,
-    PlanScores,
-    UserPreferences,
-    CostBreakdown,
-    RateType,
-    TierRate,
-    TimeOfUseRate,
     SwitchingAnalysis,
-    PlanFilter
+    UserPreferences,
 )
 from schemas.usage_analysis import UsageProjection
 from services.scoring_service import score_plan
@@ -123,7 +120,7 @@ def calculate_plan_cost(
     )
 
 
-def _calculate_fixed_cost(rate_structure: Dict[str, Any], annual_kwh: float) -> Decimal:
+def _calculate_fixed_cost(rate_structure: dict[str, Any], annual_kwh: float) -> Decimal:
     """Calculate cost for fixed-rate plan."""
     # Support both 'rate' and 'rate_per_kwh' keys for backwards compatibility
     rate_per_kwh = Decimal(str(rate_structure.get('rate', rate_structure.get('rate_per_kwh', 0))))
@@ -131,7 +128,7 @@ def _calculate_fixed_cost(rate_structure: Dict[str, Any], annual_kwh: float) -> 
     return (rate_per_kwh / 100) * Decimal(str(annual_kwh))
 
 
-def _calculate_tiered_cost(rate_structure: Dict[str, Any], annual_kwh: float) -> Decimal:
+def _calculate_tiered_cost(rate_structure: dict[str, Any], annual_kwh: float) -> Decimal:
     """Calculate cost for tiered-rate plan."""
     tiers = rate_structure.get('tiers', [])
     if not tiers:
@@ -164,8 +161,8 @@ def _calculate_tiered_cost(rate_structure: Dict[str, Any], annual_kwh: float) ->
 
 
 def _calculate_time_of_use_cost(
-    rate_structure: Dict[str, Any],
-    monthly_kwh: List[float]
+    rate_structure: dict[str, Any],
+    monthly_kwh: list[float]
 ) -> Decimal:
     """Calculate cost for time-of-use plan."""
     peak_rate = Decimal(str(rate_structure.get('peak_rate', 0)))
@@ -189,7 +186,7 @@ def _calculate_time_of_use_cost(
 
 
 def _calculate_variable_cost(
-    rate_structure: Dict[str, Any],
+    rate_structure: dict[str, Any],
     annual_kwh: float,
     confidence_score: float
 ) -> Decimal:
@@ -221,7 +218,7 @@ def _calculate_variable_cost(
 def filter_eligible_plans(
     db: Session,
     plan_filter: PlanFilter
-) -> List[PlanCatalog]:
+) -> list[PlanCatalog]:
     """
     Filter plans by region, availability, and optional criteria.
 
@@ -265,12 +262,12 @@ def filter_eligible_plans(
 # ============================================================================
 
 def rank_plans(
-    plans: List[PlanCatalog],
+    plans: list[PlanCatalog],
     projected_usage: UsageProjection,
     preferences: UserPreferences,
     db: Session,
     top_n: int = 3
-) -> List[Tuple[PlanCatalog, PlanScores, CostBreakdown]]:
+) -> list[tuple[PlanCatalog, PlanScores, CostBreakdown]]:
     """
     Score and rank all eligible plans.
 
@@ -444,7 +441,7 @@ def get_recommendations(
 
 def analyze_switching_timing(
     current_plan: CurrentPlan,
-    recommended_plans: List[RankedPlan],
+    recommended_plans: list[RankedPlan],
     today: date = None
 ) -> SwitchingAnalysis:
     """
@@ -558,7 +555,7 @@ def get_enhanced_recommendations(
     preferences: UserPreferences,
     db: Session,
     zip_code: str,
-    current_plan: Optional[CurrentPlan] = None,
+    current_plan: CurrentPlan | None = None,
     top_n: int = 3
 ) -> EnhancedRecommendationResult:
     """
@@ -655,7 +652,7 @@ def get_enhanced_recommendations(
 # UTILITY FUNCTIONS
 # ============================================================================
 
-def _create_usage_summary(usage_profile: UsageProjection) -> Dict[str, Any]:
+def _create_usage_summary(usage_profile: UsageProjection) -> dict[str, Any]:
     """Create a summary of usage profile for storage."""
     return {
         'projected_annual_kwh': usage_profile.projected_annual_kwh,

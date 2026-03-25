@@ -10,9 +10,9 @@ This script populates the database with:
 Run: python backend/scripts/seed_database.py
 """
 
-import sys
 import os
-from datetime import datetime, date
+import sys
+from datetime import datetime
 from decimal import Decimal
 from uuid import uuid4
 
@@ -21,11 +21,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from config.settings import settings
-from models.plan import Supplier, PlanCatalog
-from models.user import User
-from api.auth.jwt import get_password_hash
 
+from api.auth.jwt import get_password_hash
+from models.plan import PlanCatalog, Supplier
+from models.user import User
 
 # Texas ZIP codes to cover (major cities)
 TEXAS_ZIP_CODES = [
@@ -798,7 +797,7 @@ def seed_admin_user(db):
     db.add(admin)
     db.commit()
 
-    print(f"✓ Created admin user: admin@treebeard.com / admin123")
+    print("✓ Created admin user: admin@treebeard.com / admin123")
     print("⚠ IMPORTANT: Change admin password in production!")
     return admin
 
@@ -828,7 +827,7 @@ def seed_demo_user(db):
     db.add(user)
     db.commit()
 
-    print(f"✓ Created demo user: user@treebeard.com / user123")
+    print("✓ Created demo user: user@treebeard.com / user123")
     return user
 
 
@@ -855,13 +854,13 @@ def main():
         print("\n" + "="*60)
         print("✓ SEEDING COMPLETE!")
         print("="*60)
-        print(f"\nSummary:")
+        print("\nSummary:")
         print(f"  • Suppliers: {len(suppliers)}")
         print(f"  • Plans: {len(plans)}")
-        print(f"  • Admin user: admin@treebeard.com")
-        print(f"  • Demo user: user@treebeard.com")
+        print("  • Admin user: admin@treebeard.com")
+        print("  • Demo user: user@treebeard.com")
         print(f"  • ZIP codes covered: {len(TEXAS_ZIP_CODES)}")
-        print(f"\n⚠ Remember to change admin password in production!\n")
+        print("\n⚠ Remember to change admin password in production!\n")
 
     except Exception as e:
         print(f"\n✗ ERROR during seeding: {e}")

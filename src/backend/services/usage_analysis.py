@@ -14,25 +14,23 @@ Performance target: Process 1 year of data in <100ms
 """
 
 import statistics
-from datetime import date, datetime, timedelta
-from typing import List, Optional, Tuple
-import calendar
+from datetime import date, datetime
 
 import numpy as np
 from scipy import stats
 
 from schemas.usage_analysis import (
+    DataQualityMetrics,
     MonthlyUsage,
-    UsageProfile,
-    UserProfileType,
+    OutlierDetection,
+    PeakOffPeakAnalysis,
     SeasonalAnalysis,
     SeasonalPattern,
     SeasonType,
-    PeakOffPeakAnalysis,
-    OutlierDetection,
-    DataQualityMetrics,
+    UsageProfile,
     UsageProjection,
     UsageStatistics,
+    UserProfileType,
 )
 
 
@@ -54,9 +52,9 @@ class UsageAnalysisService:
 
     def analyze_usage_patterns(
         self,
-        usage_data: List[MonthlyUsage],
-        user_id: Optional[str] = None,
-        regional_avg_kwh: Optional[float] = None,
+        usage_data: list[MonthlyUsage],
+        user_id: str | None = None,
+        regional_avg_kwh: float | None = None,
     ) -> UsageProfile:
         """
         Perform comprehensive usage pattern analysis.
@@ -145,7 +143,7 @@ class UsageAnalysisService:
         return profile
 
     def detect_seasonal_patterns(
-        self, usage_data: List[MonthlyUsage]
+        self, usage_data: list[MonthlyUsage]
     ) -> SeasonalAnalysis:
         """
         Detect seasonal usage patterns (summer/winter peaks).
@@ -265,9 +263,9 @@ class UsageAnalysisService:
 
     def classify_user_profile(
         self,
-        usage_data: List[MonthlyUsage],
-        statistics_result: Optional[UsageStatistics] = None,
-        seasonal_analysis: Optional[SeasonalAnalysis] = None,
+        usage_data: list[MonthlyUsage],
+        statistics_result: UsageStatistics | None = None,
+        seasonal_analysis: SeasonalAnalysis | None = None,
     ) -> UserProfileType:
         """
         Classify user into profile types based on usage patterns.
@@ -320,8 +318,8 @@ class UsageAnalysisService:
 
     def project_usage(
         self,
-        usage_data: List[MonthlyUsage],
-        seasonal_analysis: Optional[SeasonalAnalysis] = None,
+        usage_data: list[MonthlyUsage],
+        seasonal_analysis: SeasonalAnalysis | None = None,
     ) -> UsageProjection:
         """
         Project 12-month forward usage based on historical patterns.
@@ -433,7 +431,7 @@ class UsageAnalysisService:
     # PRIVATE HELPER METHODS
     # ========================================================================
 
-    def _sort_usage_data(self, usage_data: List[MonthlyUsage]) -> List[MonthlyUsage]:
+    def _sort_usage_data(self, usage_data: list[MonthlyUsage]) -> list[MonthlyUsage]:
         """Sort usage data by month chronologically."""
         return sorted(usage_data, key=lambda x: x.month)
 
@@ -456,7 +454,7 @@ class UsageAnalysisService:
             return SeasonType.FALL
 
     def _calculate_statistics(
-        self, usage_data: List[MonthlyUsage]
+        self, usage_data: list[MonthlyUsage]
     ) -> UsageStatistics:
         """Calculate basic statistical measures."""
         kwh_values = [u.kwh for u in usage_data]
@@ -476,7 +474,7 @@ class UsageAnalysisService:
         )
 
     def _assess_data_quality(
-        self, usage_data: List[MonthlyUsage]
+        self, usage_data: list[MonthlyUsage]
     ) -> DataQualityMetrics:
         """
         Assess the quality and completeness of usage data.
@@ -530,8 +528,8 @@ class UsageAnalysisService:
         )
 
     def _fill_missing_months(
-        self, usage_data: List[MonthlyUsage]
-    ) -> List[MonthlyUsage]:
+        self, usage_data: list[MonthlyUsage]
+    ) -> list[MonthlyUsage]:
         """
         Fill missing months using linear interpolation.
 
@@ -573,7 +571,7 @@ class UsageAnalysisService:
         self,
         target_date: date,
         usage_dict: dict,
-        sorted_data: List[MonthlyUsage],
+        sorted_data: list[MonthlyUsage],
     ) -> float:
         """
         Interpolate a missing value using neighboring months.
@@ -600,7 +598,7 @@ class UsageAnalysisService:
             # Fallback to overall average if available
             return statistics.mean([u.kwh for u in sorted_data])
 
-    def _detect_outliers(self, usage_data: List[MonthlyUsage]) -> OutlierDetection:
+    def _detect_outliers(self, usage_data: list[MonthlyUsage]) -> OutlierDetection:
         """
         Detect anomalous usage using IQR method.
         """
@@ -639,8 +637,8 @@ class UsageAnalysisService:
         )
 
     def _handle_outliers(
-        self, usage_data: List[MonthlyUsage], outliers: OutlierDetection
-    ) -> List[MonthlyUsage]:
+        self, usage_data: list[MonthlyUsage], outliers: OutlierDetection
+    ) -> list[MonthlyUsage]:
         """
         Handle outliers by replacing with interpolated values.
         For now, we keep the original data but flag the outliers.
@@ -651,7 +649,7 @@ class UsageAnalysisService:
         return usage_data
 
     def _analyze_peak_offpeak(
-        self, usage_data: List[MonthlyUsage], statistics_result: UsageStatistics
+        self, usage_data: list[MonthlyUsage], statistics_result: UsageStatistics
     ) -> PeakOffPeakAnalysis:
         """
         Analyze peak and off-peak usage patterns.
@@ -685,8 +683,8 @@ class UsageAnalysisService:
         )
 
     def _project_seasonal(
-        self, usage_data: List[MonthlyUsage], seasonal_analysis: SeasonalAnalysis
-    ) -> List[float]:
+        self, usage_data: list[MonthlyUsage], seasonal_analysis: SeasonalAnalysis
+    ) -> list[float]:
         """
         Project 12 months using seasonal averages.
         """
@@ -705,8 +703,8 @@ class UsageAnalysisService:
         return projected
 
     def _project_with_trend(
-        self, usage_data: List[MonthlyUsage], slope: float, intercept: float
-    ) -> List[float]:
+        self, usage_data: list[MonthlyUsage], slope: float, intercept: float
+    ) -> list[float]:
         """
         Project 12 months using linear trend.
         """
@@ -720,7 +718,7 @@ class UsageAnalysisService:
 
         return projected
 
-    def _project_moving_average(self, usage_data: List[MonthlyUsage]) -> List[float]:
+    def _project_moving_average(self, usage_data: list[MonthlyUsage]) -> list[float]:
         """
         Project 12 months using moving average.
         """
@@ -759,7 +757,7 @@ class UsageAnalysisService:
         data_quality: DataQualityMetrics,
         outliers: OutlierDetection,
         overall_confidence: float,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Generate warnings about analysis quality.
         """
@@ -789,10 +787,10 @@ class UsageAnalysisService:
 
     def _create_insufficient_data_profile(
         self,
-        usage_data: List[MonthlyUsage],
-        user_id: Optional[str],
+        usage_data: list[MonthlyUsage],
+        user_id: str | None,
         data_quality: DataQualityMetrics,
-        regional_avg_kwh: Optional[float],
+        regional_avg_kwh: float | None,
     ) -> UsageProfile:
         """
         Create a minimal profile for cases with insufficient data.

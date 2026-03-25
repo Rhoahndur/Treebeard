@@ -10,13 +10,13 @@ This module provides all database models for the application, including:
 - Audit logging (audit_logs)
 """
 
+from .audit_log import AuditLog
 from .base import Base
-from .user import User, UserPreference, CurrentPlan
-from .usage import UsageHistory
+from .feedback import Feedback
 from .plan import PlanCatalog, Supplier
 from .recommendation import Recommendation, RecommendationPlan
-from .feedback import Feedback
-from .audit_log import AuditLog
+from .usage import UsageHistory
+from .user import CurrentPlan, User, UserPreference
 
 __all__ = [
     "Base",

@@ -16,7 +16,7 @@ Alert Severity Levels:
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -62,12 +62,12 @@ class AlertRule:
     description: str
     condition: str
     severity: AlertSeverity
-    channels: List[NotificationChannel]
+    channels: list[NotificationChannel]
     threshold: float
     duration: int
     enabled: bool = True
-    runbook_url: Optional[str] = None
-    tags: Optional[List[str]] = None
+    runbook_url: str | None = None
+    tags: list[str] | None = None
 
 
 # Critical Alerts - PagerDuty
@@ -282,7 +282,7 @@ INFO_ALERTS = [
 ALL_ALERT_RULES = CRITICAL_ALERTS + WARNING_ALERTS + INFO_ALERTS
 
 
-def get_alert_rules(severity: Optional[AlertSeverity] = None, enabled_only: bool = True) -> List[AlertRule]:
+def get_alert_rules(severity: AlertSeverity | None = None, enabled_only: bool = True) -> list[AlertRule]:
     """
     Get alert rules filtered by severity and enabled status.
 
@@ -304,7 +304,7 @@ def get_alert_rules(severity: Optional[AlertSeverity] = None, enabled_only: bool
     return rules
 
 
-def get_alert_rule(name: str) -> Optional[AlertRule]:
+def get_alert_rule(name: str) -> AlertRule | None:
     """
     Get a specific alert rule by name.
 
@@ -336,7 +336,7 @@ def evaluate_alert_condition(rule: AlertRule, current_value: float) -> bool:
     return current_value > rule.threshold
 
 
-def format_alert_message(rule: AlertRule, current_value: float, context: Optional[Dict[str, Any]] = None) -> str:
+def format_alert_message(rule: AlertRule, current_value: float, context: dict[str, Any] | None = None) -> str:
     """
     Format an alert message for notification.
 
@@ -375,7 +375,7 @@ def format_alert_message(rule: AlertRule, current_value: float, context: Optiona
 def send_alert(
     rule: AlertRule,
     current_value: float,
-    context: Optional[Dict[str, Any]] = None,
+    context: dict[str, Any] | None = None,
 ) -> None:
     """
     Send an alert through configured channels.
@@ -401,7 +401,7 @@ def send_alert(
             logger.error(f"Failed to send alert via {channel}: {e}")
 
 
-def _send_pagerduty_alert(rule: AlertRule, message: str, context: Optional[Dict[str, Any]] = None) -> None:
+def _send_pagerduty_alert(rule: AlertRule, message: str, context: dict[str, Any] | None = None) -> None:
     """Send alert to PagerDuty."""
     logger.info(f"[PagerDuty] {rule.name}: {message}")
     # Implementation would use PagerDuty API
@@ -420,7 +420,7 @@ def _send_pagerduty_alert(rule: AlertRule, message: str, context: Optional[Dict[
     # )
 
 
-def _send_slack_alert(rule: AlertRule, message: str, context: Optional[Dict[str, Any]] = None) -> None:
+def _send_slack_alert(rule: AlertRule, message: str, context: dict[str, Any] | None = None) -> None:
     """Send alert to Slack."""
     logger.info(f"[Slack] {rule.name}: {message}")
     # Implementation would use Slack API
@@ -430,13 +430,13 @@ def _send_slack_alert(rule: AlertRule, message: str, context: Optional[Dict[str,
     # client.chat_postMessage(channel=channel, text=message)
 
 
-def _send_email_alert(rule: AlertRule, message: str, context: Optional[Dict[str, Any]] = None) -> None:
+def _send_email_alert(rule: AlertRule, message: str, context: dict[str, Any] | None = None) -> None:
     """Send alert via email."""
     logger.info(f"[Email] {rule.name}: {message}")
     # Implementation would use email service (SendGrid, SES, etc.)
 
 
-def _send_webhook_alert(rule: AlertRule, message: str, context: Optional[Dict[str, Any]] = None) -> None:
+def _send_webhook_alert(rule: AlertRule, message: str, context: dict[str, Any] | None = None) -> None:
     """Send alert to webhook."""
     logger.info(f"[Webhook] {rule.name}: {message}")
     # Implementation would POST to configured webhook URL
