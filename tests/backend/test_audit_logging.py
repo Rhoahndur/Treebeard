@@ -4,12 +4,11 @@ Tests for audit logging system.
 Tests audit log creation, querying, filtering, and append-only constraint.
 """
 
-import pytest
 from datetime import datetime, timedelta
 from uuid import uuid4
 
+import pytest
 from src.backend.models.audit_log import AuditLog
-from src.backend.models.user import User
 from src.backend.schemas.audit_schemas import AuditLogFilter
 from src.backend.services.audit_service import (
     get_audit_logs,
@@ -266,9 +265,9 @@ class TestAuditLogSecurity:
 class TestAuditLogEndpoints:
     """Test audit log API endpoints."""
 
-    def test_list_audit_logs(self, client, admin_user, auth_headers_admin, sample_audit_logs):
+    def test_list_audit_logs(self, client, admin_user, auth_headers, sample_audit_logs):
         """Test listing audit logs via API."""
-        response = client.get("/api/v1/admin/audit-logs", headers=auth_headers_admin)
+        response = client.get("/api/v1/admin/audit-logs", headers=auth_headers(admin_user))
         assert response.status_code == 200
 
         data = response.json()
@@ -277,11 +276,11 @@ class TestAuditLogEndpoints:
         assert "limit" in data
         assert "offset" in data
 
-    def test_list_audit_logs_with_filters(self, client, admin_user, auth_headers_admin, sample_audit_logs):
+    def test_list_audit_logs_with_filters(self, client, admin_user, auth_headers, sample_audit_logs):
         """Test filtering audit logs via API."""
         response = client.get(
             f"/api/v1/admin/audit-logs?action=user_role_updated&admin_user_id={admin_user.id}",
-            headers=auth_headers_admin
+            headers=auth_headers(admin_user)
         )
         assert response.status_code == 200
 
@@ -289,9 +288,9 @@ class TestAuditLogEndpoints:
         assert all(log["action"] == "user_role_updated" for log in data["logs"])
         assert all(log["admin_user_id"] == str(admin_user.id) for log in data["logs"])
 
-    def test_get_audit_log_stats(self, client, admin_user, auth_headers_admin, sample_audit_logs):
+    def test_get_audit_log_stats(self, client, admin_user, auth_headers, sample_audit_logs):
         """Test getting audit log statistics via API."""
-        response = client.get("/api/v1/admin/audit-logs/stats", headers=auth_headers_admin)
+        response = client.get("/api/v1/admin/audit-logs/stats", headers=auth_headers(admin_user))
         assert response.status_code == 200
 
         data = response.json()
@@ -300,67 +299,11 @@ class TestAuditLogEndpoints:
         assert "actions_by_type" in data
         assert "recent_activity" in data
 
-    def test_non_admin_cannot_view_audit_logs(self, client, regular_user, auth_headers_regular):
+    def test_non_admin_cannot_view_audit_logs(self, client, regular_user, auth_headers):
         """Test that non-admin users cannot view audit logs."""
-        response = client.get("/api/v1/admin/audit-logs", headers=auth_headers_regular)
+        response = client.get("/api/v1/admin/audit-logs", headers=auth_headers(regular_user))
         assert response.status_code == 403
 
-
-# Fixtures
-
-
-@pytest.fixture
-def admin_user(db):
-    """Create an admin user for testing."""
-    user = User(
-        id=uuid4(),
-        email="admin@test.com",
-        name="Admin User",
-        hashed_password="hashed_password",
-        zip_code="78701",
-        property_type="residential",
-        is_active=True,
-        is_admin=True,
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
-
-
-@pytest.fixture
-def regular_user(db):
-    """Create a regular user for testing."""
-    user = User(
-        id=uuid4(),
-        email="regular@test.com",
-        name="Regular User",
-        hashed_password="hashed_password",
-        zip_code="78701",
-        property_type="residential",
-        is_active=True,
-        is_admin=False,
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
-
-
-@pytest.fixture
-def auth_headers_admin(admin_user):
-    """Generate JWT auth headers for admin user."""
-    from src.backend.api.auth.jwt import create_access_token
-    token = create_access_token(str(admin_user.id), is_admin=True)
-    return {"Authorization": f"Bearer {token}"}
-
-
-@pytest.fixture
-def auth_headers_regular(regular_user):
-    """Generate JWT auth headers for regular user."""
-    from src.backend.api.auth.jwt import create_access_token
-    token = create_access_token(str(regular_user.id), is_admin=False)
-    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.fixture
@@ -404,11 +347,3 @@ def sample_audit_logs(db, admin_user):
     db.commit()
 
     return logs
-
-
-@pytest.fixture
-async def async_db(db):
-    """Provide async database session for async tests."""
-    # For now, return the sync db
-    # In production, you'd use AsyncSession
-    return db
