@@ -143,52 +143,21 @@ app.add_middleware(LoggingMiddleware)
 app.add_middleware(RequestIDMiddleware)
 
 # Include routers
-app.include_router(
-    health.router,
-    tags=["Health"]
-)
+app.include_router(health.router, tags=["Health"])
 
-app.include_router(
-    auth.router,
-    prefix=f"{settings.api_v1_prefix}/auth",
-    tags=["Authentication"]
-)
+app.include_router(auth.router, prefix=f"{settings.api_v1_prefix}/auth", tags=["Authentication"])
 
-app.include_router(
-    users.router,
-    prefix=f"{settings.api_v1_prefix}/users",
-    tags=["Users"]
-)
+app.include_router(users.router, prefix=f"{settings.api_v1_prefix}/users", tags=["Users"])
 
-app.include_router(
-    recommendations.router,
-    prefix=f"{settings.api_v1_prefix}/recommendations",
-    tags=["Recommendations"]
-)
+app.include_router(recommendations.router, prefix=f"{settings.api_v1_prefix}/recommendations", tags=["Recommendations"])
 
-app.include_router(
-    plans.router,
-    prefix=f"{settings.api_v1_prefix}/plans",
-    tags=["Plans"]
-)
+app.include_router(plans.router, prefix=f"{settings.api_v1_prefix}/plans", tags=["Plans"])
 
-app.include_router(
-    usage.router,
-    prefix=f"{settings.api_v1_prefix}/usage",
-    tags=["Usage Data"]
-)
+app.include_router(usage.router, prefix=f"{settings.api_v1_prefix}/usage", tags=["Usage Data"])
 
-app.include_router(
-    feedback.router,
-    prefix=settings.api_v1_prefix,
-    tags=["Feedback"]
-)
+app.include_router(feedback.router, prefix=settings.api_v1_prefix, tags=["Feedback"])
 
-app.include_router(
-    admin.router,
-    prefix=f"{settings.api_v1_prefix}/admin",
-    tags=["Admin"]
-)
+app.include_router(admin.router, prefix=f"{settings.api_v1_prefix}/admin", tags=["Admin"])
 
 
 @app.get("/")

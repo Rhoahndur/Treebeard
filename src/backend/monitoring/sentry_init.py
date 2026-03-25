@@ -111,7 +111,9 @@ def _sanitize_dict(data: dict[str, Any]) -> dict[str, Any]:
         elif isinstance(value, dict):
             sanitized[key] = _sanitize_dict(value)
         elif isinstance(value, list):
-            sanitized[key] = [_sanitize_dict(item) if isinstance(item, dict) else _sanitize_value(item) for item in value]
+            sanitized[key] = [
+                _sanitize_dict(item) if isinstance(item, dict) else _sanitize_value(item) for item in value
+            ]
         else:
             sanitized[key] = _sanitize_value(value)
 

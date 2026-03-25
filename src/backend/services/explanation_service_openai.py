@@ -115,18 +115,14 @@ class OpenAIExplanationService:
         try:
             # Check cache first (unless force regenerate)
             if not force_regenerate and self.redis_client:
-                cached = await self._get_cached_explanation(
-                    plan, user_profile, preferences, current_plan
-                )
+                cached = await self._get_cached_explanation(plan, user_profile, preferences, current_plan)
                 if cached:
                     logger.info(f"Cache hit for plan {plan.plan_id}")
                     self.metrics.cache_hits += 1
                     return cached
 
             # Generate with OpenAI
-            explanation_text = await self._generate_with_openai(
-                plan, user_profile, preferences, current_plan
-            )
+            explanation_text = await self._generate_with_openai(plan, user_profile, preferences, current_plan)
 
             # Calculate readability
             readability_score = self._calculate_readability(explanation_text)
@@ -145,9 +141,7 @@ class OpenAIExplanationService:
 
             # Cache result
             if self.redis_client:
-                await self._cache_explanation(
-                    explanation, plan, user_profile, preferences, current_plan
-                )
+                await self._cache_explanation(explanation, plan, user_profile, preferences, current_plan)
 
             self.metrics.total_generated += 1
             self.metrics.api_calls += 1
@@ -167,7 +161,7 @@ class OpenAIExplanationService:
             return PlanExplanation(
                 plan_id=plan.plan_id,
                 explanation_text=explanation_text,
-                persona_type=preferences.get_persona_type() if hasattr(preferences, 'get_persona_type') else "balanced",
+                persona_type=preferences.get_persona_type() if hasattr(preferences, "get_persona_type") else "balanced",
                 readability_score=65.0,  # Default acceptable score
                 generated_via="template",
                 generation_time_ms=int((time.time() - start_time) * 1000),
@@ -194,10 +188,7 @@ class OpenAIExplanationService:
         Returns:
             List of explanations in same order as plans
         """
-        tasks = [
-            self.generate_explanation(plan, user_profile, preferences, current_plan)
-            for plan in plans
-        ]
+        tasks = [self.generate_explanation(plan, user_profile, preferences, current_plan) for plan in plans]
         return await asyncio.gather(*tasks)
 
     async def _generate_with_openai(
@@ -249,9 +240,7 @@ class OpenAIExplanationService:
                 return explanation
 
             except Exception as e:
-                logger.warning(
-                    f"OpenAI API attempt {attempt + 1}/{self.max_retries} failed: {e}"
-                )
+                logger.warning(f"OpenAI API attempt {attempt + 1}/{self.max_retries} failed: {e}")
 
                 if attempt < self.max_retries - 1:
                     # Exponential backoff
@@ -299,9 +288,9 @@ class OpenAIExplanationService:
 
         # Build current plan comparison
         current_plan_context = ""
-        annual_cost = getattr(current_plan, 'annual_cost', None) if current_plan else None
+        annual_cost = getattr(current_plan, "annual_cost", None) if current_plan else None
         if current_plan and annual_cost:
-            savings = getattr(plan, 'projected_annual_savings', None) or Decimal("0")
+            savings = getattr(plan, "projected_annual_savings", None) or Decimal("0")
             savings_pct = (savings / annual_cost * 100) if annual_cost > 0 else 0
             current_plan_context = f"""
 Current Plan:
@@ -416,7 +405,7 @@ Generate the explanation now (just the explanation text, no labels):"""
                 "flexibility": preferences.flexibility_priority,
                 "rating": preferences.rating_priority,
             },
-            "current_plan_cost": getattr(current_plan, 'annual_cost', None) if current_plan else None,
+            "current_plan_cost": getattr(current_plan, "annual_cost", None) if current_plan else None,
         }
 
         key_str = json.dumps(key_data, sort_keys=True)
@@ -432,9 +421,7 @@ Generate the explanation now (just the explanation text, no labels):"""
     ) -> PlanExplanation | None:
         """Retrieve cached explanation if available."""
         try:
-            cache_key = self._generate_cache_key(
-                plan, user_profile, preferences, current_plan
-            )
+            cache_key = self._generate_cache_key(plan, user_profile, preferences, current_plan)
             cached_data = await self.redis_client.get(cache_key)
 
             if cached_data:
@@ -456,13 +443,9 @@ Generate the explanation now (just the explanation text, no labels):"""
     ):
         """Cache explanation for future use."""
         try:
-            cache_key = self._generate_cache_key(
-                plan, user_profile, preferences, current_plan
-            )
+            cache_key = self._generate_cache_key(plan, user_profile, preferences, current_plan)
             data = explanation.dict()
-            await self.redis_client.setex(
-                cache_key, self.cache_ttl, json.dumps(data)
-            )
+            await self.redis_client.setex(cache_key, self.cache_ttl, json.dumps(data))
         except Exception as e:
             logger.warning(f"Cache storage failed: {e}")
 

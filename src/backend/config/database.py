@@ -31,23 +31,19 @@ engine = create_engine(
     settings.database_url,
     # Connection Pool Configuration
     poolclass=QueuePool,
-    pool_size=settings.database_pool_size,        # Base pool size (10-20)
+    pool_size=settings.database_pool_size,  # Base pool size (10-20)
     max_overflow=settings.database_max_overflow,  # Additional connections (10-20)
-    pool_pre_ping=True,                           # Health check before using connection
-    pool_recycle=3600,                            # Recycle connections after 1 hour
-    pool_timeout=30,                              # Wait time for connection (seconds)
-
+    pool_pre_ping=True,  # Health check before using connection
+    pool_recycle=3600,  # Recycle connections after 1 hour
+    pool_timeout=30,  # Wait time for connection (seconds)
     # Query Performance
-    echo=settings.database_echo,                  # Log queries (disable in production)
-    echo_pool=False,                              # Don't log pool operations
-
+    echo=settings.database_echo,  # Log queries (disable in production)
+    echo_pool=False,  # Don't log pool operations
     # Connection Configuration
     connect_args={
-        "connect_timeout": 10,                    # Connection timeout
-        "options": "-c statement_timeout=30000"   # 30s query timeout
-        if "postgresql" in settings.database_url else {},
+        "connect_timeout": 10,  # Connection timeout
+        "options": "-c statement_timeout=30000" if "postgresql" in settings.database_url else {},  # 30s query timeout
     },
-
     # Execution Options
     execution_options={
         "postgresql_readonly": False,
@@ -96,6 +92,7 @@ def get_db() -> Generator[Session, None, None]:
 # QUERY PERFORMANCE MONITORING
 # ============================================================================
 
+
 @event.listens_for(Engine, "before_cursor_execute")
 def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
     """Record query start time for performance monitoring."""
@@ -118,6 +115,7 @@ def after_cursor_execute(conn, cursor, statement, parameters, context, executema
 # ============================================================================
 # DATABASE UTILITIES
 # ============================================================================
+
 
 def get_pool_status() -> dict:
     """

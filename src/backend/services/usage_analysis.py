@@ -77,9 +77,7 @@ class UsageAnalysisService:
 
         # Handle edge cases
         if data_quality.total_months < 3:
-            return self._create_insufficient_data_profile(
-                usage_data, user_id, data_quality, regional_avg_kwh
-            )
+            return self._create_insufficient_data_profile(usage_data, user_id, data_quality, regional_avg_kwh)
 
         # Fill gaps if needed
         filled_data = self._fill_missing_months(usage_data)
@@ -98,22 +96,16 @@ class UsageAnalysisService:
         peak_offpeak = self._analyze_peak_offpeak(cleaned_data, statistics_result)
 
         # Classify user profile
-        profile_type = self.classify_user_profile(
-            cleaned_data, statistics_result, seasonal_analysis
-        )
+        profile_type = self.classify_user_profile(cleaned_data, statistics_result, seasonal_analysis)
 
         # Project future usage
         projection = self.project_usage(cleaned_data, seasonal_analysis)
 
         # Calculate overall confidence
-        overall_confidence = self._calculate_overall_confidence(
-            data_quality, seasonal_analysis, projection
-        )
+        overall_confidence = self._calculate_overall_confidence(data_quality, seasonal_analysis, projection)
 
         # Generate warnings
-        warnings = self._generate_warnings(
-            data_quality, outliers, overall_confidence
-        )
+        warnings = self._generate_warnings(data_quality, outliers, overall_confidence)
 
         # Build the complete profile
         profile = UsageProfile(
@@ -136,15 +128,11 @@ class UsageAnalysisService:
         # Performance check
         elapsed_ms = (datetime.now() - analysis_start).total_seconds() * 1000
         if elapsed_ms > 100:
-            profile.warnings.append(
-                f"Analysis took {elapsed_ms:.1f}ms (target: <100ms)"
-            )
+            profile.warnings.append(f"Analysis took {elapsed_ms:.1f}ms (target: <100ms)")
 
         return profile
 
-    def detect_seasonal_patterns(
-        self, usage_data: list[MonthlyUsage]
-    ) -> SeasonalAnalysis:
+    def detect_seasonal_patterns(self, usage_data: list[MonthlyUsage]) -> SeasonalAnalysis:
         """
         Detect seasonal usage patterns (summer/winter peaks).
 
@@ -193,9 +181,7 @@ class UsageAnalysisService:
             peak_idx = kwh_values.index(peak_kwh)
 
             # Find the month name for the peak
-            season_months = [
-                u for u in usage_data if self._get_season(u.month.month) == season
-            ]
+            season_months = [u for u in usage_data if self._get_season(u.month.month) == season]
             peak_month = season_months[peak_idx].month.strftime("%B")
 
             variation_pct = ((avg_kwh - annual_avg) / annual_avg) * 100
@@ -227,9 +213,8 @@ class UsageAnalysisService:
         peak_to_avg_ratio = peak_kwh / annual_avg if annual_avg > 0 else 1.0
 
         # Determine if there's a significant seasonal pattern
-        has_seasonal_pattern = (
-            summer_to_winter_ratio >= self.SEASONAL_RATIO_THRESHOLD
-            or summer_to_winter_ratio <= (1.0 / self.SEASONAL_RATIO_THRESHOLD)
+        has_seasonal_pattern = summer_to_winter_ratio >= self.SEASONAL_RATIO_THRESHOLD or summer_to_winter_ratio <= (
+            1.0 / self.SEASONAL_RATIO_THRESHOLD
         )
 
         # Calculate confidence score
@@ -245,9 +230,7 @@ class UsageAnalysisService:
                 cv = std_val / mean_val if mean_val > 0 else 0
                 season_cvs.append(cv)
 
-        consistency_score = 1.0 - (
-            statistics.mean(season_cvs) if season_cvs else 0.5
-        )
+        consistency_score = 1.0 - (statistics.mean(season_cvs) if season_cvs else 0.5)
         consistency_score = max(0.0, min(1.0, consistency_score))
 
         confidence_score = (data_completeness * 0.6) + (consistency_score * 0.4)
@@ -376,14 +359,10 @@ class UsageAnalysisService:
         elif len(usage_data) >= 6:
             # Check for trend
             months_numeric = list(range(len(usage_data)))
-            slope, intercept, r_value, _, _ = stats.linregress(
-                months_numeric, kwh_values
-            )
+            slope, intercept, r_value, _, _ = stats.linregress(months_numeric, kwh_values)
 
             if abs(r_value) > 0.5:  # Significant trend
-                projected_monthly = self._project_with_trend(
-                    usage_data, slope, intercept
-                )
+                projected_monthly = self._project_with_trend(usage_data, slope, intercept)
                 method = "linear_trend"
                 assumptions.append(f"Detected {'upward' if slope > 0 else 'downward'} trend")
                 assumptions.append("Applied linear regression for projection")
@@ -453,9 +432,7 @@ class UsageAnalysisService:
         else:  # 9, 10, 11
             return SeasonType.FALL
 
-    def _calculate_statistics(
-        self, usage_data: list[MonthlyUsage]
-    ) -> UsageStatistics:
+    def _calculate_statistics(self, usage_data: list[MonthlyUsage]) -> UsageStatistics:
         """Calculate basic statistical measures."""
         kwh_values = [u.kwh for u in usage_data]
 
@@ -473,9 +450,7 @@ class UsageAnalysisService:
             total_annual_kwh=sum(kwh_values),
         )
 
-    def _assess_data_quality(
-        self, usage_data: list[MonthlyUsage]
-    ) -> DataQualityMetrics:
+    def _assess_data_quality(self, usage_data: list[MonthlyUsage]) -> DataQualityMetrics:
         """
         Assess the quality and completeness of usage data.
         """
@@ -497,12 +472,7 @@ class UsageAnalysisService:
         end_date = sorted_data[-1].month
 
         # Calculate expected number of months
-        months_diff = (
-            (end_date.year - start_date.year) * 12
-            + end_date.month
-            - start_date.month
-            + 1
-        )
+        months_diff = (end_date.year - start_date.year) * 12 + end_date.month - start_date.month + 1
 
         missing_months = months_diff - total_months
         has_gaps = missing_months > 0
@@ -527,9 +497,7 @@ class UsageAnalysisService:
             quality_score=quality_score,
         )
 
-    def _fill_missing_months(
-        self, usage_data: list[MonthlyUsage]
-    ) -> list[MonthlyUsage]:
+    def _fill_missing_months(self, usage_data: list[MonthlyUsage]) -> list[MonthlyUsage]:
         """
         Fill missing months using linear interpolation.
 
@@ -554,9 +522,7 @@ class UsageAnalysisService:
                 filled_data.append(MonthlyUsage(current_date, usage_dict[current_date]))
             else:
                 # Interpolate missing value
-                interpolated_kwh = self._interpolate_value(
-                    current_date, usage_dict, sorted_data
-                )
+                interpolated_kwh = self._interpolate_value(current_date, usage_dict, sorted_data)
                 filled_data.append(MonthlyUsage(current_date, interpolated_kwh))
 
             # Move to next month
@@ -636,9 +602,7 @@ class UsageAnalysisService:
             method="IQR",
         )
 
-    def _handle_outliers(
-        self, usage_data: list[MonthlyUsage], outliers: OutlierDetection
-    ) -> list[MonthlyUsage]:
+    def _handle_outliers(self, usage_data: list[MonthlyUsage], outliers: OutlierDetection) -> list[MonthlyUsage]:
         """
         Handle outliers by replacing with interpolated values.
         For now, we keep the original data but flag the outliers.
@@ -682,16 +646,12 @@ class UsageAnalysisService:
             peak_to_offpeak_ratio=ratio,
         )
 
-    def _project_seasonal(
-        self, usage_data: list[MonthlyUsage], seasonal_analysis: SeasonalAnalysis
-    ) -> list[float]:
+    def _project_seasonal(self, usage_data: list[MonthlyUsage], seasonal_analysis: SeasonalAnalysis) -> list[float]:
         """
         Project 12 months using seasonal averages.
         """
         # Create a mapping of month to season
-        season_averages = {
-            pattern.season: pattern.avg_kwh for pattern in seasonal_analysis.patterns
-        }
+        season_averages = {pattern.season: pattern.avg_kwh for pattern in seasonal_analysis.patterns}
 
         # Project each month based on its season
         projected = []
@@ -702,9 +662,7 @@ class UsageAnalysisService:
 
         return projected
 
-    def _project_with_trend(
-        self, usage_data: list[MonthlyUsage], slope: float, intercept: float
-    ) -> list[float]:
+    def _project_with_trend(self, usage_data: list[MonthlyUsage], slope: float, intercept: float) -> list[float]:
         """
         Project 12 months using linear trend.
         """
@@ -764,9 +722,7 @@ class UsageAnalysisService:
         warnings = []
 
         if data_quality.has_gaps:
-            warnings.append(
-                f"Data has {data_quality.missing_months} missing months - values interpolated"
-            )
+            warnings.append(f"Data has {data_quality.missing_months} missing months - values interpolated")
 
         if data_quality.completeness_pct < 75:
             warnings.append(
@@ -779,9 +735,7 @@ class UsageAnalysisService:
             )
 
         if overall_confidence < self.MIN_CONFIDENCE_THRESHOLD:
-            warnings.append(
-                f"Low confidence score ({overall_confidence:.2f}) - use results with caution"
-            )
+            warnings.append(f"Low confidence score ({overall_confidence:.2f}) - use results with caution")
 
         return warnings
 

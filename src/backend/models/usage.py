@@ -33,33 +33,21 @@ class UsageHistory(Base, UUIDPrimaryKeyMixin):
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
-        comment="Reference to the user"
+        comment="Reference to the user",
     )
 
-    usage_date: Mapped[date] = mapped_column(
-        Date,
-        nullable=False,
-        index=True,
-        comment="Date of energy usage"
-    )
+    usage_date: Mapped[date] = mapped_column(Date, nullable=False, index=True, comment="Date of energy usage")
 
     kwh_consumed: Mapped[Decimal] = mapped_column(
-        Numeric(12, 3),
-        nullable=False,
-        comment="Energy consumed in kilowatt-hours"
+        Numeric(12, 3), nullable=False, comment="Energy consumed in kilowatt-hours"
     )
 
     data_source: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-        default="upload",
-        comment="Source of data: upload, api, manual"
+        String(50), nullable=False, default="upload", comment="Source of data: upload, api, manual"
     )
 
     data_quality: Mapped[str | None] = mapped_column(
-        String(50),
-        nullable=True,
-        comment="Data quality flag: complete, estimated, partial"
+        String(50), nullable=True, comment="Data quality flag: complete, estimated, partial"
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -67,7 +55,7 @@ class UsageHistory(Base, UUIDPrimaryKeyMixin):
         server_default=func.now(),
         nullable=False,
         index=True,
-        comment="Timestamp when the record was created"
+        comment="Timestamp when the record was created",
     )
 
     # Relationships
@@ -80,11 +68,8 @@ class UsageHistory(Base, UUIDPrimaryKeyMixin):
         Index("idx_usage_history_unique_user_date", "user_id", "usage_date", unique=True),
         # Support date range queries for seasonal analysis
         Index("idx_usage_history_date", "usage_date"),
-        {"comment": "Daily energy usage history for pattern analysis and projections"}
+        {"comment": "Daily energy usage history for pattern analysis and projections"},
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<UsageHistory(user_id={self.user_id}, "
-            f"date={self.usage_date}, kwh={self.kwh_consumed})>"
-        )
+        return f"<UsageHistory(user_id={self.user_id}, " f"date={self.usage_date}, kwh={self.kwh_consumed})>"

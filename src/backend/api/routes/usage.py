@@ -32,9 +32,7 @@ class UsageDataPoint(BaseModel):
 class UploadUsageRequest(BaseModel):
     """Upload usage data request."""
 
-    usage_data: list[UsageDataPoint] = Field(
-        ..., min_items=1, max_items=24, description="Usage data (1-24 months)"
-    )
+    usage_data: list[UsageDataPoint] = Field(..., min_items=1, max_items=24, description="Usage data (1-24 months)")
 
 
 # Endpoints
@@ -130,7 +128,4 @@ async def get_usage_history(current_user: CurrentUser, db: DBSession):
         .all()
     )
 
-    return [
-        UsageDataPoint(month=record.usage_date, kwh=record.kwh_consumed)
-        for record in usage_records
-    ]
+    return [UsageDataPoint(month=record.usage_date, kwh=record.kwh_consumed) for record in usage_records]

@@ -51,12 +51,8 @@ async def get_plan_catalog(
     user: OptionalUser,
     zip_code: str | None = Query(None, description="Filter by ZIP code"),
     plan_type: str | None = Query(None, description="Filter by plan type"),
-    min_renewable: int | None = Query(
-        None, ge=0, le=100, description="Minimum renewable percentage"
-    ),
-    max_contract_length: int | None = Query(
-        None, ge=0, description="Maximum contract length (months)"
-    ),
+    min_renewable: int | None = Query(None, ge=0, le=100, description="Minimum renewable percentage"),
+    max_contract_length: int | None = Query(None, ge=0, description="Maximum contract length (months)"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
 ):
@@ -89,14 +85,10 @@ async def get_plan_catalog(
         query = query.filter(PlanCatalog.plan_type == plan_type)
 
     if min_renewable is not None:
-        query = query.filter(
-            PlanCatalog.renewable_percentage >= Decimal(str(min_renewable))
-        )
+        query = query.filter(PlanCatalog.renewable_percentage >= Decimal(str(min_renewable)))
 
     if max_contract_length is not None:
-        query = query.filter(
-            PlanCatalog.contract_length_months <= max_contract_length
-        )
+        query = query.filter(PlanCatalog.contract_length_months <= max_contract_length)
 
     # Get total count
     total = query.count()

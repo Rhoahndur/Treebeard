@@ -83,9 +83,7 @@ class SavingsCalculatorService:
 
         annual_savings = current_annual_cost - projected_annual_cost
         savings_percentage = (
-            (annual_savings / current_annual_cost * Decimal("100"))
-            if current_annual_cost > 0
-            else Decimal("0")
+            (annual_savings / current_annual_cost * Decimal("100")) if current_annual_cost > 0 else Decimal("0")
         )
 
         # Calculate Total Cost of Ownership
@@ -119,12 +117,12 @@ class SavingsCalculatorService:
 
         # Fees breakdown
         total_upfront_fees = recommended_plan.connection_fee or Decimal("0.00")
-        total_monthly_fees = (
-            (recommended_plan.monthly_fee or Decimal("0.00")) * Decimal(str(contract_length))
+        total_monthly_fees = (recommended_plan.monthly_fee or Decimal("0.00")) * Decimal(str(contract_length))
+        total_energy_cost = (
+            projected_annual_cost
+            - total_upfront_fees
+            - (recommended_plan.monthly_fee or Decimal("0.00")) * Decimal("12")
         )
-        total_energy_cost = projected_annual_cost - total_upfront_fees - (
-            recommended_plan.monthly_fee or Decimal("0.00")
-        ) * Decimal("12")
 
         # Generate assumptions and warnings
         assumptions = self._generate_assumptions(
@@ -432,16 +430,12 @@ class SavingsCalculatorService:
         # High ETF warning
         if switching_cost > Decimal("150"):
             warnings.append(
-                f"High early termination fee (${switching_cost}). "
-                "Consider waiting until current contract ends."
+                f"High early termination fee (${switching_cost}). " "Consider waiting until current contract ends."
             )
 
         # Low savings warning
         if savings_percentage < Decimal("5") and savings_percentage >= 0:
-            warnings.append(
-                f"Marginal savings ({savings_percentage:.1f}%). "
-                "Switching may not be worth the effort."
-            )
+            warnings.append(f"Marginal savings ({savings_percentage:.1f}%). " "Switching may not be worth the effort.")
 
         # Negative savings (more expensive)
         if savings_percentage < 0:
@@ -453,15 +447,12 @@ class SavingsCalculatorService:
         # Variable rate risk
         if is_variable_rate:
             warnings.append(
-                "Variable rate plan: actual costs may differ from projections. "
-                "Consider rate volatility risk."
+                "Variable rate plan: actual costs may differ from projections. " "Consider rate volatility risk."
             )
 
         # Low confidence in usage projection
         if usage_projection.confidence_score < 0.6:
-            warnings.append(
-                "Low confidence in usage projection. Actual costs may vary significantly."
-            )
+            warnings.append("Low confidence in usage projection. Actual costs may vary significantly.")
 
         return warnings
 
@@ -577,11 +568,7 @@ class SavingsCalculatorService:
         current_annual = sum(month.total_cost for month in monthly_breakdown_current)
 
         savings_annual = current_annual - annual_cost
-        savings_pct = (
-            (savings_annual / current_annual * Decimal("100"))
-            if current_annual > 0
-            else Decimal("0")
-        )
+        savings_pct = (savings_annual / current_annual * Decimal("100")) if current_annual > 0 else Decimal("0")
 
         # Extract rate for fixed plans
         rate_per_kwh = None
@@ -683,8 +670,7 @@ class SavingsCalculatorService:
         recommended_plans = [p for p in plans if p.is_recommended]
         if recommended_plans:
             best_value_plan = max(
-                recommended_plans,
-                key=lambda p: p.savings_vs_current_annual - (p.early_termination_fee / Decimal("12"))
+                recommended_plans, key=lambda p: p.savings_vs_current_annual - (p.early_termination_fee / Decimal("12"))
             )
             best["best_value"] = best_value_plan.plan_id
 
@@ -771,7 +757,11 @@ class SavingsCalculatorService:
 
                 # Add connection fee in year 1
                 if year == 1:
-                    annual_cost += plan_catalog[plan.plan_id].connection_fee or Decimal("0.00") if plan.plan_id in plan_catalog else Decimal("0.00")
+                    annual_cost += (
+                        plan_catalog[plan.plan_id].connection_fee or Decimal("0.00")
+                        if plan.plan_id in plan_catalog
+                        else Decimal("0.00")
+                    )
 
                 cumulative_cost += annual_cost
                 cumulative_savings += plan.savings_vs_current_annual

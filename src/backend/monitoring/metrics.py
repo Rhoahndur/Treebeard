@@ -135,9 +135,7 @@ class MetricsCollector:
         except Exception as e:
             logger.error(f"Failed to increment metric {metric_name}: {e}")
 
-    def gauge(
-        self, metric_name: str, value: float, tags: list[str] | None = None, sample_rate: float = 1.0
-    ) -> None:
+    def gauge(self, metric_name: str, value: float, tags: list[str] | None = None, sample_rate: float = 1.0) -> None:
         """
         Set a gauge metric.
 
@@ -332,9 +330,7 @@ def track_api_request(
         metrics.increment("api.errors", tags=tags)
 
 
-def track_cache_operation(
-    operation: str, key_pattern: str, hit: bool, duration_ms: float | None = None
-) -> None:
+def track_cache_operation(operation: str, key_pattern: str, hit: bool, duration_ms: float | None = None) -> None:
     """
     Track a cache operation.
 
@@ -417,9 +413,7 @@ def track_external_api_call(
         metrics.increment("external_api.errors", tags=tags)
 
 
-def track_recommendation(
-    profile_type: str, duration_ms: float, num_recommendations: int, cached: bool = False
-) -> None:
+def track_recommendation(profile_type: str, duration_ms: float, num_recommendations: int, cached: bool = False) -> None:
     """
     Track a recommendation generation.
 

@@ -95,10 +95,7 @@ async def generate_recommendations(
         usage_service = UsageAnalysisService()
 
         # Convert request usage data to MonthlyUsage objects
-        usage_data = [
-            MonthlyUsage(month=item.month, kwh=float(item.kwh))
-            for item in request.usage_data
-        ]
+        usage_data = [MonthlyUsage(month=item.month, kwh=float(item.kwh)) for item in request.usage_data]
 
         usage_profile = usage_service.analyze_usage_patterns(
             usage_data=usage_data,
@@ -196,9 +193,7 @@ async def generate_recommendations(
                     if ranked_plan.early_termination_fee > 0 and current_plan:
                         monthly_savings = annual_savings / Decimal("12")
                         if monthly_savings > 0:
-                            break_even = int(
-                                ranked_plan.early_termination_fee / monthly_savings
-                            )
+                            break_even = int(ranked_plan.early_termination_fee / monthly_savings)
 
                     savings_data = SavingsResponse(
                         annual_savings=float(annual_savings),
@@ -224,16 +219,10 @@ async def generate_recommendations(
                             year=current_date.year,
                             projected_kwh=monthly_kwh,
                             energy_cost=monthly_cost,
-                            monthly_fee=ranked_plan.monthly_fee
-                            if ranked_plan.monthly_fee
-                            else Decimal("0"),
+                            monthly_fee=ranked_plan.monthly_fee if ranked_plan.monthly_fee else Decimal("0"),
                             other_fees=Decimal("0"),
                             total_cost=monthly_cost
-                            + (
-                                ranked_plan.monthly_fee
-                                if ranked_plan.monthly_fee
-                                else Decimal("0")
-                            ),
+                            + (ranked_plan.monthly_fee if ranked_plan.monthly_fee else Decimal("0")),
                         )
                     )
 
@@ -249,9 +238,7 @@ async def generate_recommendations(
                     tco_current_plan=current_annual_cost,
                     contract_length_months=ranked_plan.contract_length_months,
                     break_even_months=break_even,
-                    switching_cost=ranked_plan.early_termination_fee
-                    if current_plan
-                    else Decimal("0"),
+                    switching_cost=ranked_plan.early_termination_fee if current_plan else Decimal("0"),
                     cumulative_savings_12_months=annual_savings
                     - (ranked_plan.early_termination_fee if current_plan else Decimal("0")),
                     total_energy_cost=ranked_plan.projected_annual_cost,
@@ -276,9 +263,7 @@ async def generate_recommendations(
                 supplier_name=request.current_plan.supplier_name or "Current Supplier",
                 current_rate=Decimal(str(request.current_plan.current_rate or 0)),
                 contract_end_date=request.current_plan.contract_end_date,
-                early_termination_fee=Decimal(
-                    str(request.current_plan.early_termination_fee or 0)
-                ),
+                early_termination_fee=Decimal(str(request.current_plan.early_termination_fee or 0)),
                 annual_cost=current_annual_cost if request.current_plan else None,
                 contract_start_date=request.current_plan.contract_start_date,
             )
@@ -312,10 +297,7 @@ async def generate_recommendations(
 
                 stay_recommendation = stay_rec
 
-            logger.info(
-                f"Risk detection complete: {len(all_risk_warnings)} risks, "
-                f"should_stay={should_stay}"
-            )
+            logger.info(f"Risk detection complete: {len(all_risk_warnings)} risks, " f"should_stay={should_stay}")
 
         # Step 5: Query supplier websites and logos for all plans (to avoid N+1 queries)
         supplier_names = [plan.supplier_name for plan in recommendation_result.top_plans]
@@ -362,9 +344,7 @@ async def generate_recommendations(
             highest_severity = None
             if plan_risk_warnings:
                 severity_order = {"critical": 0, "warning": 1, "info": 2}
-                plan_risk_warnings_sorted = sorted(
-                    plan_risk_warnings, key=lambda r: severity_order.get(r.severity, 3)
-                )
+                plan_risk_warnings_sorted = sorted(plan_risk_warnings, key=lambda r: severity_order.get(r.severity, 3))
                 highest_severity = plan_risk_warnings_sorted[0].severity
 
             # Build response
@@ -465,7 +445,7 @@ async def generate_recommendations(
         logger.error(
             f"Failed to generate recommendations: {exc}",
             exc_info=True,
-            extra={"user_id": str(user_id) if 'user_id' in locals() else 'unknown'},
+            extra={"user_id": str(user_id) if "user_id" in locals() else "unknown"},
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -545,11 +525,7 @@ async def delete_recommendation(
         HTTPException: If not authorized or not found
     """
     # Get recommendation
-    recommendation = (
-        db.query(Recommendation)
-        .filter(Recommendation.id == recommendation_id)
-        .first()
-    )
+    recommendation = db.query(Recommendation).filter(Recommendation.id == recommendation_id).first()
 
     if not recommendation:
         raise HTTPException(

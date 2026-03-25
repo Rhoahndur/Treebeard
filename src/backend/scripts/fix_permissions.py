@@ -6,7 +6,7 @@ import os
 import sys
 
 # Add parent directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -21,7 +21,7 @@ connection_attempts = [
 ]
 
 print("Attempting to fix database permissions...")
-print("="*60)
+print("=" * 60)
 
 connected = False
 conn = None
@@ -39,9 +39,9 @@ for conn_string in connection_attempts:
         continue
 
 if not connected:
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("ERROR: Could not connect to PostgreSQL")
-    print("="*60)
+    print("=" * 60)
     print("\nPlease run one of these commands manually:")
     print("\n1. If you have Postgres.app:")
     print("   /Applications/Postgres.app/Contents/Versions/*/bin/psql -U postgres -d treebeard_dev")
@@ -80,9 +80,9 @@ try:
     cursor.close()
     conn.close()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("✓ Permissions fixed successfully!")
-    print("="*60)
+    print("=" * 60)
     print("\nYou can now run:")
     print("  alembic upgrade head")
     print("  python backend/scripts/seed_database.py")

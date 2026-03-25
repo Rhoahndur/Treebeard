@@ -39,10 +39,9 @@ logger = logging.getLogger(__name__)
 # COST CALCULATION (Story 2.2)
 # ============================================================================
 
+
 def calculate_plan_cost(
-    plan: PlanCatalog,
-    projected_usage: UsageProjection,
-    include_connection_fee: bool = True
+    plan: PlanCatalog, projected_usage: UsageProjection, include_connection_fee: bool = True
 ) -> CostBreakdown:
     """
     Calculate total annual cost for a plan based on its rate structure.
@@ -64,40 +63,33 @@ def calculate_plan_cost(
     Performance: <5ms per plan
     """
     rate_structure = plan.rate_structure
-    rate_type = rate_structure.get('type', 'fixed')
+    rate_type = rate_structure.get("type", "fixed")
     projected_annual_kwh = projected_usage.projected_annual_kwh
 
     # Calculate base cost based on rate type
-    if rate_type == 'fixed':
+    if rate_type == "fixed":
         base_cost = _calculate_fixed_cost(rate_structure, projected_annual_kwh)
 
-    elif rate_type == 'tiered':
+    elif rate_type == "tiered":
         base_cost = _calculate_tiered_cost(rate_structure, projected_annual_kwh)
 
-    elif rate_type == 'time_of_use':
-        base_cost = _calculate_time_of_use_cost(
-            rate_structure,
-            projected_usage.projected_monthly_kwh
-        )
+    elif rate_type == "time_of_use":
+        base_cost = _calculate_time_of_use_cost(rate_structure, projected_usage.projected_monthly_kwh)
 
-    elif rate_type == 'variable':
-        base_cost = _calculate_variable_cost(
-            rate_structure,
-            projected_annual_kwh,
-            projected_usage.confidence_score
-        )
+    elif rate_type == "variable":
+        base_cost = _calculate_variable_cost(rate_structure, projected_annual_kwh, projected_usage.confidence_score)
 
     else:
         logger.warning(f"Unknown rate type '{rate_type}' for plan {plan.id}, using fixed rate fallback")
         base_cost = _calculate_fixed_cost(rate_structure, projected_annual_kwh)
 
     # Add monthly fees (multiply by 12 for annual)
-    monthly_fees = Decimal('0.00')
+    monthly_fees = Decimal("0.00")
     if plan.monthly_fee:
         monthly_fees = plan.monthly_fee * 12
 
     # Add connection fee if applicable
-    connection_fee = Decimal('0.00')
+    connection_fee = Decimal("0.00")
     if include_connection_fee and plan.connection_fee:
         connection_fee = plan.connection_fee
 
@@ -108,7 +100,7 @@ def calculate_plan_cost(
     if projected_annual_kwh > 0:
         avg_rate_per_kwh = (base_cost / Decimal(str(projected_annual_kwh))) * 100  # Convert to cents
     else:
-        avg_rate_per_kwh = Decimal('0.00')
+        avg_rate_per_kwh = Decimal("0.00")
 
     return CostBreakdown(
         base_cost=base_cost,
@@ -116,34 +108,34 @@ def calculate_plan_cost(
         connection_fee=connection_fee,
         total_annual_cost=total_annual_cost,
         rate_type=rate_type,
-        avg_rate_per_kwh=avg_rate_per_kwh
+        avg_rate_per_kwh=avg_rate_per_kwh,
     )
 
 
 def _calculate_fixed_cost(rate_structure: dict[str, Any], annual_kwh: float) -> Decimal:
     """Calculate cost for fixed-rate plan."""
     # Support both 'rate' and 'rate_per_kwh' keys for backwards compatibility
-    rate_per_kwh = Decimal(str(rate_structure.get('rate', rate_structure.get('rate_per_kwh', 0))))
+    rate_per_kwh = Decimal(str(rate_structure.get("rate", rate_structure.get("rate_per_kwh", 0))))
     # Convert from cents to dollars
     return (rate_per_kwh / 100) * Decimal(str(annual_kwh))
 
 
 def _calculate_tiered_cost(rate_structure: dict[str, Any], annual_kwh: float) -> Decimal:
     """Calculate cost for tiered-rate plan."""
-    tiers = rate_structure.get('tiers', [])
+    tiers = rate_structure.get("tiers", [])
     if not tiers:
         # Fallback if tiers not defined
         return _calculate_fixed_cost(rate_structure, annual_kwh)
 
-    total_cost = Decimal('0.00')
+    total_cost = Decimal("0.00")
     remaining_kwh = annual_kwh
 
     for tier in tiers:
-        max_kwh = tier.get('max_kwh')
+        max_kwh = tier.get("max_kwh")
         # Handle None as infinity (unlimited tier)
         if max_kwh is None:
-            max_kwh = float('inf')
-        rate_per_kwh = Decimal(str(tier.get('rate_per_kwh', 0)))
+            max_kwh = float("inf")
+        rate_per_kwh = Decimal(str(tier.get("rate_per_kwh", 0)))
 
         # Calculate kWh in this tier
         kwh_in_tier = min(remaining_kwh, max_kwh)
@@ -160,43 +152,33 @@ def _calculate_tiered_cost(rate_structure: dict[str, Any], annual_kwh: float) ->
     return total_cost
 
 
-def _calculate_time_of_use_cost(
-    rate_structure: dict[str, Any],
-    monthly_kwh: list[float]
-) -> Decimal:
+def _calculate_time_of_use_cost(rate_structure: dict[str, Any], monthly_kwh: list[float]) -> Decimal:
     """Calculate cost for time-of-use plan."""
-    peak_rate = Decimal(str(rate_structure.get('peak_rate', 0)))
-    off_peak_rate = Decimal(str(rate_structure.get('off_peak_rate', 0)))
-    peak_pct = rate_structure.get('peak_pct', 0.5)  # Default: 50% during peak
+    peak_rate = Decimal(str(rate_structure.get("peak_rate", 0)))
+    off_peak_rate = Decimal(str(rate_structure.get("off_peak_rate", 0)))
+    peak_pct = rate_structure.get("peak_pct", 0.5)  # Default: 50% during peak
 
-    total_cost = Decimal('0.00')
+    total_cost = Decimal("0.00")
 
     for month_kwh in monthly_kwh:
         peak_kwh = month_kwh * peak_pct
         off_peak_kwh = month_kwh * (1 - peak_pct)
 
         # Convert rates from cents to dollars
-        month_cost = (
-            (peak_rate / 100) * Decimal(str(peak_kwh)) +
-            (off_peak_rate / 100) * Decimal(str(off_peak_kwh))
-        )
+        month_cost = (peak_rate / 100) * Decimal(str(peak_kwh)) + (off_peak_rate / 100) * Decimal(str(off_peak_kwh))
         total_cost += month_cost
 
     return total_cost
 
 
-def _calculate_variable_cost(
-    rate_structure: dict[str, Any],
-    annual_kwh: float,
-    confidence_score: float
-) -> Decimal:
+def _calculate_variable_cost(rate_structure: dict[str, Any], annual_kwh: float, confidence_score: float) -> Decimal:
     """
     Calculate cost for variable-rate plan.
 
     Uses historical average with uncertainty buffer.
     """
-    base_rate = Decimal(str(rate_structure.get('base_rate', 0)))
-    historical_avg_rate = Decimal(str(rate_structure.get('historical_avg_rate', base_rate)))
+    base_rate = Decimal(str(rate_structure.get("base_rate", 0)))
+    historical_avg_rate = Decimal(str(rate_structure.get("historical_avg_rate", base_rate)))
 
     # Use historical average if available, otherwise base rate
     rate_to_use = historical_avg_rate if historical_avg_rate > 0 else base_rate
@@ -215,10 +197,8 @@ def _calculate_variable_cost(
 # PLAN FILTERING (Story 2.2)
 # ============================================================================
 
-def filter_eligible_plans(
-    db: Session,
-    plan_filter: PlanFilter
-) -> list[PlanCatalog]:
+
+def filter_eligible_plans(db: Session, plan_filter: PlanFilter) -> list[PlanCatalog]:
     """
     Filter plans by region, availability, and optional criteria.
 
@@ -232,11 +212,15 @@ def filter_eligible_plans(
     Performance: <100ms for 1000 plans
     """
     # Base query: active plans in user's region
-    query = db.query(PlanCatalog).join(Supplier).filter(
-        and_(
-            PlanCatalog.is_active == True,
-            Supplier.is_active == True,
-            plan_filter.zip_code == any_(PlanCatalog.available_regions)
+    query = (
+        db.query(PlanCatalog)
+        .join(Supplier)
+        .filter(
+            and_(
+                PlanCatalog.is_active == True,
+                Supplier.is_active == True,
+                plan_filter.zip_code == any_(PlanCatalog.available_regions),
+            )
         )
     )
 
@@ -261,12 +245,13 @@ def filter_eligible_plans(
 # RANKING ALGORITHM (Story 2.2)
 # ============================================================================
 
+
 def rank_plans(
     plans: list[PlanCatalog],
     projected_usage: UsageProjection,
     preferences: UserPreferences,
     db: Session,
-    top_n: int = 3
+    top_n: int = 3,
 ) -> list[tuple[PlanCatalog, PlanScores, CostBreakdown]]:
     """
     Score and rank all eligible plans.
@@ -303,15 +288,12 @@ def rank_plans(
 
         # Convert to dict for scoring function
         plan_dict = {
-            'contract_length_months': plan.contract_length_months,
-            'early_termination_fee': plan.early_termination_fee,
-            'renewable_percentage': plan.renewable_percentage
+            "contract_length_months": plan.contract_length_months,
+            "early_termination_fee": plan.early_termination_fee,
+            "renewable_percentage": plan.renewable_percentage,
         }
 
-        supplier_dict = {
-            'average_rating': supplier.average_rating,
-            'review_count': supplier.review_count
-        }
+        supplier_dict = {"average_rating": supplier.average_rating, "review_count": supplier.review_count}
 
         # Get cost for this plan
         cost_breakdown = plan_cost_breakdowns[plan.id]
@@ -323,7 +305,7 @@ def rank_plans(
             projected_annual_cost=cost_breakdown.total_annual_cost,
             projected_usage=projected_usage,
             preferences=preferences,
-            all_plan_costs=plan_costs
+            all_plan_costs=plan_costs,
         )
 
         scored_plans.append((plan, scores, cost_breakdown))
@@ -332,11 +314,13 @@ def rank_plans(
     scored_plans.sort(key=lambda x: x[1].composite_score, reverse=True)
 
     # Apply tie-breaking: prefer renewable, then lower cost
-    scored_plans.sort(key=lambda x: (
-        -x[1].composite_score,  # Primary: highest composite score
-        -float(x[0].renewable_percentage),  # Tie-break 1: highest renewable
-        float(x[2].total_annual_cost)  # Tie-break 2: lowest cost
-    ))
+    scored_plans.sort(
+        key=lambda x: (
+            -x[1].composite_score,  # Primary: highest composite score
+            -float(x[0].renewable_percentage),  # Tie-break 1: highest renewable
+            float(x[2].total_annual_cost),  # Tie-break 2: lowest cost
+        )
+    )
 
     # Return top N
     return scored_plans[:top_n]
@@ -346,13 +330,14 @@ def rank_plans(
 # MAIN RECOMMENDATION FUNCTION (Story 2.2)
 # ============================================================================
 
+
 def get_recommendations(
     user_id: UUID,
     usage_profile: UsageProjection,
     preferences: UserPreferences,
     db: Session,
     zip_code: str,
-    top_n: int = 3
+    top_n: int = 3,
 ) -> RecommendationResult:
     """
     Generate top 3 plan recommendations for a user.
@@ -388,16 +373,12 @@ def get_recommendations(
             generated_at=datetime.now(),
             usage_profile_summary=_create_usage_summary(usage_profile),
             total_plans_analyzed=0,
-            total_plans_eligible=0
+            total_plans_eligible=0,
         )
 
     # Rank plans
     ranked = rank_plans(
-        plans=eligible_plans,
-        projected_usage=usage_profile,
-        preferences=preferences,
-        db=db,
-        top_n=top_n
+        plans=eligible_plans, projected_usage=usage_profile, preferences=preferences, db=db, top_n=top_n
     )
 
     # Convert to RankedPlan objects
@@ -418,7 +399,7 @@ def get_recommendations(
             cost_breakdown=cost_breakdown,
             rate_structure=plan.rate_structure,
             monthly_fee=plan.monthly_fee,
-            connection_fee=plan.connection_fee
+            connection_fee=plan.connection_fee,
         )
         top_plans.append(ranked_plan)
 
@@ -431,7 +412,7 @@ def get_recommendations(
         generated_at=datetime.now(),
         usage_profile_summary=_create_usage_summary(usage_profile),
         total_plans_analyzed=total_plans_analyzed,
-        total_plans_eligible=len(eligible_plans)
+        total_plans_eligible=len(eligible_plans),
     )
 
 
@@ -439,10 +420,9 @@ def get_recommendations(
 # CONTRACT TIMING OPTIMIZATION (Story 2.3)
 # ============================================================================
 
+
 def analyze_switching_timing(
-    current_plan: CurrentPlan,
-    recommended_plans: list[RankedPlan],
-    today: date = None
+    current_plan: CurrentPlan, recommended_plans: list[RankedPlan], today: date = None
 ) -> SwitchingAnalysis:
     """
     Analyze switching costs and optimal timing.
@@ -464,7 +444,7 @@ def analyze_switching_timing(
 
     # Calculate current plan annual cost (simplified - using rate * typical usage)
     # In production, would use actual usage history
-    current_annual_cost = (current_plan.current_rate / 100) * Decimal('12000')  # Assume 12k kWh/year
+    current_annual_cost = (current_plan.current_rate / 100) * Decimal("12000")  # Assume 12k kWh/year
     if current_plan.monthly_fee:
         current_annual_cost += current_plan.monthly_fee * 12
 
@@ -475,11 +455,11 @@ def analyze_switching_timing(
             current_contract_end_date=current_plan.contract_end_date,
             days_until_contract_end=days_until_end,
             early_termination_fee=etf,
-            monthly_savings=Decimal('0.00'),
+            monthly_savings=Decimal("0.00"),
             break_even_months=None,
             should_wait=True,
             optimal_switch_date=current_plan.contract_end_date,
-            switching_recommendation="No better plans available. Stay with current plan."
+            switching_recommendation="No better plans available. Stay with current plan.",
         )
 
     best_plan = recommended_plans[0]
@@ -497,7 +477,7 @@ def analyze_switching_timing(
             break_even_months=None,
             should_wait=True,
             optimal_switch_date=current_plan.contract_end_date,
-            switching_recommendation=f"Recommended plan costs more (${abs(monthly_savings):.2f}/month). Stay with current plan."
+            switching_recommendation=f"Recommended plan costs more (${abs(monthly_savings):.2f}/month). Stay with current plan.",
         )
 
     # Calculate break-even period
@@ -545,7 +525,7 @@ def analyze_switching_timing(
         break_even_months=break_even_months,
         should_wait=should_wait,
         optimal_switch_date=optimal_date,
-        switching_recommendation=recommendation
+        switching_recommendation=recommendation,
     )
 
 
@@ -556,7 +536,7 @@ def get_enhanced_recommendations(
     db: Session,
     zip_code: str,
     current_plan: CurrentPlan | None = None,
-    top_n: int = 3
+    top_n: int = 3,
 ) -> EnhancedRecommendationResult:
     """
     Generate recommendations with switching analysis (Story 2.3).
@@ -575,12 +555,7 @@ def get_enhanced_recommendations(
     """
     # Get base recommendations
     base_result = get_recommendations(
-        user_id=user_id,
-        usage_profile=usage_profile,
-        preferences=preferences,
-        db=db,
-        zip_code=zip_code,
-        top_n=top_n
+        user_id=user_id, usage_profile=usage_profile, preferences=preferences, db=db, zip_code=zip_code, top_n=top_n
     )
 
     # If no current plan info, return base result
@@ -594,16 +569,16 @@ def get_enhanced_recommendations(
             total_plans_eligible=base_result.total_plans_eligible,
             switching_analysis=None,
             stay_with_current=False,
-            stay_reason=None
+            stay_reason=None,
         )
 
     # Calculate current plan annual cost if provided
     current_annual_cost = None
     if current_plan and current_plan.current_rate:
         current_annual_cost = (
-            Decimal(str(current_plan.current_rate)) *
-            Decimal(str(usage_profile.projected_annual_kwh)) /
-            Decimal("100")  # Convert cents to dollars
+            Decimal(str(current_plan.current_rate))
+            * Decimal(str(usage_profile.projected_annual_kwh))
+            / Decimal("100")  # Convert cents to dollars
         )
 
     # Populate savings fields on each plan
@@ -623,10 +598,7 @@ def get_enhanced_recommendations(
             plan.break_even_months = None
 
     # Perform switching analysis
-    switching_analysis = analyze_switching_timing(
-        current_plan=current_plan,
-        recommended_plans=base_result.top_plans
-    )
+    switching_analysis = analyze_switching_timing(current_plan=current_plan, recommended_plans=base_result.top_plans)
 
     # Determine if should stay with current plan
     stay_with_current = switching_analysis.should_wait and switching_analysis.monthly_savings <= 0
@@ -644,7 +616,7 @@ def get_enhanced_recommendations(
         total_plans_eligible=base_result.total_plans_eligible,
         switching_analysis=switching_analysis,
         stay_with_current=stay_with_current,
-        stay_reason=stay_reason
+        stay_reason=stay_reason,
     )
 
 
@@ -652,10 +624,11 @@ def get_enhanced_recommendations(
 # UTILITY FUNCTIONS
 # ============================================================================
 
+
 def _create_usage_summary(usage_profile: UsageProjection) -> dict[str, Any]:
     """Create a summary of usage profile for storage."""
     return {
-        'projected_annual_kwh': usage_profile.projected_annual_kwh,
-        'confidence_score': usage_profile.confidence_score,
-        'projected_monthly_kwh': usage_profile.projected_monthly_kwh
+        "projected_annual_kwh": usage_profile.projected_annual_kwh,
+        "confidence_score": usage_profile.confidence_score,
+        "projected_monthly_kwh": usage_profile.projected_monthly_kwh,
     }

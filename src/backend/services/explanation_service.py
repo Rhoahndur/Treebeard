@@ -121,9 +121,7 @@ class ClaudeExplanationService:
 
         # Check cache first
         if not force_regenerate and self.redis_client:
-            cached = await self._get_cached_explanation(
-                plan, user_profile, preferences
-            )
+            cached = await self._get_cached_explanation(plan, user_profile, preferences)
             if cached:
                 self.metrics.cache_hits += 1
                 logger.info(f"Cache hit for plan {plan.plan_id}")
@@ -133,9 +131,7 @@ class ClaudeExplanationService:
 
         # Generate explanation
         try:
-            explanation_text = await self._generate_with_claude(
-                plan, user_profile, preferences, current_plan
-            )
+            explanation_text = await self._generate_with_claude(plan, user_profile, preferences, current_plan)
             generated_via = "claude_api"
             self.metrics.api_calls += 1
             logger.info(f"Generated explanation via Claude API for plan {plan.plan_id}")
@@ -152,9 +148,7 @@ class ClaudeExplanationService:
         readability_score = self._calculate_readability(explanation_text)
 
         # Identify differentiators and trade-offs
-        key_differentiators = self.template_generator.identify_key_differentiators(
-            plan
-        )
+        key_differentiators = self.template_generator.identify_key_differentiators(plan)
         trade_offs = self.template_generator.identify_trade_offs(plan, current_plan)
 
         # Get persona type
@@ -173,9 +167,7 @@ class ClaudeExplanationService:
 
         # Cache the result
         if self.redis_client:
-            await self._cache_explanation(
-                plan, user_profile, preferences, explanation
-            )
+            await self._cache_explanation(plan, user_profile, preferences, explanation)
 
         # Update metrics
         generation_time = (time.time() - start_time) * 1000
@@ -203,10 +195,7 @@ class ClaudeExplanationService:
         Returns:
             List of PlanExplanation objects
         """
-        tasks = [
-            self.generate_explanation(plan, user_profile, preferences, current_plan)
-            for plan in plans
-        ]
+        tasks = [self.generate_explanation(plan, user_profile, preferences, current_plan) for plan in plans]
         return await asyncio.gather(*tasks)
 
     async def _generate_with_claude(
@@ -253,13 +242,11 @@ class ClaudeExplanationService:
                 return explanation
 
             except Exception as e:
-                logger.warning(
-                    f"Claude API attempt {attempt + 1}/{self.max_retries} failed: {e}"
-                )
+                logger.warning(f"Claude API attempt {attempt + 1}/{self.max_retries} failed: {e}")
 
                 if attempt < self.max_retries - 1:
                     # Exponential backoff
-                    await asyncio.sleep(2 ** attempt)
+                    await asyncio.sleep(2**attempt)
                 else:
                     raise
 
@@ -456,9 +443,7 @@ Generate the explanation now. Do not include labels or headers, just the explana
         try:
             # Convert to JSON-serializable dict
             data = explanation.model_dump(mode="json")
-            await self.redis_client.setex(
-                cache_key, self.cache_ttl, json.dumps(data)
-            )
+            await self.redis_client.setex(cache_key, self.cache_ttl, json.dumps(data))
             logger.debug(f"Cached explanation with key: {cache_key}")
         except Exception as e:
             logger.warning(f"Cache storage failed: {e}")
@@ -491,18 +476,14 @@ Generate the explanation now. Do not include labels or headers, just the explana
         total = self.metrics.total_generated
         if total > 0:
             current_avg = self.metrics.avg_generation_time_ms
-            self.metrics.avg_generation_time_ms = (
-                current_avg * total + generation_time_ms
-            ) / (total + 1)
+            self.metrics.avg_generation_time_ms = (current_avg * total + generation_time_ms) / (total + 1)
         else:
             self.metrics.avg_generation_time_ms = generation_time_ms
 
         # Update average readability
         if total > 0:
             current_avg = self.metrics.avg_readability_score
-            self.metrics.avg_readability_score = (
-                current_avg * total + readability_score
-            ) / (total + 1)
+            self.metrics.avg_readability_score = (current_avg * total + readability_score) / (total + 1)
         else:
             self.metrics.avg_readability_score = readability_score
 
@@ -576,14 +557,10 @@ Generate the explanation now. Do not include labels or headers, just the explana
                         force_regenerate=True,
                     )
                     generated += 1
-                    logger.debug(
-                        f"Warmed cache for plan {plan.plan_id}, persona {persona}"
-                    )
+                    logger.debug(f"Warmed cache for plan {plan.plan_id}, persona {persona}")
 
                 except Exception as e:
-                    logger.warning(
-                        f"Failed to warm cache for plan {plan.plan_id}: {e}"
-                    )
+                    logger.warning(f"Failed to warm cache for plan {plan.plan_id}: {e}")
 
         logger.info(f"Warmed cache with {generated} explanations")
         return generated
@@ -591,21 +568,13 @@ Generate the explanation now. Do not include labels or headers, just the explana
     def _create_mock_preferences(self, persona: str) -> UserPreferences:
         """Create mock preferences for a persona."""
         if persona == PersonaType.BUDGET_CONSCIOUS:
-            return UserPreferences(
-                cost_priority=60, flexibility_priority=20, renewable_priority=10, rating_priority=10
-            )
+            return UserPreferences(cost_priority=60, flexibility_priority=20, renewable_priority=10, rating_priority=10)
         elif persona == PersonaType.ECO_CONSCIOUS:
-            return UserPreferences(
-                cost_priority=10, flexibility_priority=10, renewable_priority=70, rating_priority=10
-            )
+            return UserPreferences(cost_priority=10, flexibility_priority=10, renewable_priority=70, rating_priority=10)
         elif persona == PersonaType.FLEXIBILITY_FOCUSED:
-            return UserPreferences(
-                cost_priority=10, flexibility_priority=70, renewable_priority=10, rating_priority=10
-            )
+            return UserPreferences(cost_priority=10, flexibility_priority=70, renewable_priority=10, rating_priority=10)
         else:  # BALANCED
-            return UserPreferences(
-                cost_priority=25, flexibility_priority=25, renewable_priority=25, rating_priority=25
-            )
+            return UserPreferences(cost_priority=25, flexibility_priority=25, renewable_priority=25, rating_priority=25)
 
 
 def create_explanation_service(

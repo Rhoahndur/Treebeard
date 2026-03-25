@@ -17,12 +17,7 @@ class Settings(BaseSettings):
     Environment variables can be set in .env file or system environment.
     """
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-        extra="allow"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="allow")
 
     # Application
     app_name: str = Field(default="TreeBeard Energy Recommendation API", description="Application name")
@@ -32,41 +27,32 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = Field(
-        default="postgresql://treebeard:treebeard@localhost:5432/treebeard",
-        description="PostgreSQL database URL"
+        default="postgresql://treebeard:treebeard@localhost:5432/treebeard", description="PostgreSQL database URL"
     )
     database_pool_size: int = Field(default=5, description="Database connection pool size")
     database_max_overflow: int = Field(default=10, description="Maximum number of overflow connections")
     database_echo: bool = Field(default=False, description="Echo SQL queries (for debugging)")
 
     # Redis Cache
-    redis_url: str = Field(
-        default="redis://localhost:6379/0",
-        description="Redis connection URL"
-    )
+    redis_url: str = Field(default="redis://localhost:6379/0", description="Redis connection URL")
     cache_ttl_seconds: int = Field(default=86400, description="Default cache TTL (24 hours)")
 
     # API
     api_v1_prefix: str = Field(default="/api/v1", description="API version 1 prefix")
     cors_origins: list[str] = Field(
-        default=["http://localhost:3000", "http://localhost:8000"],
-        description="Allowed CORS origins"
+        default=["http://localhost:3000", "http://localhost:8000"], description="Allowed CORS origins"
     )
     max_upload_size_mb: int = Field(default=10, description="Maximum upload size in MB")
 
     # Security
     secret_key: str = Field(
-        default="development-secret-key-change-in-production",
-        description="Secret key for JWT and encryption"
+        default="development-secret-key-change-in-production", description="Secret key for JWT and encryption"
     )
     jwt_algorithm: str = Field(default="HS256", description="JWT algorithm")
     jwt_expiration_minutes: int = Field(default=60 * 24, description="JWT expiration in minutes (24 hours)")
 
     # Recommendation Engine
-    recommendation_cache_ttl_seconds: int = Field(
-        default=86400,
-        description="Recommendation cache TTL (24 hours)"
-    )
+    recommendation_cache_ttl_seconds: int = Field(default=86400, description="Recommendation cache TTL (24 hours)")
     max_recommendations: int = Field(default=3, description="Maximum number of recommendations to return")
 
     # External APIs
@@ -79,10 +65,7 @@ class Settings(BaseSettings):
 
     # Logging
     log_level: str = Field(default="INFO", description="Logging level")
-    log_format: str = Field(
-        default="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        description="Log format"
-    )
+    log_format: str = Field(default="%(asctime)s - %(name)s - %(levelname)s - %(message)s", description="Log format")
 
     # Monitoring & Observability
     monitoring_enabled: bool = Field(default=True, description="Enable monitoring and metrics")

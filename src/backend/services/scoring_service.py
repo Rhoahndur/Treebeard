@@ -48,10 +48,9 @@ RATING_MAX = 5.0  # Best rating = 100
 # COST SCORING (Story 2.1)
 # ============================================================================
 
+
 def calculate_cost_score(
-    projected_annual_cost: Decimal,
-    projected_usage: UsageProjection,
-    all_plan_costs: list[Decimal] | None = None
+    projected_annual_cost: Decimal, projected_usage: UsageProjection, all_plan_costs: list[Decimal] | None = None
 ) -> float:
     """
     Calculate cost score for a plan (0-100, higher is better).
@@ -115,10 +114,8 @@ def calculate_cost_score(
 # FLEXIBILITY SCORING (Story 2.1)
 # ============================================================================
 
-def calculate_flexibility_score(
-    contract_length_months: int,
-    early_termination_fee: Decimal
-) -> float:
+
+def calculate_flexibility_score(contract_length_months: int, early_termination_fee: Decimal) -> float:
     """
     Calculate flexibility score for a plan (0-100, higher is better).
 
@@ -164,10 +161,7 @@ def calculate_flexibility_score(
         etf_score = 100.0 * (1 - (etf - ETF_MIN) / (ETF_MAX - ETF_MIN))
 
     # Weighted combination
-    flexibility_score = (
-        CONTRACT_LENGTH_WEIGHT * contract_score +
-        ETF_WEIGHT * etf_score
-    )
+    flexibility_score = CONTRACT_LENGTH_WEIGHT * contract_score + ETF_WEIGHT * etf_score
 
     return max(0.0, min(100.0, flexibility_score))
 
@@ -175,6 +169,7 @@ def calculate_flexibility_score(
 # ============================================================================
 # RENEWABLE SCORING (Story 2.1)
 # ============================================================================
+
 
 def calculate_renewable_score(renewable_percentage: Decimal) -> float:
     """
@@ -208,10 +203,8 @@ def calculate_renewable_score(renewable_percentage: Decimal) -> float:
 # RATING SCORING (Story 2.1)
 # ============================================================================
 
-def calculate_rating_score(
-    supplier_rating: Decimal | None,
-    review_count: int = 0
-) -> float:
+
+def calculate_rating_score(supplier_rating: Decimal | None, review_count: int = 0) -> float:
     """
     Calculate supplier rating score (0-100, higher is better).
 
@@ -266,12 +259,13 @@ def calculate_rating_score(
 # COMPOSITE SCORING (Story 2.1)
 # ============================================================================
 
+
 def calculate_composite_score(
     cost_score: float,
     flexibility_score: float,
     renewable_score: float,
     rating_score: float,
-    preferences: UserPreferences
+    preferences: UserPreferences,
 ) -> float:
     """
     Calculate composite score using user preference weights.
@@ -303,30 +297,30 @@ def calculate_composite_score(
     """
     # Validate input scores
     for score_name, score_value in [
-        ('cost_score', cost_score),
-        ('flexibility_score', flexibility_score),
-        ('renewable_score', renewable_score),
-        ('rating_score', rating_score)
+        ("cost_score", cost_score),
+        ("flexibility_score", flexibility_score),
+        ("renewable_score", renewable_score),
+        ("rating_score", rating_score),
     ]:
         if not 0 <= score_value <= 100:
             raise ValueError(f"{score_name} must be between 0 and 100, got {score_value}")
 
     # Validate preferences sum to 100
     total_priority = (
-        preferences.cost_priority +
-        preferences.flexibility_priority +
-        preferences.renewable_priority +
-        preferences.rating_priority
+        preferences.cost_priority
+        + preferences.flexibility_priority
+        + preferences.renewable_priority
+        + preferences.rating_priority
     )
     if total_priority != 100:
         raise ValueError(f"Preference weights must sum to 100, got {total_priority}")
 
     # Calculate weighted composite score
     composite = (
-        cost_score * preferences.cost_priority +
-        flexibility_score * preferences.flexibility_priority +
-        renewable_score * preferences.renewable_priority +
-        rating_score * preferences.rating_priority
+        cost_score * preferences.cost_priority
+        + flexibility_score * preferences.flexibility_priority
+        + renewable_score * preferences.renewable_priority
+        + rating_score * preferences.rating_priority
     ) / 100.0
 
     return max(0.0, min(100.0, composite))
@@ -336,13 +330,14 @@ def calculate_composite_score(
 # COMPLETE SCORING FUNCTION (Story 2.1)
 # ============================================================================
 
+
 def score_plan(
     plan: dict[str, Any],
     supplier: dict[str, Any],
     projected_annual_cost: Decimal,
     projected_usage: UsageProjection,
     preferences: UserPreferences,
-    all_plan_costs: list[Decimal] | None = None
+    all_plan_costs: list[Decimal] | None = None,
 ) -> PlanScores:
     """
     Calculate all scores for a plan.
@@ -364,23 +359,17 @@ def score_plan(
     """
     # Calculate individual scores
     cost_score = calculate_cost_score(
-        projected_annual_cost=projected_annual_cost,
-        projected_usage=projected_usage,
-        all_plan_costs=all_plan_costs
+        projected_annual_cost=projected_annual_cost, projected_usage=projected_usage, all_plan_costs=all_plan_costs
     )
 
     flexibility_score = calculate_flexibility_score(
-        contract_length_months=plan['contract_length_months'],
-        early_termination_fee=plan['early_termination_fee']
+        contract_length_months=plan["contract_length_months"], early_termination_fee=plan["early_termination_fee"]
     )
 
-    renewable_score = calculate_renewable_score(
-        renewable_percentage=plan['renewable_percentage']
-    )
+    renewable_score = calculate_renewable_score(renewable_percentage=plan["renewable_percentage"])
 
     rating_score = calculate_rating_score(
-        supplier_rating=supplier.get('average_rating'),
-        review_count=supplier.get('review_count', 0)
+        supplier_rating=supplier.get("average_rating"), review_count=supplier.get("review_count", 0)
     )
 
     # Calculate composite score
@@ -389,7 +378,7 @@ def score_plan(
         flexibility_score=flexibility_score,
         renewable_score=renewable_score,
         rating_score=rating_score,
-        preferences=preferences
+        preferences=preferences,
     )
 
     return PlanScores(
@@ -397,13 +386,14 @@ def score_plan(
         flexibility_score=flexibility_score,
         renewable_score=renewable_score,
         rating_score=rating_score,
-        composite_score=composite
+        composite_score=composite,
     )
 
 
 # ============================================================================
 # UTILITY FUNCTIONS
 # ============================================================================
+
 
 def normalize_scores(scores: list[float], target_min: float = 0.0, target_max: float = 100.0) -> list[float]:
     """

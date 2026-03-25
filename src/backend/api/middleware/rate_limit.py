@@ -98,12 +98,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
 
         # Add rate limit headers
-        response.headers["X-RateLimit-Limit-User"] = str(
-            self.requests_per_minute_per_user
-        )
-        response.headers["X-RateLimit-Limit-IP"] = str(
-            self.requests_per_hour_per_ip
-        )
+        response.headers["X-RateLimit-Limit-User"] = str(self.requests_per_minute_per_user)
+        response.headers["X-RateLimit-Limit-IP"] = str(self.requests_per_hour_per_ip)
 
         return response
 
@@ -137,9 +133,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         count = int(count) if count else 0
 
         if count >= limit:
-            logger.warning(
-                f"Rate limit exceeded for user {user_id}: {count}/{limit}"
-            )
+            logger.warning(f"Rate limit exceeded for user {user_id}: {count}/{limit}")
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail=f"Rate limit exceeded. Max {limit} requests per minute.",
@@ -177,9 +171,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         count = int(count) if count else 0
 
         if count >= limit:
-            logger.warning(
-                f"Rate limit exceeded for IP {ip_address}: {count}/{limit}"
-            )
+            logger.warning(f"Rate limit exceeded for IP {ip_address}: {count}/{limit}")
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail=f"Rate limit exceeded. Max {limit} requests per hour.",

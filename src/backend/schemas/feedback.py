@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field, field_validator
 
 # Feedback schemas
 
+
 class FeedbackBase(BaseModel):
     """Base schema for feedback."""
 
@@ -31,14 +32,8 @@ class FeedbackCreate(FeedbackBase):
     """Schema for creating feedback."""
 
     recommendation_id: UUID = Field(..., description="Recommendation session ID")
-    recommended_plan_id: UUID | None = Field(
-        None,
-        description="Specific recommended plan ID (if applicable)"
-    )
-    plan_id: UUID | None = Field(
-        None,
-        description="Plan from catalog (for tracking)"
-    )
+    recommended_plan_id: UUID | None = Field(None, description="Specific recommended plan ID (if applicable)")
+    plan_id: UUID | None = Field(None, description="Plan from catalog (for tracking)")
 
 
 class FeedbackResponse(FeedbackBase):

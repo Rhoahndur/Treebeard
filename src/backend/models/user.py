@@ -25,43 +25,25 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "users"
 
     email: Mapped[str] = mapped_column(
-        String(255),
-        unique=True,
-        nullable=False,
-        index=True,
-        comment="User's email address (unique)"
+        String(255), unique=True, nullable=False, index=True, comment="User's email address (unique)"
     )
 
-    name: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        comment="User's full name"
-    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False, comment="User's full name")
 
     hashed_password: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        comment="Hashed password for authentication"
+        String(255), nullable=False, comment="Hashed password for authentication"
     )
 
     zip_code: Mapped[str] = mapped_column(
-        String(10),
-        nullable=False,
-        index=True,
-        comment="ZIP code for regional plan availability"
+        String(10), nullable=False, index=True, comment="ZIP code for regional plan availability"
     )
 
     property_type: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-        comment="Type of property: residential, commercial, etc."
+        String(50), nullable=False, comment="Type of property: residential, commercial, etc."
     )
 
     consent_given: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=True,
-        comment="GDPR/CCPA consent for data usage"
+        Boolean, nullable=False, default=True, comment="GDPR/CCPA consent for data usage"
     )
 
     is_active: Mapped[bool] = mapped_column(
@@ -69,56 +51,38 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         nullable=False,
         default=True,
         index=True,
-        comment="Whether the user account is active (soft delete support)"
+        comment="Whether the user account is active (soft delete support)",
     )
 
     is_admin: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=False,
-        index=True,
-        comment="Whether the user has admin privileges"
+        Boolean, nullable=False, default=False, index=True, comment="Whether the user has admin privileges"
     )
 
     # Relationships
     usage_history: Mapped[list["UsageHistory"]] = relationship(
-        "UsageHistory",
-        back_populates="user",
-        cascade="all, delete-orphan"
+        "UsageHistory", back_populates="user", cascade="all, delete-orphan"
     )
 
     preferences: Mapped[Optional["UserPreference"]] = relationship(
-        "UserPreference",
-        back_populates="user",
-        uselist=False,
-        cascade="all, delete-orphan"
+        "UserPreference", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
     current_plan: Mapped[Optional["CurrentPlan"]] = relationship(
-        "CurrentPlan",
-        back_populates="user",
-        uselist=False,
-        cascade="all, delete-orphan"
+        "CurrentPlan", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
     recommendations: Mapped[list["Recommendation"]] = relationship(
-        "Recommendation",
-        back_populates="user",
-        cascade="all, delete-orphan"
+        "Recommendation", back_populates="user", cascade="all, delete-orphan"
     )
 
-    feedback: Mapped[list["Feedback"]] = relationship(
-        "Feedback",
-        back_populates="user",
-        cascade="all, delete-orphan"
-    )
+    feedback: Mapped[list["Feedback"]] = relationship("Feedback", back_populates="user", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("idx_users_zip_code", "zip_code"),
         Index("idx_users_email", "email"),
         Index("idx_users_is_active", "is_active"),
         Index("idx_users_is_admin", "is_admin"),
-        {"comment": "User profiles with basic information and consent tracking"}
+        {"comment": "User profiles with basic information and consent tracking"},
     )
 
     def __repr__(self) -> str:
@@ -144,31 +108,23 @@ class UserPreference(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         unique=True,
         nullable=False,
         index=True,
-        comment="Reference to the user"
+        comment="Reference to the user",
     )
 
     cost_priority: Mapped[int] = mapped_column(
-        nullable=False,
-        default=40,
-        comment="Weight for cost consideration (0-100)"
+        nullable=False, default=40, comment="Weight for cost consideration (0-100)"
     )
 
     flexibility_priority: Mapped[int] = mapped_column(
-        nullable=False,
-        default=30,
-        comment="Weight for contract flexibility (0-100)"
+        nullable=False, default=30, comment="Weight for contract flexibility (0-100)"
     )
 
     renewable_priority: Mapped[int] = mapped_column(
-        nullable=False,
-        default=20,
-        comment="Weight for renewable energy percentage (0-100)"
+        nullable=False, default=20, comment="Weight for renewable energy percentage (0-100)"
     )
 
     rating_priority: Mapped[int] = mapped_column(
-        nullable=False,
-        default=10,
-        comment="Weight for supplier ratings (0-100)"
+        nullable=False, default=10, comment="Weight for supplier ratings (0-100)"
     )
 
     # Relationships
@@ -176,7 +132,7 @@ class UserPreference(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
     __table_args__ = (
         Index("idx_user_preferences_user_id", "user_id"),
-        {"comment": "User preferences for plan recommendation algorithm weighting"}
+        {"comment": "User preferences for plan recommendation algorithm weighting"},
     )
 
     def __repr__(self) -> str:
@@ -204,51 +160,33 @@ class CurrentPlan(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         unique=True,
         nullable=False,
         index=True,
-        comment="Reference to the user"
+        comment="Reference to the user",
     )
 
-    supplier_name: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        comment="Name of current energy supplier"
-    )
+    supplier_name: Mapped[str] = mapped_column(String(255), nullable=False, comment="Name of current energy supplier")
 
     plan_name: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True,
-        comment="Name of current plan (if available)"
+        String(255), nullable=True, comment="Name of current plan (if available)"
     )
 
     current_rate: Mapped[Decimal] = mapped_column(
-        Numeric(10, 4),
-        nullable=False,
-        comment="Current rate in cents per kWh"
+        Numeric(10, 4), nullable=False, comment="Current rate in cents per kWh"
     )
 
     contract_start_date: Mapped[date | None] = mapped_column(
-        Date,
-        nullable=True,
-        comment="Date when current contract started"
+        Date, nullable=True, comment="Date when current contract started"
     )
 
     contract_end_date: Mapped[date] = mapped_column(
-        Date,
-        nullable=False,
-        index=True,
-        comment="Date when current contract ends"
+        Date, nullable=False, index=True, comment="Date when current contract ends"
     )
 
     early_termination_fee: Mapped[Decimal] = mapped_column(
-        Numeric(10, 2),
-        nullable=False,
-        default=Decimal("0.00"),
-        comment="Early termination fee in dollars"
+        Numeric(10, 2), nullable=False, default=Decimal("0.00"), comment="Early termination fee in dollars"
     )
 
     monthly_fee: Mapped[Decimal | None] = mapped_column(
-        Numeric(10, 2),
-        nullable=True,
-        comment="Monthly base fee in dollars (if applicable)"
+        Numeric(10, 2), nullable=True, comment="Monthly base fee in dollars (if applicable)"
     )
 
     # Relationships
@@ -257,11 +195,8 @@ class CurrentPlan(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __table_args__ = (
         Index("idx_current_plans_user_id", "user_id"),
         Index("idx_current_plans_contract_end_date", "contract_end_date"),
-        {"comment": "User's current energy plan details for comparison"}
+        {"comment": "User's current energy plan details for comparison"},
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<CurrentPlan(user_id={self.user_id}, "
-            f"supplier={self.supplier_name}, rate={self.current_rate})>"
-        )
+        return f"<CurrentPlan(user_id={self.user_id}, " f"supplier={self.supplier_name}, rate={self.current_rate})>"

@@ -2,6 +2,7 @@
 Script to add logo URLs to suppliers in the database.
 Run from backend directory: python add_supplier_logos.py
 """
+
 from database.session import SessionLocal
 
 from models.plan import Supplier
@@ -19,6 +20,7 @@ LOGO_URLS = {
     "First Choice Power": "https://logo.clearbit.com/firstchoicepower.com",
     "Frontier Utilities": "https://logo.clearbit.com/frontierutilities.com",
 }
+
 
 def main():
     db = SessionLocal()
@@ -43,6 +45,7 @@ def main():
         db.rollback()
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     main()

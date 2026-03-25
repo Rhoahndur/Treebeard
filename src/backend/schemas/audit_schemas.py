@@ -53,7 +53,7 @@ class AuditLogFilter(BaseModel):
     limit: int = Field(100, ge=1, le=500, description="Maximum number of results (default 100, max 500)")
     offset: int = Field(0, ge=0, description="Number of results to skip (default 0)")
 
-    @field_validator('limit')
+    @field_validator("limit")
     @classmethod
     def validate_limit(cls, v: int) -> int:
         """Ensure limit is within acceptable range."""

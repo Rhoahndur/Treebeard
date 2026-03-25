@@ -79,14 +79,10 @@ class RiskWarning(BaseModel):
         description="Suggested mitigation or alternative action",
     )
 
-    affected_plan_ids: list[UUID] = Field(
-        ..., description="Plan IDs affected by this risk"
-    )
+    affected_plan_ids: list[UUID] = Field(..., description="Plan IDs affected by this risk")
 
     # Risk-specific data (optional structured data)
-    risk_data: dict | None = Field(
-        None, description="Additional structured data about the risk"
-    )
+    risk_data: dict | None = Field(None, description="Additional structured data about the risk")
 
     detected_at: datetime = Field(
         default_factory=datetime.utcnow,
@@ -116,13 +112,9 @@ class RiskSummary(BaseModel):
     warning_count: int = Field(default=0, ge=0, description="Number of warnings")
     info_count: int = Field(default=0, ge=0, description="Number of info items")
 
-    overall_risk_level: str = Field(
-        default="low", description="Overall risk assessment: low, medium, high"
-    )
+    overall_risk_level: str = Field(default="low", description="Overall risk assessment: low, medium, high")
 
-    risks_by_plan: dict[str, int] = Field(
-        default_factory=dict, description="Risk counts per plan_id"
-    )
+    risks_by_plan: dict[str, int] = Field(default_factory=dict, description="Risk counts per plan_id")
 
     model_config = {"from_attributes": True}
 
@@ -158,28 +150,18 @@ class StayRecommendation(BaseModel):
     Story 6.2: "Stay with current plan" logic output.
     """
 
-    should_stay: bool = Field(
-        ..., description="Whether staying with current plan is recommended"
-    )
+    should_stay: bool = Field(..., description="Whether staying with current plan is recommended")
 
     triggers: list[StayRecommendationTrigger] = Field(
         default_factory=list, description="Reasons for stay recommendation"
     )
 
-    reasoning: str = Field(
-        ..., max_length=500, description="Plain-language explanation"
-    )
+    reasoning: str = Field(..., max_length=500, description="Plain-language explanation")
 
     # Supporting data
-    net_annual_savings: Decimal | None = Field(
-        None, description="Net savings after all costs (can be negative)"
-    )
-    break_even_months: int | None = Field(
-        None, ge=0, description="Months to break even (if applicable)"
-    )
-    critical_risk_count: int = Field(
-        default=0, ge=0, description="Number of critical risks detected"
-    )
+    net_annual_savings: Decimal | None = Field(None, description="Net savings after all costs (can be negative)")
+    break_even_months: int | None = Field(None, ge=0, description="Months to break even (if applicable)")
+    critical_risk_count: int = Field(default=0, ge=0, description="Number of critical risks detected")
 
     # Current plan quality metrics
     current_plan_percentile: float | None = Field(
@@ -188,9 +170,7 @@ class StayRecommendation(BaseModel):
         le=100,
         description="Current plan ranking percentile (e.g., 90 = top 10%)",
     )
-    days_until_contract_end: int | None = Field(
-        None, ge=0, description="Days until current contract ends"
-    )
+    days_until_contract_end: int | None = Field(None, ge=0, description="Days until current contract ends")
 
     confidence: float = Field(
         default=0.8,
@@ -218,44 +198,26 @@ class EnhancedRecommendationResult(BaseModel):
     user_id: UUID = Field(..., description="User ID")
 
     # Top plans (from Story 2.2)
-    top_plans: list = Field(
-        ..., min_length=0, max_length=3, description="Top recommended plans"
-    )
+    top_plans: list = Field(..., min_length=0, max_length=3, description="Top recommended plans")
 
     # Risk analysis (Story 6.1)
-    risk_warnings: list[RiskWarning] = Field(
-        default_factory=list, description="All detected risk warnings"
-    )
-    risk_summary: RiskSummary = Field(
-        default_factory=RiskSummary, description="Aggregate risk summary"
-    )
-    overall_risk_level: str = Field(
-        default="low", description="Overall risk level: low, medium, high"
-    )
+    risk_warnings: list[RiskWarning] = Field(default_factory=list, description="All detected risk warnings")
+    risk_summary: RiskSummary = Field(default_factory=RiskSummary, description="Aggregate risk summary")
+    overall_risk_level: str = Field(default="low", description="Overall risk level: low, medium, high")
 
     # Stay recommendation (Story 6.2)
-    should_stay: bool = Field(
-        default=False, description="Whether to stay with current plan"
-    )
+    should_stay: bool = Field(default=False, description="Whether to stay with current plan")
     stay_recommendation: StayRecommendation | None = Field(
         None, description="Stay recommendation details (if applicable)"
     )
 
     # Metadata
-    generated_at: datetime = Field(
-        default_factory=datetime.utcnow, description="When recommendation was generated"
-    )
-    total_plans_analyzed: int = Field(
-        default=0, ge=0, description="Total plans considered"
-    )
+    generated_at: datetime = Field(default_factory=datetime.utcnow, description="When recommendation was generated")
+    total_plans_analyzed: int = Field(default=0, ge=0, description="Total plans considered")
 
     # Warnings and assumptions
-    warnings: list[str] = Field(
-        default_factory=list, description="General warnings about the analysis"
-    )
-    assumptions: list[str] = Field(
-        default_factory=list, description="Key assumptions made"
-    )
+    warnings: list[str] = Field(default_factory=list, description="General warnings about the analysis")
+    assumptions: list[str] = Field(default_factory=list, description="Key assumptions made")
 
     model_config = {"from_attributes": True}
 
@@ -273,17 +235,11 @@ class RiskDetectionConfig(BaseModel):
     """
 
     # ETF thresholds
-    high_etf_threshold: Decimal = Field(
-        default=Decimal("150.00"), description="ETF above this triggers warning"
-    )
-    critical_etf_threshold: Decimal = Field(
-        default=Decimal("300.00"), description="ETF above this is critical"
-    )
+    high_etf_threshold: Decimal = Field(default=Decimal("150.00"), description="ETF above this triggers warning")
+    critical_etf_threshold: Decimal = Field(default=Decimal("300.00"), description="ETF above this is critical")
 
     # Savings thresholds
-    low_savings_percentage: Decimal = Field(
-        default=Decimal("5.0"), description="Savings below this % triggers warning"
-    )
+    low_savings_percentage: Decimal = Field(default=Decimal("5.0"), description="Savings below this % triggers warning")
     negative_savings_threshold: Decimal = Field(
         default=Decimal("0.0"), description="Negative savings triggers critical"
     )
@@ -293,42 +249,26 @@ class RiskDetectionConfig(BaseModel):
     )
 
     # Data quality thresholds
-    min_confidence_score: float = Field(
-        default=0.7, description="Minimum confidence score for data quality"
-    )
-    min_data_completeness: float = Field(
-        default=0.8, description="Minimum data completeness percentage"
-    )
+    min_confidence_score: float = Field(default=0.7, description="Minimum confidence score for data quality")
+    min_data_completeness: float = Field(default=0.8, description="Minimum data completeness percentage")
 
     # Contract thresholds
-    max_acceptable_break_even: int = Field(
-        default=18, description="Maximum acceptable break-even period (months)"
-    )
-    contract_ending_soon_days: int = Field(
-        default=30, description="Days to contract end considered 'soon'"
-    )
+    max_acceptable_break_even: int = Field(default=18, description="Maximum acceptable break-even period (months)")
+    contract_ending_soon_days: int = Field(default=30, description="Days to contract end considered 'soon'")
 
     # Supplier thresholds
-    min_supplier_rating: Decimal = Field(
-        default=Decimal("3.5"), description="Minimum acceptable supplier rating"
-    )
-    min_review_count: int = Field(
-        default=10, description="Minimum reviews for reliable rating"
-    )
+    min_supplier_rating: Decimal = Field(default=Decimal("3.5"), description="Minimum acceptable supplier rating")
+    min_review_count: int = Field(default=10, description="Minimum reviews for reliable rating")
 
     # Variable rate volatility
-    max_variable_rate_volatility: float = Field(
-        default=0.25, description="Maximum acceptable rate volatility (25%)"
-    )
+    max_variable_rate_volatility: float = Field(default=0.25, description="Maximum acceptable rate volatility (25%)")
 
     # Stay recommendation thresholds
     stay_min_net_savings: Decimal = Field(
         default=Decimal("100.00"),
         description="Min annual savings after ETF to recommend switch",
     )
-    stay_max_break_even: int = Field(
-        default=24, description="Max break-even months to recommend switch"
-    )
+    stay_max_break_even: int = Field(default=24, description="Max break-even months to recommend switch")
     stay_current_plan_percentile: float = Field(
         default=90.0, description="Percentile above which current plan is 'optimal'"
     )
@@ -351,17 +291,11 @@ class PlanRiskAnalysis(BaseModel):
     plan_id: UUID = Field(..., description="Plan ID")
     plan_name: str = Field(..., description="Plan name")
 
-    risks: list[RiskWarning] = Field(
-        default_factory=list, description="Risks for this plan"
-    )
+    risks: list[RiskWarning] = Field(default_factory=list, description="Risks for this plan")
     risk_count: int = Field(default=0, ge=0, description="Total risk count")
-    highest_severity: RiskSeverity | None = Field(
-        None, description="Highest severity risk for this plan"
-    )
+    highest_severity: RiskSeverity | None = Field(None, description="Highest severity risk for this plan")
 
-    is_recommended: bool = Field(
-        default=False, description="Whether this plan is in recommendations"
-    )
+    is_recommended: bool = Field(default=False, description="Whether this plan is in recommendations")
 
     model_config = {"from_attributes": True}
 
@@ -380,8 +314,6 @@ class RiskMetrics(BaseModel):
     plans_analyzed: int = Field(..., description="Number of plans analyzed")
     plans_flagged: int = Field(..., description="Plans with at least one risk")
 
-    timestamp: datetime = Field(
-        default_factory=datetime.utcnow, description="When metrics were captured"
-    )
+    timestamp: datetime = Field(default_factory=datetime.utcnow, description="When metrics were captured")
 
     model_config = {"from_attributes": True}

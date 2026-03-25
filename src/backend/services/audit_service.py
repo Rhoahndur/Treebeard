@@ -254,10 +254,7 @@ async def get_audit_stats(db: AsyncSession) -> AuditLogStats:
 
     # Recent activity (last 10 logs)
     recent_query = (
-        select(AuditLog)
-        .options(selectinload(AuditLog.admin_user))
-        .order_by(AuditLog.timestamp.desc())
-        .limit(10)
+        select(AuditLog).options(selectinload(AuditLog.admin_user)).order_by(AuditLog.timestamp.desc()).limit(10)
     )
     recent_result = await db.execute(recent_query)
     recent_logs = recent_result.scalars().all()

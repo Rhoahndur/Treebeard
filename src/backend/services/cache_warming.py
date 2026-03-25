@@ -82,10 +82,7 @@ class CacheWarmingService:
             self.warming_stats["last_full_warm"] = datetime.utcnow()
             self.warming_stats["total_items_warmed"] += total_warmed
 
-            logger.info(
-                f"Cache warming completed in {duration:.2f}s. "
-                f"Warmed {total_warmed} items total."
-            )
+            logger.info(f"Cache warming completed in {duration:.2f}s. " f"Warmed {total_warmed} items total.")
 
         except Exception as e:
             logger.error(f"Error during cache warming: {e}")
@@ -287,15 +284,15 @@ class CacheWarmingService:
             Dictionary with warming statistics
         """
         return {
-            "last_full_warm": self.warming_stats["last_full_warm"].isoformat()
-            if self.warming_stats["last_full_warm"]
-            else None,
-            "last_plan_warm": self.warming_stats["last_plan_warm"].isoformat()
-            if self.warming_stats["last_plan_warm"]
-            else None,
-            "last_profile_warm": self.warming_stats["last_profile_warm"].isoformat()
-            if self.warming_stats["last_profile_warm"]
-            else None,
+            "last_full_warm": (
+                self.warming_stats["last_full_warm"].isoformat() if self.warming_stats["last_full_warm"] else None
+            ),
+            "last_plan_warm": (
+                self.warming_stats["last_plan_warm"].isoformat() if self.warming_stats["last_plan_warm"] else None
+            ),
+            "last_profile_warm": (
+                self.warming_stats["last_profile_warm"].isoformat() if self.warming_stats["last_profile_warm"] else None
+            ),
             "total_items_warmed": self.warming_stats["total_items_warmed"],
             "errors": self.warming_stats["errors"],
         }
@@ -341,15 +338,15 @@ class CacheWarmingService:
         # and serialize to JSON
         import json
 
-        return json.dumps({
-            "id": plan_id,
-            "name": f"Sample Plan {plan_id}",
-            "cached_at": datetime.utcnow().isoformat(),
-        })
+        return json.dumps(
+            {
+                "id": plan_id,
+                "name": f"Sample Plan {plan_id}",
+                "cached_at": datetime.utcnow().isoformat(),
+            }
+        )
 
-    def _get_active_user_ids(
-        self, db: Session, days: int, limit: int
-    ) -> list[str]:
+    def _get_active_user_ids(self, db: Session, days: int, limit: int) -> list[str]:
         """
         Get IDs of recently active users.
 
@@ -385,15 +382,15 @@ class CacheWarmingService:
         # Placeholder
         import json
 
-        return json.dumps({
-            "user_id": user_id,
-            "profile": "active",
-            "cached_at": datetime.utcnow().isoformat(),
-        })
+        return json.dumps(
+            {
+                "user_id": user_id,
+                "profile": "active",
+                "cached_at": datetime.utcnow().isoformat(),
+            }
+        )
 
-    def _get_recent_recommendation_ids(
-        self, db: Session, days: int, limit: int
-    ) -> list[str]:
+    def _get_recent_recommendation_ids(self, db: Session, days: int, limit: int) -> list[str]:
         """
         Get IDs of recent recommendations.
 

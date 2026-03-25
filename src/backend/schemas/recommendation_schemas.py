@@ -17,12 +17,14 @@ from uuid import UUID
 # SCORING SCHEMAS (Story 2.1)
 # ============================================================================
 
+
 @dataclass
 class PlanScores:
     """
     Individual factor scores and composite score for a plan.
     All scores are 0-100, where higher is better.
     """
+
     cost_score: float  # 0-100: Lower cost = higher score
     flexibility_score: float  # 0-100: Shorter contract + lower ETF = higher score
     renewable_score: float  # 0-100: Higher renewable % = higher score
@@ -31,7 +33,7 @@ class PlanScores:
 
     def __post_init__(self):
         """Validate scores are in valid range."""
-        for score_name in ['cost_score', 'flexibility_score', 'renewable_score', 'rating_score', 'composite_score']:
+        for score_name in ["cost_score", "flexibility_score", "renewable_score", "rating_score", "composite_score"]:
             score = getattr(self, score_name)
             if not 0 <= score <= 100:
                 raise ValueError(f"{score_name} must be between 0 and 100, got {score}")
@@ -43,6 +45,7 @@ class UserPreferences:
     User's preference weights for recommendation scoring.
     All priorities must sum to 100.
     """
+
     cost_priority: int = 40  # Default: 40%
     flexibility_priority: int = 30  # Default: 30%
     renewable_priority: int = 20  # Default: 20%
@@ -59,8 +62,10 @@ class UserPreferences:
 # COST CALCULATION SCHEMAS (Story 2.2)
 # ============================================================================
 
+
 class RateType(StrEnum):
     """Energy plan rate structure types."""
+
     FIXED = "fixed"
     TIERED = "tiered"
     TIME_OF_USE = "time_of_use"
@@ -72,6 +77,7 @@ class CostBreakdown:
     """
     Detailed cost breakdown for a plan.
     """
+
     base_cost: Decimal  # Cost based on usage and rate
     monthly_fees: Decimal  # Total annual monthly fees (monthly_fee * 12)
     connection_fee: Decimal  # One-time connection fee
@@ -83,6 +89,7 @@ class CostBreakdown:
 @dataclass
 class TierRate:
     """Rate tier for tiered rate structures."""
+
     max_kwh: float  # Maximum kWh for this tier (inclusive)
     rate_per_kwh: Decimal  # Rate in cents per kWh
 
@@ -90,6 +97,7 @@ class TierRate:
 @dataclass
 class TimeOfUseRate:
     """Time-of-use rate structure."""
+
     peak_rate: Decimal  # Rate during peak hours (cents per kWh)
     off_peak_rate: Decimal  # Rate during off-peak hours (cents per kWh)
     peak_hours: list[int]  # Hours considered peak (0-23)
@@ -100,12 +108,14 @@ class TimeOfUseRate:
 # RANKING & RECOMMENDATION SCHEMAS (Story 2.2)
 # ============================================================================
 
+
 @dataclass
 class RankedPlan:
     """
     A plan with its ranking and scoring details.
     This is the core output of the recommendation engine.
     """
+
     plan_id: UUID
     rank: int  # 1, 2, or 3
 
@@ -141,6 +151,7 @@ class RecommendationResult:
     Complete recommendation result for a user.
     This is the main output contract for Story 2.2.
     """
+
     user_id: UUID
     top_plans: list[RankedPlan]  # Top 3 plans (or fewer if <3 available)
 
@@ -157,12 +168,14 @@ class RecommendationResult:
 # CONTRACT TIMING OPTIMIZATION SCHEMAS (Story 2.3)
 # ============================================================================
 
+
 @dataclass
 class SwitchingAnalysis:
     """
     Analysis of switching costs and timing.
     Story 2.3 enhancement to RecommendationResult.
     """
+
     current_contract_end_date: date
     days_until_contract_end: int
     early_termination_fee: Decimal
@@ -183,6 +196,7 @@ class EnhancedRecommendationResult(RecommendationResult):
     Enhanced recommendation result with switching analysis (Story 2.3).
     Extends the base RecommendationResult from Story 2.2.
     """
+
     switching_analysis: SwitchingAnalysis | None = None
     stay_with_current: bool = False  # True if current plan is better than all recommendations
     stay_reason: str | None = None  # Explanation why staying is recommended
@@ -192,11 +206,13 @@ class EnhancedRecommendationResult(RecommendationResult):
 # FILTERING SCHEMAS (Story 2.2)
 # ============================================================================
 
+
 @dataclass
 class PlanFilter:
     """
     Criteria for filtering eligible plans.
     """
+
     zip_code: str  # Required: user's location
     is_active: bool = True  # Only active plans
     max_contract_length: int | None = None  # Max contract length in months
@@ -208,12 +224,14 @@ class PlanFilter:
 # USAGE PROJECTION (from Story 1.4)
 # ============================================================================
 
+
 @dataclass
 class UsageProjection:
     """
     12-month forward usage projection.
     Re-exported from Story 1.4 for convenience.
     """
+
     projected_monthly_kwh: list[float]  # 12 months
     projected_annual_kwh: float
     confidence_score: float  # 0.0 to 1.0
@@ -222,6 +240,7 @@ class UsageProjection:
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
+
 
 def validate_user_preferences(preferences: UserPreferences) -> bool:
     """
@@ -237,16 +256,16 @@ def validate_user_preferences(preferences: UserPreferences) -> bool:
         ValueError: If preferences are invalid
     """
     total = (
-        preferences.cost_priority +
-        preferences.flexibility_priority +
-        preferences.renewable_priority +
-        preferences.rating_priority
+        preferences.cost_priority
+        + preferences.flexibility_priority
+        + preferences.renewable_priority
+        + preferences.rating_priority
     )
 
     if total != 100:
         raise ValueError(f"Preference weights must sum to 100, got {total}")
 
-    for attr in ['cost_priority', 'flexibility_priority', 'renewable_priority', 'rating_priority']:
+    for attr in ["cost_priority", "flexibility_priority", "renewable_priority", "rating_priority"]:
         value = getattr(preferences, attr)
         if value < 0 or value > 100:
             raise ValueError(f"{attr} must be between 0 and 100, got {value}")
@@ -261,9 +280,4 @@ def create_default_preferences() -> UserPreferences:
     Returns:
         Default UserPreferences (cost=40, flexibility=30, renewable=20, rating=10)
     """
-    return UserPreferences(
-        cost_priority=40,
-        flexibility_priority=30,
-        renewable_priority=20,
-        rating_priority=10
-    )
+    return UserPreferences(cost_priority=40, flexibility_priority=30, renewable_priority=20, rating_priority=10)

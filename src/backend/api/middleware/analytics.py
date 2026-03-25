@@ -59,7 +59,7 @@ class AnalyticsMiddleware(BaseHTTPMiddleware):
                 method=method,
                 status_code=response.status_code,
                 duration_ms=duration_ms,
-                user_id=user_id
+                user_id=user_id,
             )
 
             return response
@@ -70,11 +70,7 @@ class AnalyticsMiddleware(BaseHTTPMiddleware):
 
             # Track error
             await self.analytics.track_error(
-                endpoint=endpoint,
-                error_type=type(e).__name__,
-                status_code=500,
-                error_message=str(e),
-                user_id=user_id
+                endpoint=endpoint, error_type=type(e).__name__, status_code=500, error_message=str(e), user_id=user_id
             )
 
             # Re-raise exception
@@ -108,12 +104,8 @@ class PerformanceTimer:
             # Success
             await self.analytics.track_event(
                 event_type="operation_completed",
-                properties={
-                    "operation": self.operation_name,
-                    "duration_ms": duration_ms,
-                    "success": True
-                },
-                user_id=self.user_id
+                properties={"operation": self.operation_name, "duration_ms": duration_ms, "success": True},
+                user_id=self.user_id,
             )
         else:
             # Error
@@ -124,9 +116,9 @@ class PerformanceTimer:
                     "duration_ms": duration_ms,
                     "success": False,
                     "error_type": exc_type.__name__,
-                    "error_message": str(exc_val)
+                    "error_message": str(exc_val),
                 },
-                user_id=self.user_id
+                user_id=self.user_id,
             )
 
         return False  # Don't suppress exceptions

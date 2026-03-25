@@ -115,21 +115,15 @@ class RiskDetectionService:
             # Find corresponding savings analysis
             savings = None
             if savings_analyses:
-                savings = next(
-                    (s for s in savings_analyses if s.plan_id == plan.plan_id), None
-                )
+                savings = next((s for s in savings_analyses if s.plan_id == plan.plan_id), None)
 
             # Apply all risk detection rules
-            plan_risks = self._detect_plan_risks(
-                plan, current_plan, savings, usage_profile, preferences
-            )
+            plan_risks = self._detect_plan_risks(plan, current_plan, savings, usage_profile, preferences)
             all_risks.extend(plan_risks)
 
         # Log metrics
         detection_time = (datetime.utcnow() - start_time).total_seconds() * 1000
-        self.logger.info(
-            f"Risk detection complete: {len(all_risks)} risks in {detection_time:.2f}ms"
-        )
+        self.logger.info(f"Risk detection complete: {len(all_risks)} risks in {detection_time:.2f}ms")
 
         return all_risks
 
@@ -243,9 +237,7 @@ class RiskDetectionService:
 
         return None
 
-    def _check_low_savings(
-        self, plan: RankedPlan, savings: SavingsAnalysis
-    ) -> RiskWarning | None:
+    def _check_low_savings(self, plan: RankedPlan, savings: SavingsAnalysis) -> RiskWarning | None:
         """
         Rule 2: Low Savings Warning.
 
@@ -291,9 +283,7 @@ class RiskDetectionService:
 
         return None
 
-    def _check_data_quality(
-        self, plan: RankedPlan, usage_profile: UsageProfile
-    ) -> RiskWarning | None:
+    def _check_data_quality(self, plan: RankedPlan, usage_profile: UsageProfile) -> RiskWarning | None:
         """
         Rule 3: Data Quality Issues.
 
@@ -320,9 +310,7 @@ class RiskDetectionService:
                     "completeness_pct": completeness,
                 },
             )
-        elif confidence < self.config.min_confidence_score or completeness < (
-            self.config.min_data_completeness * 100
-        ):
+        elif confidence < self.config.min_confidence_score or completeness < (self.config.min_data_completeness * 100):
             return RiskWarning(
                 risk_type=RiskType.DATA_QUALITY,
                 severity=RiskSeverity.WARNING,
@@ -330,8 +318,7 @@ class RiskDetectionService:
                 title="Data Quality Concerns",
                 message=f"Usage data is incomplete ({completeness:.0f}% complete, "
                 f"{confidence:.0%} confidence). Projections may vary.",
-                mitigation="Actual costs may differ from projections. "
-                "Monitor your first few bills closely.",
+                mitigation="Actual costs may differ from projections. " "Monitor your first few bills closely.",
                 affected_plan_ids=[plan.plan_id],
                 risk_data={
                     "confidence_score": confidence,
@@ -341,9 +328,7 @@ class RiskDetectionService:
 
         return None
 
-    def _check_variable_rate_volatility(
-        self, plan: RankedPlan
-    ) -> RiskWarning | None:
+    def _check_variable_rate_volatility(self, plan: RankedPlan) -> RiskWarning | None:
         """
         Rule 4: Variable Rate Volatility Warning.
 
@@ -368,19 +353,14 @@ class RiskDetectionService:
 
         return None
 
-    def _check_contract_length_mismatch(
-        self, plan: RankedPlan, preferences: UserPreferences
-    ) -> RiskWarning | None:
+    def _check_contract_length_mismatch(self, plan: RankedPlan, preferences: UserPreferences) -> RiskWarning | None:
         """
         Rule 5: Contract Length Mismatch.
 
         Triggers:
         - Warning: Long contract (>12 months) when flexibility priority is high (>30%)
         """
-        if (
-            plan.contract_length_months > 12
-            and preferences.flexibility_priority > 30
-        ):
+        if plan.contract_length_months > 12 and preferences.flexibility_priority > 30:
             return RiskWarning(
                 risk_type=RiskType.CONTRACT_LENGTH_MISMATCH,
                 severity=RiskSeverity.WARNING,
@@ -388,8 +368,7 @@ class RiskDetectionService:
                 title="Long Contract vs Flexibility Preference",
                 message=f"This plan has a {plan.contract_length_months}-month contract, "
                 f"but you prioritized flexibility. This limits your ability to switch.",
-                mitigation="Consider a month-to-month plan or shorter contract "
-                "if flexibility is important to you.",
+                mitigation="Consider a month-to-month plan or shorter contract " "if flexibility is important to you.",
                 affected_plan_ids=[plan.plan_id],
                 risk_data={
                     "contract_length": plan.contract_length_months,
@@ -414,9 +393,7 @@ class RiskDetectionService:
 
         return None
 
-    def _check_break_even(
-        self, plan: RankedPlan, savings: SavingsAnalysis
-    ) -> RiskWarning | None:
+    def _check_break_even(self, plan: RankedPlan, savings: SavingsAnalysis) -> RiskWarning | None:
         """
         Rule 7: Break-Even Too Long.
 
@@ -437,8 +414,7 @@ class RiskDetectionService:
                 title="Very Long Break-Even Period",
                 message=f"It will take {break_even} months to recoup the "
                 f"${savings.switching_cost} switching cost. This is a very long payback period.",
-                mitigation="Consider waiting until your current contract ends "
-                "to avoid the early termination fee.",
+                mitigation="Consider waiting until your current contract ends " "to avoid the early termination fee.",
                 affected_plan_ids=[plan.plan_id],
                 risk_data={
                     "break_even_months": break_even,
@@ -464,9 +440,7 @@ class RiskDetectionService:
 
         return None
 
-    def _check_negative_savings(
-        self, plan: RankedPlan, savings: SavingsAnalysis
-    ) -> RiskWarning | None:
+    def _check_negative_savings(self, plan: RankedPlan, savings: SavingsAnalysis) -> RiskWarning | None:
         """
         Additional Rule 8: Negative Savings.
 
@@ -497,9 +471,7 @@ class RiskDetectionService:
         Triggers:
         - Info: Connection fee + first month fees > $100
         """
-        upfront_cost = (plan.connection_fee or Decimal("0")) + (
-            plan.monthly_fee or Decimal("0")
-        )
+        upfront_cost = (plan.connection_fee or Decimal("0")) + (plan.monthly_fee or Decimal("0"))
 
         if upfront_cost > Decimal("100"):
             return RiskWarning(
@@ -563,18 +535,13 @@ class RiskDetectionService:
         # Trigger 4: Current plan already optimal (top 10%)
         # This would require knowing where current plan ranks among all plans
         # For now, we'll check if savings are very small, implying current plan is good
-        if (
-            savings.savings_percentage < Decimal("2.0")
-            and savings.annual_savings < self.config.min_annual_savings
-        ):
+        if savings.savings_percentage < Decimal("2.0") and savings.annual_savings < self.config.min_annual_savings:
             triggers.append(StayRecommendationTrigger.CURRENT_PLAN_OPTIMAL)
 
         # Trigger 5: Contract ends soon + high ETF in recommended plan
         days_until_end = None
         if current_plan.contract_end_date:
-            days_until_end = (
-                current_plan.contract_end_date - datetime.now().date()
-            ).days
+            days_until_end = (current_plan.contract_end_date - datetime.now().date()).days
             if (
                 days_until_end < self.config.contract_ending_soon_days
                 and top_plan.early_termination_fee > self.config.high_etf_threshold
@@ -588,9 +555,7 @@ class RiskDetectionService:
             return False, None
 
         # Generate reasoning
-        reasoning = self._generate_stay_reasoning(
-            triggers, net_savings, break_even, critical_risks, days_until_end
-        )
+        reasoning = self._generate_stay_reasoning(triggers, net_savings, break_even, critical_risks, days_until_end)
 
         # Calculate current plan percentile (simplified)
         # In real system, this would rank current plan among all available plans
@@ -625,37 +590,23 @@ class RiskDetectionService:
         reasons = []
 
         if StayRecommendationTrigger.LOW_NET_SAVINGS in triggers:
-            reasons.append(
-                f"the net savings after switching costs are only ${net_savings:.2f}/year"
-            )
+            reasons.append(f"the net savings after switching costs are only ${net_savings:.2f}/year")
 
         if StayRecommendationTrigger.LONG_BREAK_EVEN in triggers:
-            reasons.append(
-                f"it would take {break_even} months to recoup the switching costs"
-            )
+            reasons.append(f"it would take {break_even} months to recoup the switching costs")
 
         if StayRecommendationTrigger.CRITICAL_RISKS in triggers:
-            reasons.append(
-                f"there are {len(critical_risks)} critical risks with the recommended plans"
-            )
+            reasons.append(f"there are {len(critical_risks)} critical risks with the recommended plans")
 
         if StayRecommendationTrigger.CURRENT_PLAN_OPTIMAL in triggers:
             reasons.append("your current plan is already very competitive")
 
         if StayRecommendationTrigger.CONTRACT_ENDING_SOON in triggers:
-            reasons.append(
-                f"your contract ends in {days_until_end} days, so waiting avoids termination fees"
-            )
+            reasons.append(f"your contract ends in {days_until_end} days, so waiting avoids termination fees")
 
         if reasons:
-            reasoning = (
-                "We recommend staying with your current plan because "
-                + ", ".join(reasons)
-                + ". "
-            )
-            reasoning += (
-                "While switching is possible, the benefits don't outweigh the costs and risks."
-            )
+            reasoning = "We recommend staying with your current plan because " + ", ".join(reasons) + ". "
+            reasoning += "While switching is possible, the benefits don't outweigh the costs and risks."
         else:
             reasoning = "We recommend staying with your current plan based on the overall analysis."
 
@@ -665,9 +616,7 @@ class RiskDetectionService:
     # RISK SUMMARY AND AGGREGATION
     # ========================================================================
 
-    def calculate_risk_summary(
-        self, risks: list[RiskWarning], plans: list[RankedPlan]
-    ) -> RiskSummary:
+    def calculate_risk_summary(self, risks: list[RiskWarning], plans: list[RankedPlan]) -> RiskSummary:
         """
         Calculate aggregate risk summary.
 
@@ -689,9 +638,7 @@ class RiskDetectionService:
         risks_by_plan = {}
         for plan in plans:
             plan_id_str = str(plan.plan_id)
-            plan_risks = [
-                r for r in risks if plan.plan_id in r.affected_plan_ids
-            ]
+            plan_risks = [r for r in risks if plan.plan_id in r.affected_plan_ids]
             risks_by_plan[plan_id_str] = len(plan_risks)
 
         return RiskSummary(
@@ -703,9 +650,7 @@ class RiskDetectionService:
             risks_by_plan=risks_by_plan,
         )
 
-    def group_risks_by_plan(
-        self, risks: list[RiskWarning], plans: list[RankedPlan]
-    ) -> list[PlanRiskAnalysis]:
+    def group_risks_by_plan(self, risks: list[RiskWarning], plans: list[RankedPlan]) -> list[PlanRiskAnalysis]:
         """
         Group risks by plan for easier frontend consumption.
 
@@ -714,9 +659,7 @@ class RiskDetectionService:
         plan_risk_analyses = []
 
         for plan in plans:
-            plan_risks = [
-                r for r in risks if plan.plan_id in r.affected_plan_ids
-            ]
+            plan_risks = [r for r in risks if plan.plan_id in r.affected_plan_ids]
 
             highest_severity = None
             if plan_risks:
@@ -726,9 +669,7 @@ class RiskDetectionService:
                     RiskSeverity.WARNING: 1,
                     RiskSeverity.INFO: 2,
                 }
-                plan_risks_sorted = sorted(
-                    plan_risks, key=lambda r: severity_order[r.severity]
-                )
+                plan_risks_sorted = sorted(plan_risks, key=lambda r: severity_order[r.severity])
                 highest_severity = plan_risks_sorted[0].severity
 
             plan_risk_analyses.append(

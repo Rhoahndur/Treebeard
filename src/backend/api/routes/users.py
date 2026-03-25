@@ -25,15 +25,9 @@ class UserPreferencesRequest(BaseModel):
     """User preferences update request."""
 
     cost_priority: int = Field(..., ge=0, le=100, description="Cost priority (0-100)")
-    flexibility_priority: int = Field(
-        ..., ge=0, le=100, description="Flexibility priority (0-100)"
-    )
-    renewable_priority: int = Field(
-        ..., ge=0, le=100, description="Renewable energy priority (0-100)"
-    )
-    rating_priority: int = Field(
-        ..., ge=0, le=100, description="Supplier rating priority (0-100)"
-    )
+    flexibility_priority: int = Field(..., ge=0, le=100, description="Flexibility priority (0-100)")
+    renewable_priority: int = Field(..., ge=0, le=100, description="Renewable energy priority (0-100)")
+    rating_priority: int = Field(..., ge=0, le=100, description="Supplier rating priority (0-100)")
 
 
 class UserPreferencesResponse(BaseModel):
@@ -51,9 +45,7 @@ class UpdateUserRequest(BaseModel):
 
     name: str | None = Field(None, min_length=1, description="User name")
     email: EmailStr | None = Field(None, description="User email")
-    zip_code: str | None = Field(
-        None, min_length=5, max_length=10, description="ZIP code"
-    )
+    zip_code: str | None = Field(None, min_length=5, max_length=10, description="ZIP code")
 
 
 # Endpoints
@@ -82,12 +74,7 @@ async def save_preferences(
         UserPreferencesResponse: Updated preferences
     """
     # Validate priorities sum to 100
-    total = (
-        request.cost_priority
-        + request.flexibility_priority
-        + request.renewable_priority
-        + request.rating_priority
-    )
+    total = request.cost_priority + request.flexibility_priority + request.renewable_priority + request.rating_priority
 
     if total != 100:
         raise HTTPException(
@@ -96,11 +83,7 @@ async def save_preferences(
         )
 
     # Get or create preferences
-    preferences = (
-        db.query(UserPreference)
-        .filter(UserPreference.user_id == current_user.id)
-        .first()
-    )
+    preferences = db.query(UserPreference).filter(UserPreference.user_id == current_user.id).first()
 
     if preferences:
         # Update existing
@@ -158,11 +141,7 @@ async def get_preferences(current_user: CurrentUser, db: DBSession):
     Raises:
         HTTPException: If preferences not found
     """
-    preferences = (
-        db.query(UserPreference)
-        .filter(UserPreference.user_id == current_user.id)
-        .first()
-    )
+    preferences = db.query(UserPreference).filter(UserPreference.user_id == current_user.id).first()
 
     if not preferences:
         # Return default preferences

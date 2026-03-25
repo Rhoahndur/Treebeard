@@ -35,7 +35,7 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
-        comment="Reference to the user providing feedback"
+        comment="Reference to the user providing feedback",
     )
 
     recommendation_id: Mapped[UUID] = mapped_column(
@@ -43,7 +43,7 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
         ForeignKey("recommendations.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
-        comment="Reference to the recommendation session"
+        comment="Reference to the recommendation session",
     )
 
     recommended_plan_id: Mapped[UUID | None] = mapped_column(
@@ -51,7 +51,7 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
         ForeignKey("recommendation_plans.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
-        comment="Reference to the specific recommended plan (if applicable)"
+        comment="Reference to the specific recommended plan (if applicable)",
     )
 
     plan_id: Mapped[UUID | None] = mapped_column(
@@ -59,30 +59,21 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
         ForeignKey("plan_catalog.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
-        comment="Reference to the plan from catalog (for joins)"
+        comment="Reference to the plan from catalog (for joins)",
     )
 
     rating: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        comment="Numeric rating: 1-5 stars or thumbs up/down (1=down, 5=up)"
+        Integer, nullable=False, comment="Numeric rating: 1-5 stars or thumbs up/down (1=down, 5=up)"
     )
 
-    feedback_text: Mapped[str | None] = mapped_column(
-        Text,
-        nullable=True,
-        comment="Optional text feedback from user"
-    )
+    feedback_text: Mapped[str | None] = mapped_column(Text, nullable=True, comment="Optional text feedback from user")
 
     feedback_type: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-        comment="Type: helpful, not_helpful, selected, did_not_select, other"
+        String(50), nullable=False, comment="Type: helpful, not_helpful, selected, did_not_select, other"
     )
 
     sentiment_score: Mapped[Decimal | None] = mapped_column(
-        nullable=True,
-        comment="Automated sentiment analysis score (-1.0 to 1.0)"
+        nullable=True, comment="Automated sentiment analysis score (-1.0 to 1.0)"
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -90,7 +81,7 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
         server_default=func.now(),
         nullable=False,
         index=True,
-        comment="Timestamp when feedback was provided"
+        comment="Timestamp when feedback was provided",
     )
 
     # Relationships
@@ -99,8 +90,7 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
     recommendation: Mapped["Recommendation"] = relationship("Recommendation")
 
     recommended_plan: Mapped[Optional["RecommendationPlan"]] = relationship(
-        "RecommendationPlan",
-        back_populates="feedback"
+        "RecommendationPlan", back_populates="feedback"
     )
 
     __table_args__ = (
@@ -112,11 +102,8 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
         Index("idx_feedback_plan", "plan_id"),
         # Support rating-based queries
         Index("idx_feedback_rating", "rating"),
-        {"comment": "User feedback on recommendations for quality tracking and improvement"}
+        {"comment": "User feedback on recommendations for quality tracking and improvement"},
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<Feedback(id={self.id}, user_id={self.user_id}, "
-            f"rating={self.rating}, type={self.feedback_type})>"
-        )
+        return f"<Feedback(id={self.id}, user_id={self.user_id}, " f"rating={self.rating}, type={self.feedback_type})>"

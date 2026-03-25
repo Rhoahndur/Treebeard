@@ -36,13 +36,11 @@ class Recommendation(Base, UUIDPrimaryKeyMixin):
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
-        comment="Reference to the user"
+        comment="Reference to the user",
     )
 
     usage_profile: Mapped[dict[str, Any]] = mapped_column(
-        JSONB,
-        nullable=False,
-        comment="Analyzed usage patterns and projections used for recommendations"
+        JSONB, nullable=False, comment="Analyzed usage patterns and projections used for recommendations"
     )
 
     generated_at: Mapped[datetime] = mapped_column(
@@ -50,21 +48,18 @@ class Recommendation(Base, UUIDPrimaryKeyMixin):
         server_default=func.now(),
         nullable=False,
         index=True,
-        comment="Timestamp when recommendations were generated"
+        comment="Timestamp when recommendations were generated",
     )
 
     expires_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         index=True,
-        comment="Timestamp when recommendations should be refreshed"
+        comment="Timestamp when recommendations should be refreshed",
     )
 
     algorithm_version: Mapped[str] = mapped_column(
-        Text,
-        nullable=False,
-        default="1.0.0",
-        comment="Version of recommendation algorithm used"
+        Text, nullable=False, default="1.0.0", comment="Version of recommendation algorithm used"
     )
 
     # Relationships
@@ -74,20 +69,17 @@ class Recommendation(Base, UUIDPrimaryKeyMixin):
         "RecommendationPlan",
         back_populates="recommendation",
         cascade="all, delete-orphan",
-        order_by="RecommendationPlan.rank"
+        order_by="RecommendationPlan.rank",
     )
 
     __table_args__ = (
         Index("idx_recommendations_user_generated", "user_id", "generated_at"),
         Index("idx_recommendations_expires", "expires_at"),
-        {"comment": "Recommendation sessions with usage profile context"}
+        {"comment": "Recommendation sessions with usage profile context"},
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<Recommendation(id={self.id}, user_id={self.user_id}, "
-            f"generated_at={self.generated_at})>"
-        )
+        return f"<Recommendation(id={self.id}, user_id={self.user_id}, " f"generated_at={self.generated_at})>"
 
 
 class RecommendationPlan(Base, UUIDPrimaryKeyMixin):
@@ -114,7 +106,7 @@ class RecommendationPlan(Base, UUIDPrimaryKeyMixin):
         ForeignKey("recommendations.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
-        comment="Reference to the recommendation session"
+        comment="Reference to the recommendation session",
     )
 
     plan_id: Mapped[UUID] = mapped_column(
@@ -122,94 +114,64 @@ class RecommendationPlan(Base, UUIDPrimaryKeyMixin):
         ForeignKey("plan_catalog.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
-        comment="Reference to the recommended plan"
+        comment="Reference to the recommended plan",
     )
 
-    rank: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        comment="Rank of this plan (1=best, 2=second, 3=third)"
-    )
+    rank: Mapped[int] = mapped_column(Integer, nullable=False, comment="Rank of this plan (1=best, 2=second, 3=third)")
 
     composite_score: Mapped[Decimal] = mapped_column(
-        Numeric(10, 4),
-        nullable=False,
-        comment="Final weighted score (0.0000-100.0000)"
+        Numeric(10, 4), nullable=False, comment="Final weighted score (0.0000-100.0000)"
     )
 
     cost_score: Mapped[Decimal] = mapped_column(
-        Numeric(10, 4),
-        nullable=False,
-        comment="Cost component score (0.0000-100.0000)"
+        Numeric(10, 4), nullable=False, comment="Cost component score (0.0000-100.0000)"
     )
 
     flexibility_score: Mapped[Decimal] = mapped_column(
-        Numeric(10, 4),
-        nullable=False,
-        comment="Flexibility component score (0.0000-100.0000)"
+        Numeric(10, 4), nullable=False, comment="Flexibility component score (0.0000-100.0000)"
     )
 
     renewable_score: Mapped[Decimal] = mapped_column(
-        Numeric(10, 4),
-        nullable=False,
-        comment="Renewable energy component score (0.0000-100.0000)"
+        Numeric(10, 4), nullable=False, comment="Renewable energy component score (0.0000-100.0000)"
     )
 
     rating_score: Mapped[Decimal] = mapped_column(
-        Numeric(10, 4),
-        nullable=False,
-        comment="Supplier rating component score (0.0000-100.0000)"
+        Numeric(10, 4), nullable=False, comment="Supplier rating component score (0.0000-100.0000)"
     )
 
     projected_annual_cost: Mapped[Decimal] = mapped_column(
-        Numeric(12, 2),
-        nullable=False,
-        comment="Projected annual cost in dollars"
+        Numeric(12, 2), nullable=False, comment="Projected annual cost in dollars"
     )
 
     projected_annual_savings: Mapped[Decimal] = mapped_column(
-        Numeric(12, 2),
-        nullable=False,
-        comment="Projected annual savings vs current plan in dollars"
+        Numeric(12, 2), nullable=False, comment="Projected annual savings vs current plan in dollars"
     )
 
     break_even_months: Mapped[int | None] = mapped_column(
-        Integer,
-        nullable=True,
-        comment="Months to break even if switching costs apply"
+        Integer, nullable=True, comment="Months to break even if switching costs apply"
     )
 
     explanation: Mapped[str] = mapped_column(
-        Text,
-        nullable=False,
-        comment="Plain-language explanation of why this plan was recommended"
+        Text, nullable=False, comment="Plain-language explanation of why this plan was recommended"
     )
 
     risk_flags: Mapped[dict[str, Any] | None] = mapped_column(
-        JSONB,
-        nullable=True,
-        comment="Risk warnings and alerts for this plan"
+        JSONB, nullable=True, comment="Risk warnings and alerts for this plan"
     )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
-        comment="Timestamp when this recommendation was created"
+        comment="Timestamp when this recommendation was created",
     )
 
     # Relationships
-    recommendation: Mapped["Recommendation"] = relationship(
-        "Recommendation",
-        back_populates="recommendation_plans"
-    )
+    recommendation: Mapped["Recommendation"] = relationship("Recommendation", back_populates="recommendation_plans")
 
     plan: Mapped["PlanCatalog"] = relationship("PlanCatalog", back_populates="recommendation_plans")
 
-    feedback: Mapped[list["Feedback"]] = relationship(
-        "Feedback",
-        back_populates="recommended_plan"
-    )
+    feedback: Mapped[list["Feedback"]] = relationship("Feedback", back_populates="recommended_plan")
 
     __table_args__ = (
         # Composite index for efficient recommendation retrieval
@@ -217,12 +179,8 @@ class RecommendationPlan(Base, UUIDPrimaryKeyMixin):
         # Support feedback queries
         Index("idx_recommendation_plans_plan", "plan_id"),
         # Ensure rank is unique within a recommendation
-        Index(
-            "idx_recommendation_plans_unique_rec_rank",
-            "recommendation_id", "rank",
-            unique=True
-        ),
-        {"comment": "Top 3 recommended plans per recommendation with scoring and explanations"}
+        Index("idx_recommendation_plans_unique_rec_rank", "recommendation_id", "rank", unique=True),
+        {"comment": "Top 3 recommended plans per recommendation with scoring and explanations"},
     )
 
     def __repr__(self) -> str:

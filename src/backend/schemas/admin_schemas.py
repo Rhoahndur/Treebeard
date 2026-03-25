@@ -93,11 +93,11 @@ class PlanCatalogCreate(BaseModel):
     plan_description: str | None = Field(None, description="Marketing description of the plan")
     terms_url: str | None = Field(None, description="URL to full terms and conditions")
 
-    @field_validator('plan_type')
+    @field_validator("plan_type")
     @classmethod
     def validate_plan_type(cls, v: str) -> str:
         """Validate plan type."""
-        allowed_types = ['fixed', 'variable', 'indexed', 'tiered']
+        allowed_types = ["fixed", "variable", "indexed", "tiered"]
         if v.lower() not in allowed_types:
             raise ValueError(f"Plan type must be one of: {', '.join(allowed_types)}")
         return v.lower()
@@ -119,13 +119,13 @@ class PlanCatalogUpdate(BaseModel):
     plan_description: str | None = Field(None, description="Plan description")
     terms_url: str | None = Field(None, description="Terms URL")
 
-    @field_validator('plan_type')
+    @field_validator("plan_type")
     @classmethod
     def validate_plan_type(cls, v: str | None) -> str | None:
         """Validate plan type."""
         if v is None:
             return v
-        allowed_types = ['fixed', 'variable', 'indexed', 'tiered']
+        allowed_types = ["fixed", "variable", "indexed", "tiered"]
         if v.lower() not in allowed_types:
             raise ValueError(f"Plan type must be one of: {', '.join(allowed_types)}")
         return v.lower()
@@ -228,7 +228,7 @@ class PaginationParams(BaseModel):
     limit: int = Field(50, ge=1, le=100, description="Number of results per page (default 50, max 100)")
     offset: int = Field(0, ge=0, description="Number of results to skip (default 0)")
 
-    @field_validator('limit')
+    @field_validator("limit")
     @classmethod
     def validate_limit(cls, v: int) -> int:
         """Ensure limit is within acceptable range."""

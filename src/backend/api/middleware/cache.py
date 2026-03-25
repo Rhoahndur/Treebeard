@@ -63,9 +63,7 @@ class CacheMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         # Check if path is cacheable
-        if not any(
-            request.url.path.startswith(path) for path in self.cacheable_paths
-        ):
+        if not any(request.url.path.startswith(path) for path in self.cacheable_paths):
             return await call_next(request)
 
         # Generate cache key
@@ -91,9 +89,7 @@ class CacheMiddleware(BaseHTTPMiddleware):
 
                 # Add cache header
                 response.headers["X-Cache-Status"] = "HIT"
-                response.headers["X-Request-ID"] = getattr(
-                    request.state, "request_id", "unknown"
-                )
+                response.headers["X-Request-ID"] = getattr(request.state, "request_id", "unknown")
 
                 return response
 

@@ -28,70 +28,42 @@ class Supplier(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "suppliers"
 
     supplier_name: Mapped[str] = mapped_column(
-        String(255),
-        unique=True,
-        nullable=False,
-        index=True,
-        comment="Official name of the energy supplier"
+        String(255), unique=True, nullable=False, index=True, comment="Official name of the energy supplier"
     )
 
     average_rating: Mapped[Decimal | None] = mapped_column(
-        Numeric(3, 2),
-        nullable=True,
-        comment="Average customer rating (0.00-5.00)"
+        Numeric(3, 2), nullable=True, comment="Average customer rating (0.00-5.00)"
     )
 
     review_count: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        default=0,
-        comment="Total number of customer reviews"
+        Integer, nullable=False, default=0, comment="Total number of customer reviews"
     )
 
-    website: Mapped[str | None] = mapped_column(
-        String(500),
-        nullable=True,
-        comment="Supplier's official website URL"
-    )
+    website: Mapped[str | None] = mapped_column(String(500), nullable=True, comment="Supplier's official website URL")
 
-    logo_url: Mapped[str | None] = mapped_column(
-        String(500),
-        nullable=True,
-        comment="URL to supplier's logo image"
-    )
+    logo_url: Mapped[str | None] = mapped_column(String(500), nullable=True, comment="URL to supplier's logo image")
 
     customer_service_phone: Mapped[str | None] = mapped_column(
-        String(20),
-        nullable=True,
-        comment="Customer service phone number"
+        String(20), nullable=True, comment="Customer service phone number"
     )
 
     is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=True,
-        index=True,
-        comment="Whether supplier is currently active"
+        Boolean, nullable=False, default=True, index=True, comment="Whether supplier is currently active"
     )
 
     # Relationships
     plans: Mapped[list["PlanCatalog"]] = relationship(
-        "PlanCatalog",
-        back_populates="supplier",
-        cascade="all, delete-orphan"
+        "PlanCatalog", back_populates="supplier", cascade="all, delete-orphan"
     )
 
     __table_args__ = (
         Index("idx_suppliers_name", "supplier_name"),
         Index("idx_suppliers_active", "is_active"),
-        {"comment": "Energy suppliers with ratings and contact information"}
+        {"comment": "Energy suppliers with ratings and contact information"},
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<Supplier(id={self.id}, name={self.supplier_name}, "
-            f"rating={self.average_rating})>"
-        )
+        return f"<Supplier(id={self.id}, name={self.supplier_name}, " f"rating={self.average_rating})>"
 
 
 class PlanCatalog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -115,41 +87,25 @@ class PlanCatalog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         ForeignKey("suppliers.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
-        comment="Reference to the supplier"
+        comment="Reference to the supplier",
     )
 
-    plan_name: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        index=True,
-        comment="Name of the energy plan"
-    )
+    plan_name: Mapped[str] = mapped_column(String(255), nullable=False, index=True, comment="Name of the energy plan")
 
     plan_type: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-        index=True,
-        comment="Type: fixed, variable, indexed, tiered"
+        String(50), nullable=False, index=True, comment="Type: fixed, variable, indexed, tiered"
     )
 
     rate_structure: Mapped[dict[str, Any]] = mapped_column(
-        JSONB,
-        nullable=False,
-        comment="Rate structure in JSON format (supports multiple rate types)"
+        JSONB, nullable=False, comment="Rate structure in JSON format (supports multiple rate types)"
     )
 
     contract_length_months: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        index=True,
-        comment="Contract length in months (0 for month-to-month)"
+        Integer, nullable=False, index=True, comment="Contract length in months (0 for month-to-month)"
     )
 
     early_termination_fee: Mapped[Decimal] = mapped_column(
-        Numeric(10, 2),
-        nullable=False,
-        default=Decimal("0.00"),
-        comment="Early termination fee in dollars"
+        Numeric(10, 2), nullable=False, default=Decimal("0.00"), comment="Early termination fee in dollars"
     )
 
     renewable_percentage: Mapped[Decimal] = mapped_column(
@@ -157,45 +113,31 @@ class PlanCatalog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         nullable=False,
         default=Decimal("0.00"),
         index=True,
-        comment="Percentage of renewable energy (0.00-100.00)"
+        comment="Percentage of renewable energy (0.00-100.00)",
     )
 
     monthly_fee: Mapped[Decimal | None] = mapped_column(
-        Numeric(10, 2),
-        nullable=True,
-        comment="Monthly base fee in dollars"
+        Numeric(10, 2), nullable=True, comment="Monthly base fee in dollars"
     )
 
     connection_fee: Mapped[Decimal | None] = mapped_column(
-        Numeric(10, 2),
-        nullable=True,
-        comment="One-time connection/activation fee in dollars"
+        Numeric(10, 2), nullable=True, comment="One-time connection/activation fee in dollars"
     )
 
     available_regions: Mapped[list[str]] = mapped_column(
-        ARRAY(String(10)),
-        nullable=False,
-        comment="List of ZIP codes or regions where plan is available"
+        ARRAY(String(10)), nullable=False, comment="List of ZIP codes or regions where plan is available"
     )
 
     is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=True,
-        index=True,
-        comment="Whether plan is currently available"
+        Boolean, nullable=False, default=True, index=True, comment="Whether plan is currently available"
     )
 
     plan_description: Mapped[str | None] = mapped_column(
-        Text,
-        nullable=True,
-        comment="Marketing description of the plan"
+        Text, nullable=True, comment="Marketing description of the plan"
     )
 
     terms_url: Mapped[str | None] = mapped_column(
-        String(500),
-        nullable=True,
-        comment="URL to full terms and conditions"
+        String(500), nullable=True, comment="URL to full terms and conditions"
     )
 
     last_updated: Mapped[datetime] = mapped_column(
@@ -204,16 +146,13 @@ class PlanCatalog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         onupdate=func.now(),
         nullable=False,
         index=True,
-        comment="Last time plan details were updated"
+        comment="Last time plan details were updated",
     )
 
     # Relationships
     supplier: Mapped["Supplier"] = relationship("Supplier", back_populates="plans")
 
-    recommendation_plans: Mapped[list["RecommendationPlan"]] = relationship(
-        "RecommendationPlan",
-        back_populates="plan"
-    )
+    recommendation_plans: Mapped[list["RecommendationPlan"]] = relationship("RecommendationPlan", back_populates="plan")
 
     __table_args__ = (
         # Composite index for efficient filtering by supplier and active status
@@ -224,7 +163,7 @@ class PlanCatalog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         Index("idx_plan_catalog_renewable", "renewable_percentage"),
         # GIN index for efficient array searches on available_regions
         Index("idx_plan_catalog_regions", "available_regions", postgresql_using="gin"),
-        {"comment": "Energy plan catalog with all attributes for matching and recommendations"}
+        {"comment": "Energy plan catalog with all attributes for matching and recommendations"},
     )
 
     def __repr__(self) -> str:

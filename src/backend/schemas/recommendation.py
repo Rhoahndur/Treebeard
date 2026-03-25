@@ -13,6 +13,7 @@ from .plan import PlanCatalogResponse
 
 # Score component schemas
 
+
 class PlanScores(BaseModel):
     """Individual score components for a plan recommendation."""
 
@@ -25,41 +26,25 @@ class PlanScores(BaseModel):
 
 # Risk flags schema
 
+
 class RiskFlags(BaseModel):
     """Risk warnings for a recommended plan."""
 
-    high_etf: dict[str, Any] | None = Field(
-        None,
-        description="High early termination fee warning"
-    )
-    low_savings: dict[str, Any] | None = Field(
-        None,
-        description="Low savings warning"
-    )
-    data_quality: dict[str, Any] | None = Field(
-        None,
-        description="Data quality issues warning"
-    )
-    variable_rate: dict[str, Any] | None = Field(
-        None,
-        description="Variable rate volatility warning"
-    )
-    contract_mismatch: dict[str, Any] | None = Field(
-        None,
-        description="Contract timing mismatch warning"
-    )
+    high_etf: dict[str, Any] | None = Field(None, description="High early termination fee warning")
+    low_savings: dict[str, Any] | None = Field(None, description="Low savings warning")
+    data_quality: dict[str, Any] | None = Field(None, description="Data quality issues warning")
+    variable_rate: dict[str, Any] | None = Field(None, description="Variable rate volatility warning")
+    contract_mismatch: dict[str, Any] | None = Field(None, description="Contract timing mismatch warning")
 
 
 # Recommendation request/response schemas
+
 
 class RecommendationRequest(BaseModel):
     """Request to generate recommendations for a user."""
 
     user_id: UUID = Field(..., description="User ID to generate recommendations for")
-    force_refresh: bool = Field(
-        default=False,
-        description="Force regeneration even if cached recommendations exist"
-    )
+    force_refresh: bool = Field(default=False, description="Force regeneration even if cached recommendations exist")
 
 
 class RecommendationPlanResponse(BaseModel):
@@ -77,10 +62,7 @@ class RecommendationPlanResponse(BaseModel):
     # Projections
     projected_annual_cost: Decimal = Field(..., description="Projected annual cost in dollars")
     projected_annual_savings: Decimal = Field(..., description="Savings vs current plan in dollars")
-    break_even_months: int | None = Field(
-        None,
-        description="Months to break even if switching costs apply"
-    )
+    break_even_months: int | None = Field(None, description="Months to break even if switching costs apply")
 
     # Explanation
     explanation: str = Field(..., description="Plain-language explanation")
@@ -98,17 +80,11 @@ class RecommendationResponse(BaseModel):
     user_id: UUID = Field(..., description="User ID")
 
     # Usage analysis
-    usage_profile: dict[str, Any] = Field(
-        ...,
-        description="Analyzed usage patterns and projections"
-    )
+    usage_profile: dict[str, Any] = Field(..., description="Analyzed usage patterns and projections")
 
     # Recommended plans (top 3)
     recommended_plans: list[RecommendationPlanResponse] = Field(
-        ...,
-        min_length=0,
-        max_length=3,
-        description="Top 3 recommended plans (may be less if insufficient options)"
+        ..., min_length=0, max_length=3, description="Top 3 recommended plans (may be less if insufficient options)"
     )
 
     # Metadata
@@ -117,14 +93,8 @@ class RecommendationResponse(BaseModel):
     algorithm_version: str = Field(..., description="Algorithm version used")
 
     # Special cases
-    stay_with_current: bool = Field(
-        default=False,
-        description="Whether staying with current plan is recommended"
-    )
-    stay_reason: str | None = Field(
-        None,
-        description="Reason for recommending to stay with current plan"
-    )
+    stay_with_current: bool = Field(default=False, description="Whether staying with current plan is recommended")
+    stay_reason: str | None = Field(None, description="Reason for recommending to stay with current plan")
 
     model_config = {"from_attributes": True}
 

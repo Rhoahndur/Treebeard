@@ -12,23 +12,14 @@ from pydantic import BaseModel, Field, field_validator
 
 # Base Schemas
 
+
 class FeedbackBase(BaseModel):
     """Base schema for Feedback with common fields."""
 
-    rating: int = Field(
-        ...,
-        ge=1,
-        le=5,
-        description="Rating: 1 (thumbs down) to 5 (thumbs up)"
-    )
-    feedback_text: str | None = Field(
-        None,
-        max_length=500,
-        description="Optional text feedback from user"
-    )
+    rating: int = Field(..., ge=1, le=5, description="Rating: 1 (thumbs down) to 5 (thumbs up)")
+    feedback_text: str | None = Field(None, max_length=500, description="Optional text feedback from user")
     feedback_type: str = Field(
-        default="helpful",
-        description="Type: helpful, not_helpful, selected, did_not_select, other"
+        default="helpful", description="Type: helpful, not_helpful, selected, did_not_select, other"
     )
 
     @field_validator("feedback_text")
@@ -51,30 +42,23 @@ class FeedbackBase(BaseModel):
 
 # Create Schemas
 
+
 class PlanFeedbackCreate(FeedbackBase):
     """Schema for creating feedback on a specific plan."""
 
     plan_id: UUID = Field(..., description="ID of the plan being reviewed")
-    recommendation_id: UUID | None = Field(
-        None,
-        description="Optional recommendation session ID"
-    )
+    recommendation_id: UUID | None = Field(None, description="Optional recommendation session ID")
 
 
 class RecommendationFeedbackCreate(FeedbackBase):
     """Schema for creating feedback on overall recommendation."""
 
-    recommendation_id: UUID = Field(
-        ...,
-        description="ID of the recommendation session"
-    )
-    plan_id: UUID | None = Field(
-        None,
-        description="Optional specific plan ID within the recommendation"
-    )
+    recommendation_id: UUID = Field(..., description="ID of the recommendation session")
+    plan_id: UUID | None = Field(None, description="Optional specific plan ID within the recommendation")
 
 
 # Response Schemas
+
 
 class FeedbackResponse(BaseModel):
     """Schema for feedback response."""
@@ -102,36 +86,18 @@ class FeedbackSubmissionResponse(BaseModel):
 
 # Analytics Schemas
 
+
 class FeedbackStats(BaseModel):
     """Schema for aggregated feedback statistics."""
 
-    total_feedback_count: int = Field(
-        ...,
-        description="Total number of feedback submissions"
-    )
-    average_rating: float = Field(
-        ...,
-        description="Average rating across all feedback"
-    )
-    thumbs_up_count: int = Field(
-        ...,
-        description="Number of positive ratings (4-5)"
-    )
-    thumbs_down_count: int = Field(
-        ...,
-        description="Number of negative ratings (1-2)"
-    )
-    neutral_count: int = Field(
-        ...,
-        description="Number of neutral ratings (3)"
-    )
-    text_feedback_count: int = Field(
-        ...,
-        description="Number of feedback submissions with text"
-    )
+    total_feedback_count: int = Field(..., description="Total number of feedback submissions")
+    average_rating: float = Field(..., description="Average rating across all feedback")
+    thumbs_up_count: int = Field(..., description="Number of positive ratings (4-5)")
+    thumbs_down_count: int = Field(..., description="Number of negative ratings (1-2)")
+    neutral_count: int = Field(..., description="Number of neutral ratings (3)")
+    text_feedback_count: int = Field(..., description="Number of feedback submissions with text")
     sentiment_breakdown: dict[str, int] = Field(
-        default_factory=dict,
-        description="Sentiment distribution (positive, neutral, negative)"
+        default_factory=dict, description="Sentiment distribution (positive, neutral, negative)"
     )
 
 
@@ -160,17 +126,10 @@ class FeedbackAnalyticsResponse(BaseModel):
     """Schema for comprehensive feedback analytics."""
 
     stats: FeedbackStats
-    time_series: list[FeedbackTimeSeriesPoint] = Field(
-        ...,
-        description="Daily feedback volume for last 30 days"
-    )
-    top_plans: list[PlanFeedbackAggregation] = Field(
-        ...,
-        description="Top 10 most-reviewed plans"
-    )
+    time_series: list[FeedbackTimeSeriesPoint] = Field(..., description="Daily feedback volume for last 30 days")
+    top_plans: list[PlanFeedbackAggregation] = Field(..., description="Top 10 most-reviewed plans")
     recent_text_feedback: list[FeedbackResponse] = Field(
-        default_factory=list,
-        description="Recent feedback with text comments"
+        default_factory=list, description="Recent feedback with text comments"
     )
 
 
@@ -181,10 +140,7 @@ class FeedbackSearchParams(BaseModel):
     min_rating: int | None = Field(None, ge=1, le=5)
     max_rating: int | None = Field(None, ge=1, le=5)
     has_text: bool | None = None
-    sentiment: str | None = Field(
-        None,
-        description="Filter by sentiment: positive, neutral, negative"
-    )
+    sentiment: str | None = Field(None, description="Filter by sentiment: positive, neutral, negative")
     start_date: datetime | None = None
     end_date: datetime | None = None
     limit: int = Field(default=100, ge=1, le=1000)

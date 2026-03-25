@@ -10,23 +10,19 @@ from pydantic import BaseModel, Field, field_validator
 
 # UsageHistory Schemas
 
+
 class UsageHistoryBase(BaseModel):
     """Base schema for usage history."""
 
     usage_date: date = Field(..., description="Date of energy usage")
     kwh_consumed: Decimal = Field(..., gt=0, description="Energy consumed in kWh")
-    data_source: str = Field(
-        default="upload",
-        description="Source: upload, api, manual"
-    )
-    data_quality: str | None = Field(
-        None,
-        description="Quality flag: complete, estimated, partial"
-    )
+    data_source: str = Field(default="upload", description="Source: upload, api, manual")
+    data_quality: str | None = Field(None, description="Quality flag: complete, estimated, partial")
 
 
 class UsageHistoryCreate(UsageHistoryBase):
     """Schema for creating a single usage record."""
+
     pass
 
 
@@ -34,11 +30,7 @@ class UsageHistoryBulkCreate(BaseModel):
     """Schema for bulk creating usage records."""
 
     user_id: UUID
-    usage_records: list[UsageHistoryCreate] = Field(
-        ...,
-        min_length=1,
-        description="List of usage records to create"
-    )
+    usage_records: list[UsageHistoryCreate] = Field(..., min_length=1, description="List of usage records to create")
 
     @field_validator("usage_records")
     @classmethod
@@ -60,6 +52,7 @@ class UsageHistoryResponse(UsageHistoryBase):
 
 
 # Usage Analysis Schemas (for Backend Dev #2)
+
 
 class SeasonalPattern(BaseModel):
     """Seasonal usage pattern analysis."""
@@ -111,10 +104,7 @@ class UsageProfile(BaseModel):
     """
 
     user_id: UUID
-    profile_type: str = Field(
-        ...,
-        description="User type: baseline, high_user, variable_user, seasonal_user"
-    )
+    profile_type: str = Field(..., description="User type: baseline, high_user, variable_user, seasonal_user")
     analysis_period_start: date = Field(..., description="Start date of analysis period")
     analysis_period_end: date = Field(..., description="End date of analysis period")
 
@@ -122,10 +112,7 @@ class UsageProfile(BaseModel):
     statistics: UsageStatistics
 
     # Seasonal patterns
-    seasonal_patterns: list[SeasonalPattern] = Field(
-        default_factory=list,
-        description="Seasonal usage patterns"
-    )
+    seasonal_patterns: list[SeasonalPattern] = Field(default_factory=list, description="Seasonal usage patterns")
 
     # Peak/off-peak (if available)
     peak_analysis: PeakUsageAnalysis | None = None
@@ -133,22 +120,14 @@ class UsageProfile(BaseModel):
     # Projections
     projected_annual_kwh: Decimal = Field(..., description="Projected 12-month consumption")
     projected_monthly_kwh: list[Decimal] = Field(
-        ...,
-        min_length=12,
-        max_length=12,
-        description="Projected kWh for next 12 months"
+        ..., min_length=12, max_length=12, description="Projected kWh for next 12 months"
     )
 
     # Data quality
     data_quality: DataQualityMetrics
 
     # Additional metadata
-    confidence_score: Decimal = Field(
-        ...,
-        ge=0,
-        le=1,
-        description="Confidence in projections (0.0-1.0)"
-    )
+    confidence_score: Decimal = Field(..., ge=0, le=1, description="Confidence in projections (0.0-1.0)")
     notes: list[str] = Field(default_factory=list, description="Analysis notes")
 
     model_config = {"from_attributes": True}
@@ -171,6 +150,7 @@ class UsageSummary(BaseModel):
 
 
 # Month-by-month breakdown for visualizations
+
 
 class MonthlyUsage(BaseModel):
     """Monthly usage breakdown."""

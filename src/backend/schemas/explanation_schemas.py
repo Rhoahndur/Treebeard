@@ -103,28 +103,13 @@ class PlanExplanation(BaseModel):
     plan_id: UUID = Field(..., description="Plan ID")
     explanation_text: str = Field(..., description="Main explanation (2-3 sentences)")
     key_differentiators: list[str] = Field(
-        default_factory=list,
-        description="Key features that make this plan stand out"
+        default_factory=list, description="Key features that make this plan stand out"
     )
-    trade_offs: list[str] = Field(
-        default_factory=list,
-        description="Important trade-offs or compromises"
-    )
+    trade_offs: list[str] = Field(default_factory=list, description="Important trade-offs or compromises")
     persona_type: str = Field(..., description="User persona type")
-    readability_score: float = Field(
-        ...,
-        ge=0,
-        le=100,
-        description="Flesch-Kincaid readability score"
-    )
-    generated_via: str = Field(
-        ...,
-        description="Generation method: 'claude_api' or 'template'"
-    )
-    generated_at: datetime = Field(
-        default_factory=datetime.utcnow,
-        description="When explanation was generated"
-    )
+    readability_score: float = Field(..., ge=0, le=100, description="Flesch-Kincaid readability score")
+    generated_via: str = Field(..., description="Generation method: 'claude_api' or 'template'")
+    generated_at: datetime = Field(default_factory=datetime.utcnow, description="When explanation was generated")
 
     model_config = {"from_attributes": True}
 
@@ -136,10 +121,7 @@ class ExplanationRequest(BaseModel):
     user_profile: dict[str, Any] = Field(..., description="User's usage profile")
     preferences: UserPreferences = Field(..., description="User preferences")
     current_plan: CurrentPlan | None = Field(None, description="Current plan for comparison")
-    force_regenerate: bool = Field(
-        default=False,
-        description="Force regeneration even if cached"
-    )
+    force_regenerate: bool = Field(default=False, description="Force regeneration even if cached")
 
 
 class ExplanationResponse(BaseModel):
@@ -203,5 +185,5 @@ class CacheWarmingRequest(BaseModel):
             PersonaType.FLEXIBILITY_FOCUSED,
             PersonaType.BALANCED,
         ],
-        description="Personas to generate for"
+        description="Personas to generate for",
     )

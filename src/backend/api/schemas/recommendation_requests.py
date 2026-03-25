@@ -41,15 +41,9 @@ class UserPreferencesRequest(BaseModel):
     """
 
     cost_priority: int = Field(40, ge=0, le=100, description="Cost priority (0-100)")
-    flexibility_priority: int = Field(
-        30, ge=0, le=100, description="Flexibility priority (0-100)"
-    )
-    renewable_priority: int = Field(
-        20, ge=0, le=100, description="Renewable energy priority (0-100)"
-    )
-    rating_priority: int = Field(
-        10, ge=0, le=100, description="Supplier rating priority (0-100)"
-    )
+    flexibility_priority: int = Field(30, ge=0, le=100, description="Flexibility priority (0-100)")
+    renewable_priority: int = Field(20, ge=0, le=100, description="Renewable energy priority (0-100)")
+    rating_priority: int = Field(10, ge=0, le=100, description="Supplier rating priority (0-100)")
 
 
 class CurrentPlanRequest(BaseModel):
@@ -59,16 +53,10 @@ class CurrentPlanRequest(BaseModel):
 
     plan_name: str | None = Field(None, description="Current plan name")
     supplier_name: str | None = Field(None, description="Current supplier name")
-    current_rate: Decimal | None = Field(
-        None, ge=0, description="Current rate (cents per kWh)"
-    )
+    current_rate: Decimal | None = Field(None, ge=0, description="Current rate (cents per kWh)")
     contract_end_date: date | None = Field(None, description="Contract end date")
-    early_termination_fee: Decimal | None = Field(
-        None, ge=0, description="Early termination fee"
-    )
-    annual_cost: Decimal | None = Field(
-        None, ge=0, description="Annual cost of current plan"
-    )
+    early_termination_fee: Decimal | None = Field(None, ge=0, description="Early termination fee")
+    annual_cost: Decimal | None = Field(None, ge=0, description="Annual cost of current plan")
     contract_start_date: date | None = Field(None, description="Contract start date")
 
 
@@ -133,9 +121,7 @@ class UsageProfileSummary(BaseModel):
     profile_type: str = Field(..., description="Profile type classification")
     projected_annual_kwh: Decimal = Field(..., description="Projected annual usage")
     mean_monthly_kwh: Decimal = Field(..., description="Mean monthly usage")
-    has_seasonal_pattern: bool = Field(
-        ..., description="Whether user has seasonal usage pattern"
-    )
+    has_seasonal_pattern: bool = Field(..., description="Whether user has seasonal usage pattern")
     confidence_score: Decimal = Field(..., description="Analysis confidence (0-1)")
 
 
@@ -159,9 +145,7 @@ class SavingsResponse(BaseModel):
     annual_savings: Decimal = Field(..., description="Annual savings vs current plan")
     savings_percentage: Decimal = Field(..., description="Savings percentage")
     monthly_savings: Decimal = Field(..., description="Average monthly savings")
-    break_even_months: int | None = Field(
-        None, description="Months to break even (if ETF exists)"
-    )
+    break_even_months: int | None = Field(None, description="Months to break even (if ETF exists)")
 
 
 class RiskWarningResponse(BaseModel):
@@ -217,9 +201,7 @@ class PlanRecommendationResponse(BaseModel):
     trade_offs: list[str] = Field(..., description="Important trade-offs")
 
     # Risk warnings (Story 6.1)
-    risk_warnings: list[RiskWarningResponse] = Field(
-        default_factory=list, description="Risk warnings for this plan"
-    )
+    risk_warnings: list[RiskWarningResponse] = Field(default_factory=list, description="Risk warnings for this plan")
     risk_count: int = Field(default=0, description="Total risk count")
     highest_risk_severity: str | None = Field(None, description="Highest risk severity")
 
@@ -248,27 +230,19 @@ class GenerateRecommendationResponse(BaseModel):
 
     recommendation_id: UUID = Field(..., description="Unique recommendation ID")
     user_profile: UsageProfileSummary = Field(..., description="User usage profile summary")
-    top_plans: list[PlanRecommendationResponse] = Field(
-        ..., description="Top 3 recommended plans"
-    )
+    top_plans: list[PlanRecommendationResponse] = Field(..., description="Top 3 recommended plans")
     generated_at: datetime = Field(..., description="Generation timestamp")
     total_plans_analyzed: int = Field(..., description="Number of plans analyzed")
     warnings: list[str] = Field(default_factory=list, description="Any warnings or notes")
 
     # Risk analysis (Story 6.1)
-    overall_risk_level: str = Field(
-        default="low", description="Overall risk level: low, medium, high"
-    )
+    overall_risk_level: str = Field(default="low", description="Overall risk level: low, medium, high")
     total_risks_detected: int = Field(default=0, description="Total risks across all plans")
     critical_risk_count: int = Field(default=0, description="Number of critical risks")
 
     # Stay recommendation (Story 6.2)
-    should_stay: bool = Field(
-        default=False, description="Whether staying with current plan is recommended"
-    )
-    stay_recommendation: StayRecommendationResponse | None = Field(
-        None, description="Stay recommendation details"
-    )
+    should_stay: bool = Field(default=False, description="Whether staying with current plan is recommended")
+    stay_recommendation: StayRecommendationResponse | None = Field(None, description="Stay recommendation details")
 
     class Config:
         json_schema_extra = {

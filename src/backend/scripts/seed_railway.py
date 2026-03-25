@@ -9,7 +9,7 @@ import os
 import sys
 
 # Add backend directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -22,9 +22,9 @@ from scripts.seed_database import seed_admin_user, seed_demo_user, seed_plans, s
 
 def main():
     """Main seeding function for Railway."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TreeBeard Database Seeding (Railway)")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     # Use DATABASE_URL from environment (Railway sets this automatically)
     db_url = settings.database_url
@@ -48,9 +48,9 @@ def main():
         print("\n[4/4] Creating demo user...")
         demo_user = seed_demo_user(db)
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("✓ RAILWAY SEEDING COMPLETE!")
-        print("="*60)
+        print("=" * 60)
         print("\nSummary:")
         print(f"  • Suppliers: {len(suppliers)}")
         print(f"  • Plans: {len(plans)}")
@@ -61,6 +61,7 @@ def main():
     except Exception as e:
         print(f"\n✗ ERROR during seeding: {e}")
         import traceback
+
         traceback.print_exc()
         db.rollback()
         raise

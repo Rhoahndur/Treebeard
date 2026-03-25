@@ -34,7 +34,7 @@ class TimestampMixin:
         server_default=func.now(),
         nullable=False,
         index=True,
-        comment="Timestamp when the record was created"
+        comment="Timestamp when the record was created",
     )
 
     updated_at: Mapped[datetime] = mapped_column(
@@ -42,7 +42,7 @@ class TimestampMixin:
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
-        comment="Timestamp when the record was last updated"
+        comment="Timestamp when the record was last updated",
     )
 
 
@@ -54,5 +54,5 @@ class UUIDPrimaryKeyMixin:
         primary_key=True,
         default=uuid.uuid4,
         nullable=False,
-        comment="Unique identifier for the record"
+        comment="Unique identifier for the record",
     )

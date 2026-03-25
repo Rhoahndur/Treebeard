@@ -189,9 +189,7 @@ async def submit_recommendation_feedback(
     except HTTPException:
         raise
     except Exception as exc:
-        logger.error(
-            f"Failed to submit recommendation feedback: {exc}", exc_info=True
-        )
+        logger.error(f"Failed to submit recommendation feedback: {exc}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to submit feedback. Please try again later.",
@@ -441,35 +439,39 @@ async def export_feedback_csv(
         writer = csv.writer(output)
 
         # Write header
-        writer.writerow([
-            "Feedback ID",
-            "User ID",
-            "Recommendation ID",
-            "Plan ID",
-            "Plan Name",
-            "Supplier Name",
-            "Rating",
-            "Feedback Type",
-            "Feedback Text",
-            "Sentiment Score",
-            "Created At",
-        ])
+        writer.writerow(
+            [
+                "Feedback ID",
+                "User ID",
+                "Recommendation ID",
+                "Plan ID",
+                "Plan Name",
+                "Supplier Name",
+                "Rating",
+                "Feedback Type",
+                "Feedback Text",
+                "Sentiment Score",
+                "Created At",
+            ]
+        )
 
         # Write rows
         for feedback, plan in feedbacks:
-            writer.writerow([
-                str(feedback.id),
-                str(feedback.user_id) if feedback.user_id else "Anonymous",
-                str(feedback.recommendation_id) if feedback.recommendation_id else "",
-                str(feedback.plan_id) if feedback.plan_id else "",
-                plan.plan_name if plan else "",
-                plan.supplier_name if plan else "",
-                feedback.rating,
-                feedback.feedback_type,
-                feedback.feedback_text or "",
-                str(feedback.sentiment_score) if feedback.sentiment_score else "",
-                feedback.created_at.isoformat(),
-            ])
+            writer.writerow(
+                [
+                    str(feedback.id),
+                    str(feedback.user_id) if feedback.user_id else "Anonymous",
+                    str(feedback.recommendation_id) if feedback.recommendation_id else "",
+                    str(feedback.plan_id) if feedback.plan_id else "",
+                    plan.plan_name if plan else "",
+                    plan.supplier_name if plan else "",
+                    feedback.rating,
+                    feedback.feedback_type,
+                    feedback.feedback_text or "",
+                    str(feedback.sentiment_score) if feedback.sentiment_score else "",
+                    feedback.created_at.isoformat(),
+                ]
+            )
 
         # Prepare response
         output.seek(0)
@@ -482,9 +484,7 @@ async def export_feedback_csv(
         return StreamingResponse(
             iter([output.getvalue()]),
             media_type="text/csv",
-            headers={
-                "Content-Disposition": f"attachment; filename=feedback_export_{current_admin.id}.csv"
-            },
+            headers={"Content-Disposition": f"attachment; filename=feedback_export_{current_admin.id}.csv"},
         )
 
     except Exception as exc:

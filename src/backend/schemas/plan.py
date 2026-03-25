@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 # Rate Structure Schemas
 
+
 class FixedRateStructure(BaseModel):
     """Fixed rate structure - single rate for all usage."""
 
@@ -22,10 +23,7 @@ class TieredRateStructure(BaseModel):
     """Tiered rate structure - different rates based on usage levels."""
 
     type: str = Field(default="tiered", description="Rate type")
-    tiers: list[dict[str, Any]] = Field(
-        ...,
-        description="List of tiers with usage_max and rate_per_kwh"
-    )
+    tiers: list[dict[str, Any]] = Field(..., description="List of tiers with usage_max and rate_per_kwh")
 
 
 class TimeOfUseRateStructure(BaseModel):
@@ -51,23 +49,15 @@ RateStructure = dict[str, Any]
 
 # Supplier Schemas
 
+
 class SupplierBase(BaseModel):
     """Base schema for Supplier."""
 
     supplier_name: str = Field(..., max_length=255, description="Supplier name")
-    average_rating: Decimal | None = Field(
-        None,
-        ge=0,
-        le=5,
-        description="Average rating (0.00-5.00)"
-    )
+    average_rating: Decimal | None = Field(None, ge=0, le=5, description="Average rating (0.00-5.00)")
     review_count: int = Field(default=0, ge=0, description="Number of reviews")
     website: HttpUrl | None = Field(None, description="Supplier website URL")
-    customer_service_phone: str | None = Field(
-        None,
-        max_length=20,
-        description="Customer service phone"
-    )
+    customer_service_phone: str | None = Field(None, max_length=20, description="Customer service phone")
 
 
 class SupplierCreate(SupplierBase):
@@ -100,6 +90,7 @@ class SupplierResponse(SupplierBase):
 
 # PlanCatalog Schemas
 
+
 class PlanCatalogBase(BaseModel):
     """Base schema for PlanCatalog."""
 
@@ -107,16 +98,9 @@ class PlanCatalogBase(BaseModel):
     plan_type: str = Field(..., description="Type: fixed, variable, indexed, tiered")
     rate_structure: RateStructure = Field(..., description="Rate structure (JSONB)")
     contract_length_months: int = Field(..., ge=0, description="Contract length (0=month-to-month)")
-    early_termination_fee: Decimal = Field(
-        default=Decimal("0.00"),
-        ge=0,
-        description="Early termination fee"
-    )
+    early_termination_fee: Decimal = Field(default=Decimal("0.00"), ge=0, description="Early termination fee")
     renewable_percentage: Decimal = Field(
-        default=Decimal("0.00"),
-        ge=0,
-        le=100,
-        description="Renewable energy percentage"
+        default=Decimal("0.00"), ge=0, le=100, description="Renewable energy percentage"
     )
     monthly_fee: Decimal | None = Field(None, ge=0, description="Monthly base fee")
     connection_fee: Decimal | None = Field(None, ge=0, description="Connection fee")
@@ -199,6 +183,7 @@ class PlanCatalogSummary(BaseModel):
 
 
 # Helper schemas for filtering
+
 
 class PlanFilterParams(BaseModel):
     """Parameters for filtering plans."""

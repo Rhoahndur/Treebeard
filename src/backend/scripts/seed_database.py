@@ -17,7 +17,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 # Add parent directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -29,23 +29,140 @@ from models.user import User
 # Texas ZIP codes to cover (major cities)
 TEXAS_ZIP_CODES = [
     # Austin
-    "78701", "78702", "78703", "78704", "78705", "78721", "78722", "78723", "78724", "78725",
-    "78726", "78727", "78728", "78729", "78730", "78731", "78732", "78733", "78734", "78735",
-    "78736", "78737", "78738", "78739", "78741", "78742", "78744", "78745", "78746", "78747",
-    "78748", "78749", "78750", "78751", "78752", "78753", "78754", "78756", "78757", "78758",
+    "78701",
+    "78702",
+    "78703",
+    "78704",
+    "78705",
+    "78721",
+    "78722",
+    "78723",
+    "78724",
+    "78725",
+    "78726",
+    "78727",
+    "78728",
+    "78729",
+    "78730",
+    "78731",
+    "78732",
+    "78733",
+    "78734",
+    "78735",
+    "78736",
+    "78737",
+    "78738",
+    "78739",
+    "78741",
+    "78742",
+    "78744",
+    "78745",
+    "78746",
+    "78747",
+    "78748",
+    "78749",
+    "78750",
+    "78751",
+    "78752",
+    "78753",
+    "78754",
+    "78756",
+    "78757",
+    "78758",
     "78759",
     # Houston
-    "77001", "77002", "77003", "77004", "77005", "77006", "77007", "77008", "77009", "77010",
-    "77019", "77020", "77021", "77025", "77030", "77035", "77036", "77040", "77041", "77042",
-    "77043", "77044", "77045", "77046", "77047", "77048", "77049", "77050", "77051", "77054",
-    "77055", "77056", "77057", "77058", "77059", "77060", "77061", "77062", "77063", "77064",
+    "77001",
+    "77002",
+    "77003",
+    "77004",
+    "77005",
+    "77006",
+    "77007",
+    "77008",
+    "77009",
+    "77010",
+    "77019",
+    "77020",
+    "77021",
+    "77025",
+    "77030",
+    "77035",
+    "77036",
+    "77040",
+    "77041",
+    "77042",
+    "77043",
+    "77044",
+    "77045",
+    "77046",
+    "77047",
+    "77048",
+    "77049",
+    "77050",
+    "77051",
+    "77054",
+    "77055",
+    "77056",
+    "77057",
+    "77058",
+    "77059",
+    "77060",
+    "77061",
+    "77062",
+    "77063",
+    "77064",
     # Dallas
-    "75201", "75202", "75203", "75204", "75205", "75206", "75207", "75208", "75209", "75210",
-    "75211", "75212", "75214", "75215", "75216", "75217", "75218", "75219", "75220", "75223",
-    "75224", "75225", "75226", "75227", "75228", "75229", "75230", "75231", "75232", "75233",
+    "75201",
+    "75202",
+    "75203",
+    "75204",
+    "75205",
+    "75206",
+    "75207",
+    "75208",
+    "75209",
+    "75210",
+    "75211",
+    "75212",
+    "75214",
+    "75215",
+    "75216",
+    "75217",
+    "75218",
+    "75219",
+    "75220",
+    "75223",
+    "75224",
+    "75225",
+    "75226",
+    "75227",
+    "75228",
+    "75229",
+    "75230",
+    "75231",
+    "75232",
+    "75233",
     # San Antonio
-    "78201", "78202", "78203", "78204", "78205", "78207", "78208", "78209", "78210", "78211",
-    "78212", "78213", "78214", "78215", "78216", "78217", "78218", "78219", "78220", "78221",
+    "78201",
+    "78202",
+    "78203",
+    "78204",
+    "78205",
+    "78207",
+    "78208",
+    "78209",
+    "78210",
+    "78211",
+    "78212",
+    "78213",
+    "78214",
+    "78215",
+    "78216",
+    "78217",
+    "78218",
+    "78219",
+    "78220",
+    "78221",
 ]
 
 
@@ -72,154 +189,154 @@ def seed_suppliers(db):
             "license_number": "TX-10001",
         },
         {
-            "supplier_name":"Reliant Energy",
+            "supplier_name": "Reliant Energy",
             "website": "https://www.reliant.com",
-            "customer_service_phone":"1-866-222-7100",
+            "customer_service_phone": "1-866-222-7100",
             "email": "customercare@reliant.com",
-            "average_rating":Decimal("4.0"),
+            "average_rating": Decimal("4.0"),
             "review_count": 4521,
             "description": "Trusted energy provider with flexible plans and green energy options.",
             "service_areas": ["Houston", "Galveston", "Corpus Christi"],
             "license_number": "TX-10002",
         },
         {
-            "supplier_name":"Direct Energy",
+            "supplier_name": "Direct Energy",
             "website": "https://www.directenergy.com",
-            "customer_service_phone":"1-866-201-7173",
+            "customer_service_phone": "1-866-201-7173",
             "email": "help@directenergy.com",
-            "average_rating":Decimal("3.9"),
+            "average_rating": Decimal("3.9"),
             "review_count": 3842,
             "description": "Competitive rates with straightforward plans and excellent customer service.",
             "service_areas": ["Dallas", "Austin", "San Antonio"],
             "license_number": "TX-10003",
         },
         {
-            "supplier_name":"Green Mountain Energy",
+            "supplier_name": "Green Mountain Energy",
             "website": "https://www.greenmountainenergy.com",
-            "customer_service_phone":"1-888-895-2055",
+            "customer_service_phone": "1-888-895-2055",
             "email": "service@greenmountainenergy.com",
-            "average_rating":Decimal("4.5"),
+            "average_rating": Decimal("4.5"),
             "review_count": 2934,
             "description": "100% renewable energy plans for environmentally conscious customers.",
             "service_areas": ["Austin", "Dallas", "Houston"],
             "license_number": "TX-10004",
         },
         {
-            "supplier_name":"Champion Energy",
+            "supplier_name": "Champion Energy",
             "website": "https://www.championenergyservices.com",
-            "customer_service_phone":"1-866-446-0499",
+            "customer_service_phone": "1-866-446-0499",
             "email": "info@championenergy.com",
-            "average_rating":Decimal("3.8"),
+            "average_rating": Decimal("3.8"),
             "review_count": 2156,
             "description": "Budget-friendly electricity plans with flexible contract options.",
             "service_areas": ["Houston", "Dallas", "Fort Worth"],
             "license_number": "TX-10005",
         },
         {
-            "supplier_name":"Gexa Energy",
+            "supplier_name": "Gexa Energy",
             "website": "https://www.gexaenergy.com",
-            "customer_service_phone":"1-866-961-9399",
+            "customer_service_phone": "1-866-961-9399",
             "email": "customersupport@gexaenergy.com",
-            "average_rating":Decimal("3.7"),
+            "average_rating": Decimal("3.7"),
             "review_count": 1876,
             "description": "Simple, affordable electricity plans with renewable options.",
             "service_areas": ["Dallas", "Houston", "San Antonio"],
             "license_number": "TX-10006",
         },
         {
-            "supplier_name":"Frontier Utilities",
+            "supplier_name": "Frontier Utilities",
             "website": "https://www.frontierutilities.com",
-            "customer_service_phone":"1-866-480-2226",
+            "customer_service_phone": "1-866-480-2226",
             "email": "support@frontierutilities.com",
-            "average_rating":Decimal("4.1"),
+            "average_rating": Decimal("4.1"),
             "review_count": 1654,
             "description": "Customer-focused provider with competitive fixed-rate plans.",
             "service_areas": ["Austin", "Dallas", "Waco"],
             "license_number": "TX-10007",
         },
         {
-            "supplier_name":"4Change Energy",
+            "supplier_name": "4Change Energy",
             "website": "https://www.4changeenergy.com",
-            "customer_service_phone":"1-877-933-5443",
+            "customer_service_phone": "1-877-933-5443",
             "email": "info@4changeenergy.com",
-            "average_rating":Decimal("4.3"),
+            "average_rating": Decimal("4.3"),
             "review_count": 1432,
             "description": "Innovative renewable energy plans with community giving programs.",
             "service_areas": ["Houston", "Austin", "Corpus Christi"],
             "license_number": "TX-10008",
         },
         {
-            "supplier_name":"Cirro Energy",
+            "supplier_name": "Cirro Energy",
             "website": "https://www.cirroenergy.com",
-            "customer_service_phone":"1-844-222-4776",
+            "customer_service_phone": "1-844-222-4776",
             "email": "hello@cirroenergy.com",
-            "average_rating":Decimal("3.9"),
+            "average_rating": Decimal("3.9"),
             "review_count": 1298,
             "description": "Straightforward electricity plans with no surprises.",
             "service_areas": ["Dallas", "Austin", "Houston"],
             "license_number": "TX-10009",
         },
         {
-            "supplier_name":"Pulse Power",
+            "supplier_name": "Pulse Power",
             "website": "https://www.pulsepower.com",
-            "customer_service_phone":"1-877-785-7373",
+            "customer_service_phone": "1-877-785-7373",
             "email": "support@pulsepower.com",
-            "average_rating":Decimal("3.6"),
+            "average_rating": Decimal("3.6"),
             "review_count": 1187,
             "description": "Prepaid and traditional electricity plans with flexible options.",
             "service_areas": ["Houston", "Dallas", "San Antonio"],
             "license_number": "TX-10010",
         },
         {
-            "supplier_name":"Discount Power",
+            "supplier_name": "Discount Power",
             "website": "https://www.discountpower.com",
-            "customer_service_phone":"1-866-657-0247",
+            "customer_service_phone": "1-866-657-0247",
             "email": "info@discountpower.com",
-            "average_rating":Decimal("3.5"),
+            "average_rating": Decimal("3.5"),
             "review_count": 1056,
             "description": "Low-cost electricity with month-to-month and fixed-rate options.",
             "service_areas": ["Dallas", "Fort Worth", "Houston"],
             "license_number": "TX-10011",
         },
         {
-            "supplier_name":"Ambit Energy",
+            "supplier_name": "Ambit Energy",
             "website": "https://www.ambitenergy.com",
-            "customer_service_phone":"1-877-282-6248",
+            "customer_service_phone": "1-877-282-6248",
             "email": "customercare@ambitenergy.com",
-            "average_rating":Decimal("3.4"),
+            "average_rating": Decimal("3.4"),
             "review_count": 967,
             "description": "Competitive rates with customer rewards program.",
             "service_areas": ["Dallas", "Houston", "Austin"],
             "license_number": "TX-10012",
         },
         {
-            "supplier_name":"Tara Energy",
+            "supplier_name": "Tara Energy",
             "website": "https://www.taraenergy.com",
-            "customer_service_phone":"1-866-368-7802",
+            "customer_service_phone": "1-866-368-7802",
             "email": "help@taraenergy.com",
-            "average_rating":Decimal("4.0"),
+            "average_rating": Decimal("4.0"),
             "review_count": 845,
             "description": "Texas-based provider with renewable energy options and local support.",
             "service_areas": ["Houston", "Austin", "San Antonio"],
             "license_number": "TX-10013",
         },
         {
-            "supplier_name":"Just Energy",
+            "supplier_name": "Just Energy",
             "website": "https://www.justenergy.com",
-            "customer_service_phone":"1-866-587-8674",
+            "customer_service_phone": "1-866-587-8674",
             "email": "support@justenergy.com",
-            "average_rating":Decimal("3.3"),
+            "average_rating": Decimal("3.3"),
             "review_count": 723,
             "description": "Energy plans with price protection and green options.",
             "service_areas": ["Dallas", "Houston", "Corpus Christi"],
             "license_number": "TX-10014",
         },
         {
-            "supplier_name":"Express Energy",
+            "supplier_name": "Express Energy",
             "website": "https://www.expressenergy.com",
-            "customer_service_phone":"1-888-397-7377",
+            "customer_service_phone": "1-888-397-7377",
             "email": "info@expressenergy.com",
-            "average_rating":Decimal("3.8"),
+            "average_rating": Decimal("3.8"),
             "review_count": 654,
             "description": "Simple electricity plans with transparent pricing.",
             "service_areas": ["Austin", "Dallas", "Houston"],
@@ -262,7 +379,7 @@ def seed_plans(db, suppliers):
         # TXU Energy Plans
         {
             "supplier": suppliers[0],
-            "supplier_name":"TXU Energy Secure 12",
+            "supplier_name": "TXU Energy Secure 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -275,7 +392,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[0],
-            "supplier_name":"TXU Energy Secure 24",
+            "supplier_name": "TXU Energy Secure 24",
             "plan_type": "fixed",
             "contract_length_months": 24,
             "rate_structure": "fixed",
@@ -288,7 +405,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[0],
-            "supplier_name":"TXU Energy Solar Choice 12",
+            "supplier_name": "TXU Energy Solar Choice 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -302,7 +419,7 @@ def seed_plans(db, suppliers):
         # Reliant Energy Plans
         {
             "supplier": suppliers[1],
-            "supplier_name":"Reliant Basic Power 12",
+            "supplier_name": "Reliant Basic Power 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -315,7 +432,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[1],
-            "supplier_name":"Reliant Flex Monthly",
+            "supplier_name": "Reliant Flex Monthly",
             "plan_type": "variable",
             "contract_length_months": 0,
             "rate_structure": "variable",
@@ -328,7 +445,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[1],
-            "supplier_name":"Reliant Truly Free Weekends 12",
+            "supplier_name": "Reliant Truly Free Weekends 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "tiered",
@@ -342,7 +459,7 @@ def seed_plans(db, suppliers):
         # Direct Energy Plans
         {
             "supplier": suppliers[2],
-            "supplier_name":"Direct Energy Live Brighter 12",
+            "supplier_name": "Direct Energy Live Brighter 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -355,7 +472,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[2],
-            "supplier_name":"Direct Energy All Green 12",
+            "supplier_name": "Direct Energy All Green 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -369,7 +486,7 @@ def seed_plans(db, suppliers):
         # Green Mountain Energy Plans
         {
             "supplier": suppliers[3],
-            "supplier_name":"Pollution Free 12",
+            "supplier_name": "Pollution Free 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -382,7 +499,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[3],
-            "supplier_name":"Renewable Rewards 24",
+            "supplier_name": "Renewable Rewards 24",
             "plan_type": "fixed",
             "contract_length_months": 24,
             "rate_structure": "fixed",
@@ -395,7 +512,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[3],
-            "supplier_name":"Pollution Free Month-to-Month",
+            "supplier_name": "Pollution Free Month-to-Month",
             "plan_type": "variable",
             "contract_length_months": 0,
             "rate_structure": "variable",
@@ -409,7 +526,7 @@ def seed_plans(db, suppliers):
         # Champion Energy Plans
         {
             "supplier": suppliers[4],
-            "supplier_name":"Champ Saver 12",
+            "supplier_name": "Champ Saver 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -422,7 +539,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[4],
-            "supplier_name":"Champ Select 24",
+            "supplier_name": "Champ Select 24",
             "plan_type": "fixed",
             "contract_length_months": 24,
             "rate_structure": "fixed",
@@ -436,7 +553,7 @@ def seed_plans(db, suppliers):
         # Gexa Energy Plans
         {
             "supplier": suppliers[5],
-            "supplier_name":"Gexa Saver Supreme 12",
+            "supplier_name": "Gexa Saver Supreme 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -449,7 +566,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[5],
-            "supplier_name":"Gexa Green 12",
+            "supplier_name": "Gexa Green 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -463,7 +580,7 @@ def seed_plans(db, suppliers):
         # Frontier Utilities Plans
         {
             "supplier": suppliers[6],
-            "supplier_name":"Frontier Secure 12",
+            "supplier_name": "Frontier Secure 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -476,7 +593,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[6],
-            "supplier_name":"Frontier Green Choice 12",
+            "supplier_name": "Frontier Green Choice 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -490,7 +607,7 @@ def seed_plans(db, suppliers):
         # 4Change Energy Plans
         {
             "supplier": suppliers[7],
-            "supplier_name":"Maxx Saver Select 12",
+            "supplier_name": "Maxx Saver Select 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -503,7 +620,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[7],
-            "supplier_name":"Maxx Saver Select 24",
+            "supplier_name": "Maxx Saver Select 24",
             "plan_type": "fixed",
             "contract_length_months": 24,
             "rate_structure": "fixed",
@@ -516,7 +633,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[7],
-            "supplier_name":"Freedom Solar 12",
+            "supplier_name": "Freedom Solar 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -530,7 +647,7 @@ def seed_plans(db, suppliers):
         # Cirro Energy Plans
         {
             "supplier": suppliers[8],
-            "supplier_name":"Simple Rate 12",
+            "supplier_name": "Simple Rate 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -543,7 +660,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[8],
-            "supplier_name":"Simple Month-to-Month",
+            "supplier_name": "Simple Month-to-Month",
             "plan_type": "variable",
             "contract_length_months": 0,
             "rate_structure": "variable",
@@ -557,7 +674,7 @@ def seed_plans(db, suppliers):
         # Pulse Power Plans
         {
             "supplier": suppliers[9],
-            "supplier_name":"Pulse Plus 12",
+            "supplier_name": "Pulse Plus 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -570,7 +687,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[9],
-            "supplier_name":"Pulse Prepaid",
+            "supplier_name": "Pulse Prepaid",
             "plan_type": "prepaid",
             "contract_length_months": 0,
             "rate_structure": "fixed",
@@ -584,7 +701,7 @@ def seed_plans(db, suppliers):
         # Discount Power Plans
         {
             "supplier": suppliers[10],
-            "supplier_name":"Budget Saver 12",
+            "supplier_name": "Budget Saver 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -597,7 +714,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[10],
-            "supplier_name":"Discount Green 12",
+            "supplier_name": "Discount Green 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -611,7 +728,7 @@ def seed_plans(db, suppliers):
         # Ambit Energy Plans
         {
             "supplier": suppliers[11],
-            "supplier_name":"Ambit Secure 12",
+            "supplier_name": "Ambit Secure 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -624,7 +741,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[11],
-            "supplier_name":"Ambit Eco Rewards 12",
+            "supplier_name": "Ambit Eco Rewards 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -638,7 +755,7 @@ def seed_plans(db, suppliers):
         # Tara Energy Plans
         {
             "supplier": suppliers[12],
-            "supplier_name":"Tara Breeze 12",
+            "supplier_name": "Tara Breeze 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -651,7 +768,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[12],
-            "supplier_name":"Tara Wind Power 12",
+            "supplier_name": "Tara Wind Power 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -665,7 +782,7 @@ def seed_plans(db, suppliers):
         # Just Energy Plans
         {
             "supplier": suppliers[13],
-            "supplier_name":"Just Fixed 12",
+            "supplier_name": "Just Fixed 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -678,7 +795,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[13],
-            "supplier_name":"Just Green 12",
+            "supplier_name": "Just Green 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -692,7 +809,7 @@ def seed_plans(db, suppliers):
         # Express Energy Plans
         {
             "supplier": suppliers[14],
-            "supplier_name":"Express Value 12",
+            "supplier_name": "Express Value 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -705,7 +822,7 @@ def seed_plans(db, suppliers):
         },
         {
             "supplier": suppliers[14],
-            "supplier_name":"Express Eco 12",
+            "supplier_name": "Express Eco 12",
             "plan_type": "fixed",
             "contract_length_months": 12,
             "rate_structure": "fixed",
@@ -728,25 +845,15 @@ def seed_plans(db, suppliers):
                     {"min_kwh": 0, "max_kwh": 500, "rate": float(data["base_rate"]) - 1.0},
                     {"min_kwh": 501, "max_kwh": 1000, "rate": float(data["base_rate"])},
                     {"min_kwh": 1001, "max_kwh": None, "rate": float(data["base_rate"]) + 1.0},
-                ]
+                ],
             }
         elif data["rate_structure"] == "fixed":
-            rate_structure = {
-                "type": "fixed",
-                "rate": float(data["base_rate"])
-            }
+            rate_structure = {"type": "fixed", "rate": float(data["base_rate"])}
         elif data["rate_structure"] == "variable":
-            rate_structure = {
-                "type": "variable",
-                "base_rate": float(data["base_rate"]),
-                "adjustment_factor": 0.1
-            }
+            rate_structure = {"type": "variable", "base_rate": float(data["base_rate"]), "adjustment_factor": 0.1}
         else:
             # Default to fixed
-            rate_structure = {
-                "type": data["rate_structure"],
-                "rate": float(data["base_rate"])
-            }
+            rate_structure = {"type": data["rate_structure"], "rate": float(data["base_rate"])}
 
         plan = PlanCatalog(
             id=uuid4(),
@@ -833,9 +940,9 @@ def seed_demo_user(db):
 
 def main():
     """Main seeding function."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TreeBeard Database Seeding")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     # Create database engine - use explicit connection string
     db_url = "postgresql://treebeard:dev_password_123@localhost:5432/treebeard_dev"
@@ -851,9 +958,9 @@ def main():
         admin = seed_admin_user(db)
         demo_user = seed_demo_user(db)
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("✓ SEEDING COMPLETE!")
-        print("="*60)
+        print("=" * 60)
         print("\nSummary:")
         print(f"  • Suppliers: {len(suppliers)}")
         print(f"  • Plans: {len(plans)}")

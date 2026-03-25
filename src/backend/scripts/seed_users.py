@@ -15,7 +15,7 @@ env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(env_path)
 
 # Add parent directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from backend.api.auth.jwt import get_password_hash
 from backend.models.user import User
@@ -23,10 +23,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Use DATABASE_URL directly from environment
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://treebeard:dev_password_123@localhost:5432/treebeard_dev"
-)
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://treebeard:dev_password_123@localhost:5432/treebeard_dev")
+
 
 def seed_users():
     """Seed admin and demo users."""
@@ -46,7 +44,7 @@ def seed_users():
         if existing_count > 0:
             print(f"\n⚠ Found {existing_count} existing users")
             response = input("Delete existing users and re-seed? (y/n): ")
-            if response.lower() == 'y':
+            if response.lower() == "y":
                 db.query(User).delete()
                 db.commit()
                 print("✓ Deleted existing users")
@@ -137,10 +135,12 @@ def seed_users():
     except Exception as e:
         print(f"\n✗ Error seeding users: {e}")
         import traceback
+
         traceback.print_exc()
         db.rollback()
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     seed_users()

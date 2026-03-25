@@ -22,6 +22,7 @@ from typing import Any
 try:
     import redis
     from redis import Redis
+
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
@@ -32,6 +33,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CacheStats:
     """Cache statistics for monitoring."""
+
     total_requests: int = 0
     cache_hits: int = 0
     cache_misses: int = 0
@@ -74,6 +76,7 @@ class CacheStats:
 @dataclass
 class CacheKeyStats:
     """Statistics for individual cache key patterns."""
+
     pattern: str
     hits: int = 0
     misses: int = 0
@@ -103,11 +106,11 @@ class OptimizedCacheService:
 
     # Default TTL configurations (optimized based on usage patterns)
     DEFAULT_TTLS = {
-        "plan_catalog": 3600,        # 1 hour - frequently updated
-        "user_profile": 86400,        # 24 hours - changes infrequently
-        "recommendations": 86400,     # 24 hours - stable for a day
-        "usage_analysis": 604800,     # 1 week - historical data
-        "response_cache": 300,        # 5 minutes - API responses
+        "plan_catalog": 3600,  # 1 hour - frequently updated
+        "user_profile": 86400,  # 24 hours - changes infrequently
+        "recommendations": 86400,  # 24 hours - stable for a day
+        "usage_analysis": 604800,  # 1 week - historical data
+        "response_cache": 300,  # 5 minutes - API responses
     }
 
     # Key patterns for monitoring
@@ -142,9 +145,7 @@ class OptimizedCacheService:
         self.enabled = enabled and REDIS_AVAILABLE
         self._client: Redis | None = None
         self.stats = CacheStats()
-        self.key_stats: dict[str, CacheKeyStats] = defaultdict(
-            lambda: CacheKeyStats(pattern="unknown")
-        )
+        self.key_stats: dict[str, CacheKeyStats] = defaultdict(lambda: CacheKeyStats(pattern="unknown"))
         self.stats_interval = stats_interval
         self._last_stats_flush = time.time()
 
@@ -387,12 +388,14 @@ class OptimizedCacheService:
         if self.enabled and self._client:
             try:
                 info = self._client.info("stats")
-                stats_dict.update({
-                    "redis_keyspace_hits": info.get("keyspace_hits", 0),
-                    "redis_keyspace_misses": info.get("keyspace_misses", 0),
-                    "connected_clients": info.get("connected_clients", 0),
-                    "used_memory_human": self._client.info("memory").get("used_memory_human", "0"),
-                })
+                stats_dict.update(
+                    {
+                        "redis_keyspace_hits": info.get("keyspace_hits", 0),
+                        "redis_keyspace_misses": info.get("keyspace_misses", 0),
+                        "connected_clients": info.get("connected_clients", 0),
+                        "used_memory_human": self._client.info("memory").get("used_memory_human", "0"),
+                    }
+                )
             except Exception as e:
                 logger.error(f"Error fetching Redis stats: {e}")
 

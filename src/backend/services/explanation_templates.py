@@ -56,19 +56,13 @@ class TemplateExplanationGenerator:
     def _get_intro(self, plan: RankedPlan, persona: str, dominant_pref: str) -> str:
         """Get personalized intro based on persona."""
         intros = {
-            PersonaType.BUDGET_CONSCIOUS: (
-                "This plan offers the best value for your money."
-            ),
+            PersonaType.BUDGET_CONSCIOUS: ("This plan offers the best value for your money."),
             PersonaType.ECO_CONSCIOUS: (
                 f"This plan aligns with your environmental priorities with "
                 f"{plan.renewable_percentage:.0f}% renewable energy."
             ),
-            PersonaType.FLEXIBILITY_FOCUSED: (
-                "This plan gives you the flexibility you're looking for."
-            ),
-            PersonaType.BALANCED: (
-                "This plan provides the best overall match for your needs."
-            ),
+            PersonaType.FLEXIBILITY_FOCUSED: ("This plan gives you the flexibility you're looking for."),
+            PersonaType.BALANCED: ("This plan provides the best overall match for your needs."),
         }
         return intros.get(persona, intros[PersonaType.BALANCED])
 
@@ -84,23 +78,17 @@ class TemplateExplanationGenerator:
 
         # Cost benefit
         if preferences.cost_priority > 30:
-            projected_savings = getattr(plan, 'projected_annual_savings', None)
+            projected_savings = getattr(plan, "projected_annual_savings", None)
             if projected_savings and projected_savings > 0:
-                annual_cost = getattr(current_plan, 'annual_cost', None) if current_plan else None
-                savings_pct = (
-                    projected_savings / annual_cost * 100
-                    if current_plan and annual_cost
-                    else 0
-                )
+                annual_cost = getattr(current_plan, "annual_cost", None) if current_plan else None
+                savings_pct = projected_savings / annual_cost * 100 if current_plan and annual_cost else 0
                 if savings_pct > 10:
                     benefits.append(
                         f"You'll save ${projected_savings:.0f} per year "
                         f"({savings_pct:.0f}% less than your current plan)"
                     )
                 else:
-                    benefits.append(
-                        f"You'll save ${projected_savings:.0f} annually"
-                    )
+                    benefits.append(f"You'll save ${projected_savings:.0f} annually")
             else:
                 avg_usage = user_profile.get("statistics", {}).get("mean_kwh", 1000)
                 benefits.append(
@@ -113,19 +101,14 @@ class TemplateExplanationGenerator:
             if plan.renewable_percentage == 100:
                 benefits.append("it's 100% renewable energy")
             elif plan.renewable_percentage >= 50:
-                benefits.append(
-                    f"it includes {plan.renewable_percentage:.0f}% renewable energy"
-                )
+                benefits.append(f"it includes {plan.renewable_percentage:.0f}% renewable energy")
 
         # Flexibility benefit
         if preferences.flexibility_priority > 30:
             if plan.contract_length_months == 0:
                 benefits.append("with no long-term contract required")
             elif plan.early_termination_fee == 0:
-                benefits.append(
-                    f"with a {plan.contract_length_months}-month agreement "
-                    f"and no cancellation fee"
-                )
+                benefits.append(f"with a {plan.contract_length_months}-month agreement " f"and no cancellation fee")
 
         # Rating benefit
         if preferences.rating_priority > 30 and plan.rating_score > 80:
@@ -167,29 +150,19 @@ class TemplateExplanationGenerator:
 
         # Contract commitment
         elif plan.contract_length_months >= 12 and plan.early_termination_fee > 0:
-            tradeoffs.append(
-                f"This requires a {plan.contract_length_months}-month commitment"
-            )
+            tradeoffs.append(f"This requires a {plan.contract_length_months}-month commitment")
 
         # Variable rate
         elif plan.plan_type == "variable":
-            tradeoffs.append(
-                "Keep in mind that the rate can change month-to-month based on market conditions"
-            )
+            tradeoffs.append("Keep in mind that the rate can change month-to-month based on market conditions")
 
         # Low savings
-        projected_savings = getattr(plan, 'projected_annual_savings', None)
-        annual_cost = getattr(current_plan, 'annual_cost', None) if current_plan else None
-        if (
-            projected_savings
-            and current_plan
-            and annual_cost
-        ):
+        projected_savings = getattr(plan, "projected_annual_savings", None)
+        annual_cost = getattr(current_plan, "annual_cost", None) if current_plan else None
+        if projected_savings and current_plan and annual_cost:
             savings_pct = projected_savings / annual_cost * 100
             if 0 < savings_pct < 5:
-                tradeoffs.append(
-                    "The savings are modest, so switching may not be worth the effort"
-                )
+                tradeoffs.append("The savings are modest, so switching may not be worth the effort")
 
         # Return first tradeoff or empty string
         return tradeoffs[0] + "." if tradeoffs else ""
@@ -218,12 +191,8 @@ class TemplateExplanationGenerator:
                 differentiators.append("Lowest cost option")
 
             # Highest renewable
-            if plan.renewable_percentage >= max(
-                p.renewable_percentage for p in all_plans
-            ) - 10:
-                differentiators.append(
-                    f"{plan.renewable_percentage:.0f}% renewable energy"
-                )
+            if plan.renewable_percentage >= max(p.renewable_percentage for p in all_plans) - 10:
+                differentiators.append(f"{plan.renewable_percentage:.0f}% renewable energy")
 
             # Most flexible
             if plan.contract_length_months == 0:
@@ -237,9 +206,7 @@ class TemplateExplanationGenerator:
             if plan.renewable_percentage >= 90:
                 differentiators.append("Nearly 100% renewable energy")
             elif plan.renewable_percentage >= 50:
-                differentiators.append(
-                    f"{plan.renewable_percentage:.0f}% renewable energy"
-                )
+                differentiators.append(f"{plan.renewable_percentage:.0f}% renewable energy")
 
             if plan.contract_length_months == 0:
                 differentiators.append("Month-to-month flexibility")
@@ -271,29 +238,23 @@ class TemplateExplanationGenerator:
 
         # Early termination fee
         if plan.early_termination_fee > 50:
-            trade_offs.append(
-                f"Early termination fee of ${plan.early_termination_fee:.0f}"
-            )
+            trade_offs.append(f"Early termination fee of ${plan.early_termination_fee:.0f}")
 
         # Contract commitment
         if plan.contract_length_months >= 12:
-            trade_offs.append(
-                f"{plan.contract_length_months}-month contract commitment"
-            )
+            trade_offs.append(f"{plan.contract_length_months}-month contract commitment")
 
         # Variable rate risk
         if plan.plan_type == "variable":
             trade_offs.append("Rate can change based on market conditions")
 
         # Cost vs renewable trade-off
-        projected_savings = getattr(plan, 'projected_annual_savings', None)
+        projected_savings = getattr(plan, "projected_annual_savings", None)
         if current_plan and projected_savings:
             if projected_savings < 0:
                 cost_increase = abs(projected_savings)
                 if plan.renewable_percentage > 50:
-                    trade_offs.append(
-                        f"Costs ${cost_increase:.0f} more per year for renewable energy"
-                    )
+                    trade_offs.append(f"Costs ${cost_increase:.0f} more per year for renewable energy")
 
         # Monthly fees
         if plan.monthly_fee and plan.monthly_fee > 5:
@@ -350,8 +311,8 @@ def get_context_aware_message(
         )
 
     # Low savings warning
-    projected_savings = getattr(plan, 'projected_annual_savings', None)
-    annual_cost = getattr(current_plan, 'annual_cost', None) if current_plan else None
+    projected_savings = getattr(plan, "projected_annual_savings", None)
+    annual_cost = getattr(current_plan, "annual_cost", None) if current_plan else None
     if projected_savings and current_plan and annual_cost:
         savings_pct = projected_savings / annual_cost * 100
         if 0 < savings_pct < 5:

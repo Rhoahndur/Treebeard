@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 class EventType(StrEnum):
     """Analytics event types"""
+
     # API Events
     API_REQUEST = "api_request"
     API_ERROR = "error_occurred"
@@ -45,6 +46,7 @@ class EventType(StrEnum):
 
 class AnalyticsBackend(StrEnum):
     """Supported analytics backends"""
+
     MIXPANEL = "mixpanel"
     LOGGING = "logging"
     DATABASE = "database"
@@ -69,7 +71,7 @@ class AnalyticsService:
         mixpanel_token: str | None = None,
         batch_size: int = 100,
         flush_interval: int = 60,
-        enabled: bool = True
+        enabled: bool = True,
     ):
         self.backend = backend
         self.mixpanel_token = mixpanel_token
@@ -88,18 +90,14 @@ class AnalyticsService:
         """Initialize Mixpanel client"""
         try:
             from mixpanel import Mixpanel
+
             self.mixpanel = Mixpanel(self.mixpanel_token)
             logger.info("Mixpanel analytics initialized")
         except ImportError:
             logger.warning("Mixpanel library not installed. Using logging backend.")
             self.backend = AnalyticsBackend.LOGGING
 
-    async def track_event(
-        self,
-        event_type: EventType,
-        properties: dict[str, Any],
-        user_id: UUID | None = None
-    ):
+    async def track_event(self, event_type: EventType, properties: dict[str, Any], user_id: UUID | None = None):
         """
         Track an analytics event.
 
@@ -120,7 +118,7 @@ class AnalyticsService:
             "properties": {
                 **properties,
                 "timestamp": datetime.utcnow().isoformat(),
-                "environment": "production"  # Could be configurable
+                "environment": "production",  # Could be configurable
             },
             "distinct_id": anonymous_user_id,
         }
@@ -153,21 +151,14 @@ class AnalyticsService:
         """Send events to Mixpanel"""
         try:
             for event in events:
-                self.mixpanel.track(
-                    event["distinct_id"],
-                    event["event"],
-                    event["properties"]
-                )
+                self.mixpanel.track(event["distinct_id"], event["event"], event["properties"])
         except Exception as e:
             logger.error(f"Failed to send events to Mixpanel: {e}")
 
     async def _send_to_logging(self, events: list[dict[str, Any]]):
         """Send events to logging"""
         for event in events:
-            logger.info(
-                f"Analytics Event: {event['event']}",
-                extra={"analytics": event}
-            )
+            logger.info(f"Analytics Event: {event['event']}", extra={"analytics": event})
 
     async def _send_to_database(self, events: list[dict[str, Any]]):
         """Send events to database"""
@@ -190,12 +181,7 @@ class AnalyticsService:
     # Specific event tracking methods
 
     async def track_api_request(
-        self,
-        endpoint: str,
-        method: str,
-        status_code: int,
-        duration_ms: float,
-        user_id: UUID | None = None
+        self, endpoint: str, method: str, status_code: int, duration_ms: float, user_id: UUID | None = None
     ):
         """Track API request"""
         await self.track_event(
@@ -206,16 +192,11 @@ class AnalyticsService:
                 "status_code": status_code,
                 "duration_ms": duration_ms,
             },
-            user_id
+            user_id,
         )
 
     async def track_recommendation_generated(
-        self,
-        user_id: UUID,
-        profile_type: str,
-        num_plans: int,
-        duration_ms: float,
-        total_savings: float | None = None
+        self, user_id: UUID, profile_type: str, num_plans: int, duration_ms: float, total_savings: float | None = None
     ):
         """Track recommendation generation"""
         await self.track_event(
@@ -226,7 +207,7 @@ class AnalyticsService:
                 "duration_ms": duration_ms,
                 "total_savings": total_savings,
             },
-            user_id
+            user_id,
         )
 
     async def track_error(
@@ -235,7 +216,7 @@ class AnalyticsService:
         error_type: str,
         status_code: int,
         error_message: str | None = None,
-        user_id: UUID | None = None
+        user_id: UUID | None = None,
     ):
         """Track error occurrence"""
         await self.track_event(
@@ -246,29 +227,20 @@ class AnalyticsService:
                 "status_code": status_code,
                 "error_message": error_message,
             },
-            user_id
+            user_id,
         )
 
-    async def track_cache_hit(
-        self,
-        cache_key: str,
-        hit: bool
-    ):
+    async def track_cache_hit(self, cache_key: str, hit: bool):
         """Track cache hit/miss"""
         event_type = EventType.CACHE_HIT if hit else EventType.CACHE_MISS
         await self.track_event(
             event_type,
             {
                 "cache_key": hashlib.md5(cache_key.encode()).hexdigest()[:8],  # Anonymize key
-            }
+            },
         )
 
-    async def track_risk_warning(
-        self,
-        risk_type: str,
-        severity: str,
-        user_id: UUID | None = None
-    ):
+    async def track_risk_warning(self, risk_type: str, severity: str, user_id: UUID | None = None):
         """Track risk warning triggered"""
         await self.track_event(
             EventType.RISK_WARNING_TRIGGERED,
@@ -276,15 +248,10 @@ class AnalyticsService:
                 "risk_type": risk_type,
                 "severity": severity,
             },
-            user_id
+            user_id,
         )
 
-    async def track_user_created(
-        self,
-        user_id: UUID,
-        property_type: str | None = None,
-        zip_code: str | None = None
-    ):
+    async def track_user_created(self, user_id: UUID, property_type: str | None = None, zip_code: str | None = None):
         """Track user creation"""
         await self.track_event(
             EventType.USER_CREATED,
@@ -292,30 +259,21 @@ class AnalyticsService:
                 "property_type": property_type,
                 "zip_code": zip_code,
             },
-            user_id
+            user_id,
         )
 
-    async def track_preferences_updated(
-        self,
-        user_id: UUID,
-        preferences: dict[str, Any]
-    ):
+    async def track_preferences_updated(self, user_id: UUID, preferences: dict[str, Any]):
         """Track preference updates"""
         await self.track_event(
             EventType.USER_PREFERENCES_UPDATED,
             {
                 "preferences": preferences,
             },
-            user_id
+            user_id,
         )
 
     async def track_file_upload(
-        self,
-        user_id: UUID,
-        file_type: str,
-        file_size_kb: float,
-        success: bool,
-        error_message: str | None = None
+        self, user_id: UUID, file_type: str, file_size_kb: float, success: bool, error_message: str | None = None
     ):
         """Track file upload"""
         event_type = EventType.FILE_UPLOADED if success else EventType.FILE_UPLOAD_FAILED
@@ -326,7 +284,7 @@ class AnalyticsService:
                 "file_size_kb": file_size_kb,
                 "error_message": error_message if not success else None,
             },
-            user_id
+            user_id,
         )
 
     async def shutdown(self):
@@ -347,9 +305,7 @@ def get_analytics_service() -> AnalyticsService:
 
 
 def init_analytics(
-    backend: AnalyticsBackend = AnalyticsBackend.LOGGING,
-    mixpanel_token: str | None = None,
-    enabled: bool = True
+    backend: AnalyticsBackend = AnalyticsBackend.LOGGING, mixpanel_token: str | None = None, enabled: bool = True
 ) -> AnalyticsService:
     """
     Initialize analytics service.
@@ -363,9 +319,5 @@ def init_analytics(
         AnalyticsService instance
     """
     global analytics_service
-    analytics_service = AnalyticsService(
-        backend=backend,
-        mixpanel_token=mixpanel_token,
-        enabled=enabled
-    )
+    analytics_service = AnalyticsService(backend=backend, mixpanel_token=mixpanel_token, enabled=enabled)
     return analytics_service

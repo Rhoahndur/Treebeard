@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field, field_validator
 
 # Story 2.4: Savings Analysis Schemas
 
+
 class MonthlyCost(BaseModel):
     """Month-by-month cost breakdown."""
 
@@ -41,15 +42,9 @@ class CostRange(BaseModel):
     high_estimate: Decimal = Field(..., description="Upper bound estimate (worst case)")
     expected_value: Decimal = Field(..., description="Most likely cost (expected value)")
     confidence_level: Decimal = Field(
-        default=Decimal("0.95"),
-        ge=0,
-        le=1,
-        description="Confidence level (e.g., 0.95 for 95% confidence interval)"
+        default=Decimal("0.95"), ge=0, le=1, description="Confidence level (e.g., 0.95 for 95% confidence interval)"
     )
-    volatility_note: str | None = Field(
-        None,
-        description="Explanation of volatility factors"
-    )
+    volatility_note: str | None = Field(None, description="Explanation of volatility factors")
 
     @field_validator("low_estimate", "high_estimate", "expected_value")
     @classmethod
@@ -70,111 +65,57 @@ class SavingsAnalysis(BaseModel):
     user_id: UUID = Field(..., description="ID of the user")
 
     # Annual cost comparison
-    projected_annual_cost: Decimal = Field(
-        ...,
-        ge=0,
-        description="Projected annual cost for recommended plan"
-    )
-    current_annual_cost: Decimal = Field(
-        ...,
-        ge=0,
-        description="Current plan annual cost"
-    )
-    annual_savings: Decimal = Field(
-        ...,
-        description="Annual savings (can be negative if more expensive)"
-    )
-    savings_percentage: Decimal = Field(
-        ...,
-        description="Savings as percentage of current cost"
-    )
+    projected_annual_cost: Decimal = Field(..., ge=0, description="Projected annual cost for recommended plan")
+    current_annual_cost: Decimal = Field(..., ge=0, description="Current plan annual cost")
+    annual_savings: Decimal = Field(..., description="Annual savings (can be negative if more expensive)")
+    savings_percentage: Decimal = Field(..., description="Savings as percentage of current cost")
 
     # Monthly breakdown
     monthly_breakdown: list[MonthlyCost] = Field(
-        ...,
-        min_length=12,
-        max_length=12,
-        description="Month-by-month cost projection (12 months)"
+        ..., min_length=12, max_length=12, description="Month-by-month cost projection (12 months)"
     )
 
     # Total Cost of Ownership
     total_cost_of_ownership: Decimal = Field(
-        ...,
-        ge=0,
-        description="Total cost over contract length including all fees"
+        ..., ge=0, description="Total cost over contract length including all fees"
     )
-    tco_current_plan: Decimal = Field(
-        ...,
-        ge=0,
-        description="TCO for current plan over same period"
-    )
-    contract_length_months: int = Field(
-        ...,
-        ge=0,
-        description="Contract length used for TCO calculation"
-    )
+    tco_current_plan: Decimal = Field(..., ge=0, description="TCO for current plan over same period")
+    contract_length_months: int = Field(..., ge=0, description="Contract length used for TCO calculation")
 
     # Break-even analysis (if switching cost exists)
-    break_even_months: int | None = Field(
-        None,
-        ge=0,
-        description="Months until savings offset switching cost (ETF)"
-    )
+    break_even_months: int | None = Field(None, ge=0, description="Months until savings offset switching cost (ETF)")
     switching_cost: Decimal = Field(
-        default=Decimal("0.00"),
-        ge=0,
-        description="Early termination fee for leaving current plan"
+        default=Decimal("0.00"), ge=0, description="Early termination fee for leaving current plan"
     )
     cumulative_savings_12_months: Decimal = Field(
-        ...,
-        description="Cumulative savings after 12 months (including switching cost)"
+        ..., description="Cumulative savings after 12 months (including switching cost)"
     )
 
     # Variable rate uncertainty (if applicable)
-    uncertainty_range: CostRange | None = Field(
-        None,
-        description="Cost range for variable rate plans"
-    )
-    is_variable_rate: bool = Field(
-        default=False,
-        description="Whether this is a variable rate plan"
-    )
+    uncertainty_range: CostRange | None = Field(None, description="Cost range for variable rate plans")
+    is_variable_rate: bool = Field(default=False, description="Whether this is a variable rate plan")
 
     # Fees breakdown
     total_upfront_fees: Decimal = Field(
-        default=Decimal("0.00"),
-        ge=0,
-        description="Total upfront fees (connection fee, etc.)"
+        default=Decimal("0.00"), ge=0, description="Total upfront fees (connection fee, etc.)"
     )
     total_monthly_fees: Decimal = Field(
-        default=Decimal("0.00"),
-        ge=0,
-        description="Total monthly fees over contract period"
+        default=Decimal("0.00"), ge=0, description="Total monthly fees over contract period"
     )
-    total_energy_cost: Decimal = Field(
-        ...,
-        ge=0,
-        description="Total energy cost (kWh × rate)"
-    )
+    total_energy_cost: Decimal = Field(..., ge=0, description="Total energy cost (kWh × rate)")
 
     # Metadata
-    analysis_date: datetime = Field(
-        default_factory=datetime.now,
-        description="When this analysis was generated"
-    )
-    assumptions: list[str] = Field(
-        default_factory=list,
-        description="Key assumptions used in calculations"
-    )
+    analysis_date: datetime = Field(default_factory=datetime.now, description="When this analysis was generated")
+    assumptions: list[str] = Field(default_factory=list, description="Key assumptions used in calculations")
     warnings: list[str] = Field(
-        default_factory=list,
-        description="Warnings about the analysis (e.g., high ETF, low confidence)"
+        default_factory=list, description="Warnings about the analysis (e.g., high ETF, low confidence)"
     )
 
     model_config = {"from_attributes": True}
 
 
 # Story 2.5: Comparison Features Schemas
+
 
 class ComparisonPlan(BaseModel):
     """
@@ -207,13 +148,9 @@ class ComparisonPlan(BaseModel):
 
     # Savings vs current
     savings_vs_current_annual: Decimal = Field(
-        ...,
-        description="Annual savings vs current plan (negative if more expensive)"
+        ..., description="Annual savings vs current plan (negative if more expensive)"
     )
-    savings_vs_current_percentage: Decimal = Field(
-        ...,
-        description="Savings percentage vs current plan"
-    )
+    savings_vs_current_percentage: Decimal = Field(..., description="Savings percentage vs current plan")
 
     # Rank and scores (from Story 2.2)
     rank: int | None = Field(None, ge=1, description="Recommendation rank")
@@ -232,10 +169,7 @@ class TradeOffNote(BaseModel):
     category: str = Field(..., description="Category: cost, contract, renewable, flexibility, rating")
     description: str = Field(..., description="Human-readable trade-off description")
     affected_plans: list[UUID] = Field(..., description="Plan IDs affected by this trade-off")
-    severity: str = Field(
-        default="info",
-        description="Severity: info, warning, critical"
-    )
+    severity: str = Field(default="info", description="Severity: info, warning, critical")
 
     @field_validator("category")
     @classmethod
@@ -263,10 +197,7 @@ class MultiYearProjection(BaseModel):
     annual_cost: Decimal = Field(..., ge=0, description="Projected annual cost")
     cumulative_cost: Decimal = Field(..., ge=0, description="Cumulative cost from year 1")
     cumulative_savings: Decimal = Field(..., description="Cumulative savings vs current plan")
-    notes: list[str] = Field(
-        default_factory=list,
-        description="Notes (e.g., contract renewal, rate changes)"
-    )
+    notes: list[str] = Field(default_factory=list, description="Notes (e.g., contract renewal, rate changes)")
 
 
 class PlanComparison(BaseModel):
@@ -280,44 +211,26 @@ class PlanComparison(BaseModel):
     user_id: UUID = Field(..., description="User ID")
 
     # Plans being compared
-    plans: list[ComparisonPlan] = Field(
-        ...,
-        min_length=1,
-        description="Plans to compare (including recommended plans)"
-    )
+    plans: list[ComparisonPlan] = Field(..., min_length=1, description="Plans to compare (including recommended plans)")
     current_plan: ComparisonPlan = Field(..., description="User's current plan for baseline")
 
     # Best in category
-    best_by_category: dict[str, UUID] = Field(
-        ...,
-        description="Best plan ID for each category"
-    )
+    best_by_category: dict[str, UUID] = Field(..., description="Best plan ID for each category")
 
     # Trade-off analysis
     trade_offs: list[TradeOffNote] = Field(
-        default_factory=list,
-        description="Trade-off notes explaining plan differences"
+        default_factory=list, description="Trade-off notes explaining plan differences"
     )
 
     # Multi-year projections
     multi_year_projections: dict[str, list[MultiYearProjection]] = Field(
-        default_factory=dict,
-        description="Multi-year cost projections by plan_id"
+        default_factory=dict, description="Multi-year cost projections by plan_id"
     )
 
     # Comparison metadata
-    generated_at: datetime = Field(
-        default_factory=datetime.now,
-        description="When comparison was generated"
-    )
-    projection_basis: str = Field(
-        ...,
-        description="Basis for projections (e.g., 'Historical 12-month usage')"
-    )
-    assumptions: list[str] = Field(
-        default_factory=list,
-        description="Key assumptions for comparison"
-    )
+    generated_at: datetime = Field(default_factory=datetime.now, description="When comparison was generated")
+    projection_basis: str = Field(..., description="Basis for projections (e.g., 'Historical 12-month usage')")
+    assumptions: list[str] = Field(default_factory=list, description="Key assumptions for comparison")
 
     model_config = {"from_attributes": True}
 
@@ -325,13 +238,7 @@ class PlanComparison(BaseModel):
     @classmethod
     def validate_best_by_category(cls, v: dict[str, UUID]) -> dict[str, UUID]:
         """Validate best_by_category structure."""
-        _expected_categories = [
-            "lowest_cost",
-            "highest_renewable",
-            "most_flexible",
-            "highest_rated",
-            "best_value"
-        ]
+        _expected_categories = ["lowest_cost", "highest_renewable", "most_flexible", "highest_rated", "best_value"]
         # Just ensure it's a dict - plans may not have all categories
         if not isinstance(v, dict):
             raise ValueError("best_by_category must be a dictionary")
@@ -339,6 +246,7 @@ class PlanComparison(BaseModel):
 
 
 # Helper schemas for API responses
+
 
 class SavingsSummary(BaseModel):
     """Simplified savings summary for quick display."""
@@ -367,6 +275,7 @@ class ComparisonSummary(BaseModel):
 
 # Mock data structures for Story 2.2 integration (TEMPORARY)
 
+
 class RankedPlan(BaseModel):
     """
     TEMPORARY MOCK - Replace when Backend Dev #3 publishes Story 2.2 contract.
@@ -394,12 +303,7 @@ class RecommendationResult(BaseModel):
     """
 
     user_id: UUID = Field(..., description="User ID")
-    top_plans: list[RankedPlan] = Field(
-        ...,
-        min_length=1,
-        max_length=3,
-        description="Top 3 recommended plans"
-    )
+    top_plans: list[RankedPlan] = Field(..., min_length=1, max_length=3, description="Top 3 recommended plans")
     generated_at: datetime = Field(default_factory=datetime.now, description="Generation timestamp")
 
     model_config = {"from_attributes": True}

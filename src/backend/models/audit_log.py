@@ -40,7 +40,7 @@ class AuditLog(Base, UUIDPrimaryKeyMixin):
         server_default=func.now(),
         nullable=False,
         index=True,
-        comment="Timestamp when the action occurred"
+        comment="Timestamp when the action occurred",
     )
 
     admin_user_id: Mapped[UUID] = mapped_column(
@@ -48,53 +48,39 @@ class AuditLog(Base, UUIDPrimaryKeyMixin):
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
-        comment="ID of the admin user who performed the action"
+        comment="ID of the admin user who performed the action",
     )
 
     action: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-        index=True,
-        comment="Action performed (e.g., 'user_role_updated', 'plan_created')"
+        String(100), nullable=False, index=True, comment="Action performed (e.g., 'user_role_updated', 'plan_created')"
     )
 
     resource_type: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-        index=True,
-        comment="Type of resource affected (e.g., 'user', 'plan', 'settings')"
+        String(50), nullable=False, index=True, comment="Type of resource affected (e.g., 'user', 'plan', 'settings')"
     )
 
     resource_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True),
         nullable=True,
         index=True,
-        comment="ID of the resource affected (nullable for bulk operations)"
+        comment="ID of the resource affected (nullable for bulk operations)",
     )
 
     details: Mapped[dict[str, Any] | None] = mapped_column(
-        JSONB,
-        nullable=True,
-        comment="Action-specific details in JSON format (e.g., old/new values)"
+        JSONB, nullable=True, comment="Action-specific details in JSON format (e.g., old/new values)"
     )
 
     ip_address: Mapped[str | None] = mapped_column(
-        String(45),
-        nullable=True,
-        comment="IP address of the admin who performed the action (IPv4 or IPv6)"
+        String(45), nullable=True, comment="IP address of the admin who performed the action (IPv4 or IPv6)"
     )
 
     user_agent: Mapped[str | None] = mapped_column(
-        Text,
-        nullable=True,
-        comment="User agent string from the HTTP request"
+        Text, nullable=True, comment="User agent string from the HTTP request"
     )
 
     # Relationships
     admin_user: Mapped[Optional["User"]] = relationship(
-        "User",
-        foreign_keys=[admin_user_id],
-        backref="audit_logs_created"
+        "User", foreign_keys=[admin_user_id], backref="audit_logs_created"
     )
 
     __table_args__ = (
@@ -107,7 +93,7 @@ class AuditLog(Base, UUIDPrimaryKeyMixin):
         # Composite index for common query patterns
         Index("idx_audit_logs_admin_timestamp", "admin_user_id", "timestamp"),
         Index("idx_audit_logs_resource", "resource_type", "resource_id"),
-        {"comment": "Audit log for tracking admin actions and system events (append-only)"}
+        {"comment": "Audit log for tracking admin actions and system events (append-only)"},
     )
 
     def __repr__(self) -> str:

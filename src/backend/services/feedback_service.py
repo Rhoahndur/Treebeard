@@ -44,15 +44,43 @@ class FeedbackService:
 
     # Sentiment keywords for basic sentiment analysis
     POSITIVE_KEYWORDS = {
-        "great", "excellent", "love", "perfect", "amazing", "wonderful",
-        "best", "fantastic", "helpful", "satisfied", "recommend", "good",
-        "happy", "pleased", "awesome", "brilliant", "super"
+        "great",
+        "excellent",
+        "love",
+        "perfect",
+        "amazing",
+        "wonderful",
+        "best",
+        "fantastic",
+        "helpful",
+        "satisfied",
+        "recommend",
+        "good",
+        "happy",
+        "pleased",
+        "awesome",
+        "brilliant",
+        "super",
     }
 
     NEGATIVE_KEYWORDS = {
-        "bad", "terrible", "worst", "hate", "awful", "horrible", "poor",
-        "disappointed", "frustrating", "confusing", "unclear", "expensive",
-        "complicated", "difficult", "unhappy", "dissatisfied", "useless"
+        "bad",
+        "terrible",
+        "worst",
+        "hate",
+        "awful",
+        "horrible",
+        "poor",
+        "disappointed",
+        "frustrating",
+        "confusing",
+        "unclear",
+        "expensive",
+        "complicated",
+        "difficult",
+        "unhappy",
+        "dissatisfied",
+        "useless",
     }
 
     def __init__(self, db: Session):
@@ -127,10 +155,7 @@ class FeedbackService:
         self.db.commit()
         self.db.refresh(feedback)
 
-        logger.info(
-            f"Created feedback: rating={rating}, type={feedback_type}, "
-            f"sentiment={sentiment_score}"
-        )
+        logger.info(f"Created feedback: rating={rating}, type={feedback_type}, " f"sentiment={sentiment_score}")
 
         return feedback
 
@@ -190,48 +215,20 @@ class FeedbackService:
         avg_rating = self.db.query(func.avg(Feedback.rating)).scalar() or 0.0
 
         # Rating distribution
-        thumbs_up = (
-            self.db.query(func.count(Feedback.id))
-            .filter(Feedback.rating >= 4)
-            .scalar()
-            or 0
-        )
+        thumbs_up = self.db.query(func.count(Feedback.id)).filter(Feedback.rating >= 4).scalar() or 0
 
-        thumbs_down = (
-            self.db.query(func.count(Feedback.id))
-            .filter(Feedback.rating <= 2)
-            .scalar()
-            or 0
-        )
+        thumbs_down = self.db.query(func.count(Feedback.id)).filter(Feedback.rating <= 2).scalar() or 0
 
-        neutral = (
-            self.db.query(func.count(Feedback.id))
-            .filter(Feedback.rating == 3)
-            .scalar()
-            or 0
-        )
+        neutral = self.db.query(func.count(Feedback.id)).filter(Feedback.rating == 3).scalar() or 0
 
         # Text feedback count
-        text_count = (
-            self.db.query(func.count(Feedback.id))
-            .filter(Feedback.feedback_text.isnot(None))
-            .scalar()
-            or 0
-        )
+        text_count = self.db.query(func.count(Feedback.id)).filter(Feedback.feedback_text.isnot(None)).scalar() or 0
 
         # Sentiment breakdown (based on sentiment_score)
-        positive_sentiment = (
-            self.db.query(func.count(Feedback.id))
-            .filter(Feedback.sentiment_score > 0.3)
-            .scalar()
-            or 0
-        )
+        positive_sentiment = self.db.query(func.count(Feedback.id)).filter(Feedback.sentiment_score > 0.3).scalar() or 0
 
         negative_sentiment = (
-            self.db.query(func.count(Feedback.id))
-            .filter(Feedback.sentiment_score < -0.3)
-            .scalar()
-            or 0
+            self.db.query(func.count(Feedback.id)).filter(Feedback.sentiment_score < -0.3).scalar() or 0
         )
 
         neutral_sentiment = total_count - positive_sentiment - negative_sentiment
@@ -295,18 +292,12 @@ class FeedbackService:
             if date_str in date_map:
                 time_series.append(date_map[date_str])
             else:
-                time_series.append(
-                    FeedbackTimeSeriesPoint(
-                        date=date_str, count=0, average_rating=0.0
-                    )
-                )
+                time_series.append(FeedbackTimeSeriesPoint(date=date_str, count=0, average_rating=0.0))
             current_date += timedelta(days=1)
 
         return time_series
 
-    def get_plan_feedback_aggregation(
-        self, limit: int = 10
-    ) -> list[PlanFeedbackAggregation]:
+    def get_plan_feedback_aggregation(self, limit: int = 10) -> list[PlanFeedbackAggregation]:
         """
         Get plan-level feedback aggregation.
 
@@ -323,12 +314,8 @@ class FeedbackService:
                 PlanCatalog.supplier_name,
                 func.count(Feedback.id).label("total_feedback"),
                 func.avg(Feedback.rating).label("avg_rating"),
-                func.sum(func.case((Feedback.rating >= 4, 1), else_=0)).label(
-                    "thumbs_up"
-                ),
-                func.sum(func.case((Feedback.rating <= 2, 1), else_=0)).label(
-                    "thumbs_down"
-                ),
+                func.sum(func.case((Feedback.rating >= 4, 1), else_=0)).label("thumbs_up"),
+                func.sum(func.case((Feedback.rating <= 2, 1), else_=0)).label("thumbs_down"),
                 func.max(Feedback.created_at).label("most_recent"),
             )
             .join(PlanCatalog, Feedback.plan_id == PlanCatalog.id)
@@ -373,9 +360,7 @@ class FeedbackService:
             .all()
         )
 
-        recent_text_feedback = [
-            FeedbackResponse.model_validate(fb) for fb in recent_feedback
-        ]
+        recent_text_feedback = [FeedbackResponse.model_validate(fb) for fb in recent_feedback]
 
         return FeedbackAnalyticsResponse(
             stats=stats,
@@ -384,9 +369,7 @@ class FeedbackService:
             recent_text_feedback=recent_text_feedback,
         )
 
-    def search_feedback(
-        self, params: FeedbackSearchParams
-    ) -> FeedbackSearchResponse:
+    def search_feedback(self, params: FeedbackSearchParams) -> FeedbackSearchResponse:
         """
         Search feedback with filters.
 
@@ -437,12 +420,7 @@ class FeedbackService:
         total_count = query.count()
 
         # Apply pagination
-        results = (
-            query.order_by(Feedback.created_at.desc())
-            .offset(params.offset)
-            .limit(params.limit)
-            .all()
-        )
+        results = query.order_by(Feedback.created_at.desc()).offset(params.offset).limit(params.limit).all()
 
         feedback_responses = [FeedbackResponse.model_validate(fb) for fb in results]
 

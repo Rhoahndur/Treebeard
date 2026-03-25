@@ -10,6 +10,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 
 # User Schemas
 
+
 class UserBase(BaseModel):
     """Base schema for User with common fields."""
 
@@ -47,33 +48,14 @@ class UserResponse(UserBase):
 
 # UserPreference Schemas
 
+
 class UserPreferenceBase(BaseModel):
     """Base schema for UserPreference with validation."""
 
-    cost_priority: int = Field(
-        default=40,
-        ge=0,
-        le=100,
-        description="Weight for cost consideration (0-100)"
-    )
-    flexibility_priority: int = Field(
-        default=30,
-        ge=0,
-        le=100,
-        description="Weight for contract flexibility (0-100)"
-    )
-    renewable_priority: int = Field(
-        default=20,
-        ge=0,
-        le=100,
-        description="Weight for renewable energy (0-100)"
-    )
-    rating_priority: int = Field(
-        default=10,
-        ge=0,
-        le=100,
-        description="Weight for supplier ratings (0-100)"
-    )
+    cost_priority: int = Field(default=40, ge=0, le=100, description="Weight for cost consideration (0-100)")
+    flexibility_priority: int = Field(default=30, ge=0, le=100, description="Weight for contract flexibility (0-100)")
+    renewable_priority: int = Field(default=20, ge=0, le=100, description="Weight for renewable energy (0-100)")
+    rating_priority: int = Field(default=10, ge=0, le=100, description="Weight for supplier ratings (0-100)")
 
     @field_validator("cost_priority", "flexibility_priority", "renewable_priority", "rating_priority")
     @classmethod
@@ -86,6 +68,7 @@ class UserPreferenceBase(BaseModel):
 
 class UserPreferenceCreate(UserPreferenceBase):
     """Schema for creating user preferences."""
+
     pass
 
 
@@ -111,6 +94,7 @@ class UserPreferenceResponse(UserPreferenceBase):
 
 # CurrentPlan Schemas
 
+
 class CurrentPlanBase(BaseModel):
     """Base schema for CurrentPlan."""
 
@@ -120,15 +104,14 @@ class CurrentPlanBase(BaseModel):
     contract_start_date: date | None = Field(None, description="Contract start date")
     contract_end_date: date = Field(..., description="Contract end date")
     early_termination_fee: Decimal = Field(
-        default=Decimal("0.00"),
-        ge=0,
-        description="Early termination fee in dollars"
+        default=Decimal("0.00"), ge=0, description="Early termination fee in dollars"
     )
     monthly_fee: Decimal | None = Field(None, ge=0, description="Monthly base fee")
 
 
 class CurrentPlanCreate(CurrentPlanBase):
     """Schema for creating current plan information."""
+
     pass
 
 
@@ -156,6 +139,7 @@ class CurrentPlanResponse(CurrentPlanBase):
 
 
 # Combined User Profile Schema (for convenience)
+
 
 class UserProfileResponse(BaseModel):
     """Complete user profile including preferences and current plan."""

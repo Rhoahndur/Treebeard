@@ -5,6 +5,7 @@ Revises: 003_add_audit_logs
 Create Date: 2025-11-11 14:38:06.271417
 
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -12,17 +13,19 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = 'd28c69317dc9'
-down_revision: str | None = '003_add_audit_logs'
+revision: str = "d28c69317dc9"
+down_revision: str | None = "003_add_audit_logs"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
     # Add logo_url column to suppliers table
-    op.add_column('suppliers', sa.Column('logo_url', sa.String(500), nullable=True, comment="URL to supplier's logo image"))
+    op.add_column(
+        "suppliers", sa.Column("logo_url", sa.String(500), nullable=True, comment="URL to supplier's logo image")
+    )
 
 
 def downgrade() -> None:
     # Remove logo_url column from suppliers table
-    op.drop_column('suppliers', 'logo_url')
+    op.drop_column("suppliers", "logo_url")

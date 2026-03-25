@@ -146,16 +146,14 @@ async def get_user_detail(
 
     # Get last feedback
     last_feedback_query = (
-        select(Feedback.created_at)
-        .where(Feedback.user_id == user_id)
-        .order_by(Feedback.created_at.desc())
-        .limit(1)
+        select(Feedback.created_at).where(Feedback.user_id == user_id).order_by(Feedback.created_at.desc()).limit(1)
     )
     last_feedback_result = await db.execute(last_feedback_query)
     last_feedback = last_feedback_result.scalar_one_or_none()
 
     # Count usage data points
     from models.usage import UsageHistory
+
     usage_count_query = select(func.count()).select_from(UsageHistory).where(UsageHistory.user_id == user_id)
     usage_count_result = await db.execute(usage_count_query)
     usage_data_points = usage_count_result.scalar() or 0
@@ -586,9 +584,7 @@ async def get_system_stats(db: AsyncSession) -> SystemStats:
     total_recommendations_result = await db.execute(total_recommendations_query)
     total_recommendations = total_recommendations_result.scalar() or 0
 
-    avg_recommendations_per_user = (
-        total_recommendations / total_users if total_users > 0 else 0.0
-    )
+    avg_recommendations_per_user = total_recommendations / total_users if total_users > 0 else 0.0
 
     # Feedback statistics
     total_feedback_query = select(func.count()).select_from(Feedback)

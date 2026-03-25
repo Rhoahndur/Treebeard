@@ -2,15 +2,13 @@
 Simple script to add logo URLs to suppliers.
 Run from backend directory: python scripts/add_logos.py
 """
+
 import os
 
 from sqlalchemy import create_engine, text
 
 # Get database URL from environment or use default
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://treebeard:dev_password_123@localhost:5432/treebeard_dev"
-)
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://treebeard:dev_password_123@localhost:5432/treebeard_dev")
 
 # Logo URLs for Texas energy suppliers
 LOGO_URLS = {
@@ -25,6 +23,7 @@ LOGO_URLS = {
     "First Choice Power": "https://logo.clearbit.com/firstchoicepower.com",
     "Frontier Utilities": "https://logo.clearbit.com/frontierutilities.com",
 }
+
 
 def main():
     engine = create_engine(DATABASE_URL)
@@ -43,7 +42,7 @@ def main():
         for supplier_name, logo_url in LOGO_URLS.items():
             result = conn.execute(
                 text("UPDATE suppliers SET logo_url = :logo_url WHERE supplier_name = :name"),
-                {"logo_url": logo_url, "name": supplier_name}
+                {"logo_url": logo_url, "name": supplier_name},
             )
             if result.rowcount > 0:
                 updated_count += 1
@@ -53,6 +52,7 @@ def main():
 
         conn.commit()
         print(f"\n✅ Successfully updated {updated_count} supplier logos")
+
 
 if __name__ == "__main__":
     main()

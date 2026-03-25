@@ -16,12 +16,14 @@ from typing import Any
 # INPUT SCHEMAS (Mock - Will be replaced by Story 1.1 contract)
 # ============================================================================
 
+
 @dataclass
 class MonthlyUsage:
     """
     Monthly electricity usage data point.
     Mock schema until Story 1.1 is complete.
     """
+
     month: date  # First day of the month
     kwh: float  # Kilowatt-hours consumed
 
@@ -35,10 +37,12 @@ class MonthlyUsage:
 # ANALYSIS OUTPUT SCHEMAS
 # ============================================================================
 
+
 class UserProfileType(StrEnum):
     """
     User classification based on usage patterns.
     """
+
     BASELINE = "baseline"  # Consistent usage year-round
     HIGH_USER = "high_user"  # Above-average consumption
     VARIABLE = "variable"  # Significant month-to-month variation
@@ -48,6 +52,7 @@ class UserProfileType(StrEnum):
 
 class SeasonType(StrEnum):
     """Season classification for pattern detection."""
+
     WINTER = "winter"  # Dec, Jan, Feb
     SPRING = "spring"  # Mar, Apr, May
     SUMMER = "summer"  # Jun, Jul, Aug
@@ -59,6 +64,7 @@ class SeasonalPattern:
     """
     Detected seasonal usage pattern.
     """
+
     season: SeasonType
     avg_kwh: float
     peak_month: str  # Month name (e.g., "July")
@@ -71,6 +77,7 @@ class SeasonalAnalysis:
     """
     Complete seasonal pattern analysis results.
     """
+
     has_seasonal_pattern: bool
     dominant_season: SeasonType | None
     patterns: list[SeasonalPattern]
@@ -86,6 +93,7 @@ class PeakOffPeakAnalysis:
     This is a simplified version assuming monthly granularity.
     For time-of-use analysis, hourly data would be needed.
     """
+
     peak_months: list[str]  # Months with above-average usage
     off_peak_months: list[str]  # Months with below-average usage
     peak_avg_kwh: float
@@ -98,6 +106,7 @@ class OutlierDetection:
     """
     Anomalous usage detection results.
     """
+
     has_outliers: bool
     outlier_months: list[str]  # Months with anomalous usage
     outlier_values: list[float]  # Corresponding kWh values
@@ -109,6 +118,7 @@ class DataQualityMetrics:
     """
     Metrics about the quality and completeness of input data.
     """
+
     total_months: int
     missing_months: int
     interpolated_months: int
@@ -122,6 +132,7 @@ class UsageProjection:
     """
     12-month forward usage projection with confidence intervals.
     """
+
     projected_monthly_kwh: list[float]  # 12 months of projected usage
     projected_annual_kwh: float
     confidence_lower: list[float]  # Lower bound (95% CI)
@@ -136,6 +147,7 @@ class UsageStatistics:
     """
     Basic statistical measures of usage patterns.
     """
+
     min_kwh: float
     max_kwh: float
     mean_kwh: float
@@ -151,6 +163,7 @@ class UsageProfile:
     Complete usage pattern analysis profile.
     This is the primary output of the analysis service.
     """
+
     user_id: str | None  # User identifier (if available)
     profile_type: UserProfileType
 
@@ -194,7 +207,9 @@ class UsageProfile:
             },
             "seasonal_analysis": {
                 "has_seasonal_pattern": self.seasonal_analysis.has_seasonal_pattern,
-                "dominant_season": self.seasonal_analysis.dominant_season.value if self.seasonal_analysis.dominant_season else None,
+                "dominant_season": (
+                    self.seasonal_analysis.dominant_season.value if self.seasonal_analysis.dominant_season else None
+                ),
                 "patterns": [
                     {
                         "season": p.season.value,

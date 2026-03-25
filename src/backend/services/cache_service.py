@@ -20,6 +20,7 @@ from datetime import timedelta
 try:
     import redis
     from redis import Redis
+
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
@@ -123,9 +124,7 @@ class CacheService:
             print(f"Cache get error: {e}")
             return None
 
-    def set_profile(
-        self, user_id: str, profile: UsageProfile, ttl: int | None = None
-    ) -> bool:
+    def set_profile(self, user_id: str, profile: UsageProfile, ttl: int | None = None) -> bool:
         """
         Store usage profile in cache.
 
@@ -192,9 +191,7 @@ class CacheService:
         data_str = "|".join([f"{u.month.isoformat()}:{u.kwh}" for u in usage_data])
         return hashlib.md5(data_str.encode()).hexdigest()
 
-    def get_profile_with_hash(
-        self, user_id: str, usage_data_hash: str
-    ) -> UsageProfile | None:
+    def get_profile_with_hash(self, user_id: str, usage_data_hash: str) -> UsageProfile | None:
         """
         Retrieve cached profile only if the usage data hash matches.
         This ensures we don't return stale profiles.
@@ -224,9 +221,7 @@ class CacheService:
             print(f"Cache get with hash error: {e}")
             return None
 
-    def set_profile_with_hash(
-        self, user_id: str, profile: UsageProfile, usage_data_hash: str
-    ) -> bool:
+    def set_profile_with_hash(self, user_id: str, profile: UsageProfile, usage_data_hash: str) -> bool:
         """
         Store profile along with usage data hash for validation.
 
