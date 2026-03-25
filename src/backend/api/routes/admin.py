@@ -340,7 +340,7 @@ async def create_new_plan(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
-        )
+        ) from None
 
     # Log the action
     await log_admin_action(

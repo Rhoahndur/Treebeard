@@ -10,7 +10,7 @@ Author: Backend Dev #7
 
 from datetime import datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field, field_validator
 # ============================================================================
 
 
-class RiskType(str, Enum):
+class RiskType(StrEnum):
     """Types of risks detected in plan recommendations."""
 
     HIGH_ETF = "high_etf"
@@ -36,7 +36,7 @@ class RiskType(str, Enum):
     INSUFFICIENT_DATA = "insufficient_data"
 
 
-class RiskSeverity(str, Enum):
+class RiskSeverity(StrEnum):
     """Severity levels for risk warnings."""
 
     CRITICAL = "critical"  # Major issues, user should reconsider
@@ -44,7 +44,7 @@ class RiskSeverity(str, Enum):
     INFO = "info"  # FYI items, no action needed
 
 
-class RiskCategory(str, Enum):
+class RiskCategory(StrEnum):
     """Categories for grouping risk warnings."""
 
     COST = "cost"
@@ -141,7 +141,7 @@ class RiskSummary(BaseModel):
 # ============================================================================
 
 
-class StayRecommendationTrigger(str, Enum):
+class StayRecommendationTrigger(StrEnum):
     """Reasons for recommending staying with current plan."""
 
     LOW_NET_SAVINGS = "low_net_savings"  # Savings after ETF < threshold

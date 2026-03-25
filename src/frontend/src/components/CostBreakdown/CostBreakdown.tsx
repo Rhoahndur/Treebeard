@@ -23,7 +23,7 @@ export interface CostBreakdownProps {
 
 export const CostBreakdown: React.FC<CostBreakdownProps> = ({
   plan,
-  currentPlanCost,
+  _currentPlanCost,
   monthlyBreakdown,
 }) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -33,7 +33,7 @@ export const CostBreakdown: React.FC<CostBreakdownProps> = ({
 
   const totalAnnualCost = plan.projected_annual_cost;
   const annualSavings = plan.savings?.annual_savings || 0;
-  const savingsPercentage = plan.savings?.savings_percentage || 0;
+  const _savingsPercentage = plan.savings?.savings_percentage || 0;
   const breakEvenMonths = plan.savings?.break_even_months;
 
   return (

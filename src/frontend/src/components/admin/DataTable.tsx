@@ -66,7 +66,7 @@ export const DataTable = <T,>({
   onPageChange,
   onSort,
   sortKey,
-  sortDirection,
+  sortDirection: _sortDirection,
   getRowKey,
   onRowClick,
 }: DataTableProps<T>) => {

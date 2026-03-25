@@ -30,7 +30,7 @@ export const ScenarioPage: React.FC = () => {
     rating_priority: 50,
   } : undefined);
 
-  const [scenarioResults, setScenarioResults] = useState<GenerateRecommendationResponse | undefined>();
+  const [scenarioResults, _setScenarioResults] = useState<GenerateRecommendationResponse | undefined>();
 
   const handleBack = () => {
     navigate(-1);

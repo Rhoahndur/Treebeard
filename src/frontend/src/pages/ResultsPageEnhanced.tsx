@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle, Sparkles, Download, BarChart3, Settings } from 'lucide-react';
+import { AlertCircle, CheckCircle, Sparkles, BarChart3, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PlanCard } from '@/components/PlanCard/PlanCard';
 import { CostBreakdown } from '@/components/CostBreakdown/CostBreakdown';

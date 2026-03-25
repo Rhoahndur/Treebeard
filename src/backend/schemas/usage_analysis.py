@@ -9,7 +9,7 @@ publishes the official database schema contract from Story 1.1.
 
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 # ============================================================================
@@ -35,7 +35,7 @@ class MonthlyUsage:
 # ANALYSIS OUTPUT SCHEMAS
 # ============================================================================
 
-class UserProfileType(str, Enum):
+class UserProfileType(StrEnum):
     """
     User classification based on usage patterns.
     """
@@ -46,7 +46,7 @@ class UserProfileType(str, Enum):
     INSUFFICIENT_DATA = "insufficient_data"  # Not enough data to classify
 
 
-class SeasonType(str, Enum):
+class SeasonType(StrEnum):
     """Season classification for pattern detection."""
     WINTER = "winter"  # Dec, Jan, Feb
     SPRING = "spring"  # Mar, Apr, May

@@ -99,7 +99,7 @@ export const DailyUsageChart: React.FC<DailyUsageChartProps> = ({
           <Tooltip
             content={
               <ChartTooltip
-                formatter={(value, name) => `${formatNumber(Number(value))} kWh`}
+                formatter={(value, _name) => `${formatNumber(Number(value))} kWh`}
                 labelFormatter={(label) => `At ${label}`}
               />
             }

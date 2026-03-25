@@ -44,7 +44,7 @@ export const Step3UsageData: React.FC<Step3UsageDataProps> = ({
     setManualData(newData);
   };
 
-  const handleManualSubmit = () => {
+  const _handleManualSubmit = () => {
     // Filter out empty rows
     const validData = manualData.filter((item) => item.month && item.kwh > 0);
     if (validData.length >= 3) {

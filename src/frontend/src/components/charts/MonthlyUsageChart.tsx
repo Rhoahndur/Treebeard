@@ -30,15 +30,6 @@ export interface MonthlyUsageChartProps {
   height?: number;
 }
 
-interface ChartDataPoint {
-  month: string;
-  monthLabel: string;
-  kwh: number;
-  season: string;
-  color: string;
-  isOutlier: boolean;
-}
-
 export const MonthlyUsageChart: React.FC<MonthlyUsageChartProps> = ({
   usageData,
   isLoading = false,
@@ -151,7 +142,7 @@ export const MonthlyUsageChart: React.FC<MonthlyUsageChartProps> = ({
           <Tooltip
             content={
               <ChartTooltip
-                formatter={(value, name) => `${formatNumber(Number(value))} kWh`}
+                formatter={(value, _name) => `${formatNumber(Number(value))} kWh`}
                 labelFormatter={(label) => `Usage for ${label}`}
               />
             }

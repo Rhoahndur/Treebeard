@@ -148,7 +148,7 @@ export const SeasonalPatternChart: React.FC<SeasonalPatternChartProps> = ({
           <Tooltip
             content={
               <ChartTooltip
-                formatter={(value, name) => `${formatNumber(Number(value))} kWh`}
+                formatter={(value, _name) => `${formatNumber(Number(value))} kWh`}
               />
             }
           />

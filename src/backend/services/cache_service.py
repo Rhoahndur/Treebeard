@@ -11,6 +11,7 @@ Cache Strategy:
 - Invalidation: On user data updates
 """
 
+import contextlib
 import hashlib
 import json
 import os
@@ -110,7 +111,7 @@ class CacheService:
 
             if cached_data:
                 # Deserialize from JSON
-                profile_dict = json.loads(cached_data)
+                _profile_dict = json.loads(cached_data)
                 # Note: In production, you'd have a proper deserialization method
                 # For now, we'll just return None if cache is hit but can't deserialize
                 # The caller will recompute and cache again
@@ -323,31 +324,25 @@ class CacheService:
         """Set value with optional TTL."""
         if not self.enabled or not self._client:
             return
-        try:
+        with contextlib.suppress(Exception):
             if ttl:
                 self._client.setex(key, ttl, str(value))
             else:
                 self._client.set(key, str(value))
-        except Exception:
-            pass
 
     async def setex(self, key: str, ttl: int, value: str) -> None:
         """Set value with TTL."""
         if not self.enabled or not self._client:
             return
-        try:
+        with contextlib.suppress(Exception):
             self._client.setex(key, ttl, value)
-        except Exception:
-            pass
 
     async def delete(self, key: str) -> None:
         """Delete key."""
         if not self.enabled or not self._client:
             return
-        try:
+        with contextlib.suppress(Exception):
             self._client.delete(key)
-        except Exception:
-            pass
 
     async def incr(self, key: str) -> int:
         """Increment counter."""
@@ -402,7 +397,7 @@ class InMemoryCache:
         """Get keys matching pattern."""
         # Simple pattern matching (just prefix)
         prefix = pattern.replace("*", "")
-        return [k for k in self._cache.keys() if k.startswith(prefix)]
+        return [k for k in self._cache if k.startswith(prefix)]
 
     def ping(self) -> bool:
         """Ping test."""

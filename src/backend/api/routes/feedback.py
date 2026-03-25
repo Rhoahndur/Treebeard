@@ -108,7 +108,7 @@ async def submit_plan_feedback(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to submit feedback. Please try again later.",
-        )
+        ) from exc
 
 
 @router.post(
@@ -195,7 +195,7 @@ async def submit_recommendation_feedback(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to submit feedback. Please try again later.",
-        )
+        ) from exc
 
 
 @router.get(
@@ -248,7 +248,7 @@ async def get_feedback_stats(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve feedback statistics.",
-        )
+        ) from exc
 
 
 @router.get(
@@ -298,7 +298,7 @@ async def get_feedback_analytics(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve feedback analytics.",
-        )
+        ) from exc
 
 
 @router.get(
@@ -382,7 +382,7 @@ async def search_feedback(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to search feedback.",
-        )
+        ) from exc
 
 
 @router.get(
@@ -492,4 +492,4 @@ async def export_feedback_csv(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to export feedback data.",
-        )
+        ) from exc

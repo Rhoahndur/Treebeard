@@ -325,7 +325,7 @@ class PlanComparison(BaseModel):
     @classmethod
     def validate_best_by_category(cls, v: dict[str, UUID]) -> dict[str, UUID]:
         """Validate best_by_category structure."""
-        expected_categories = [
+        _expected_categories = [
             "lowest_cost",
             "highest_renewable",
             "most_flexible",

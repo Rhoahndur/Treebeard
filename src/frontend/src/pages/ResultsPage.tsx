@@ -20,7 +20,6 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
   error = null,
 }) => {
   const [selectedPlan, setSelectedPlan] = useState<RankedPlan | null>(null);
-  const [showCostBreakdown, setShowCostBreakdown] = useState(false);
 
   useEffect(() => {
     if (recommendation?.top_plans && recommendation.top_plans.length > 0) {

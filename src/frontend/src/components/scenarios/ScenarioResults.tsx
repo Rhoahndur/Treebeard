@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, TrendingUp } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import type { GenerateRecommendationResponse } from '@/types/recommendation';
 import { formatCurrency } from '@/utils/formatters';
 

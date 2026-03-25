@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, AlertTriangle } from 'lucide-react';
 import type { RankedPlan } from '@/types/recommendation';
 import { formatCurrency, formatPercentage } from '@/utils/formatters';
 
@@ -43,7 +43,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({ plans }) => {
 
     // Contract
     const contracts = plans.map((p) => p.contract_length_months);
-    const contractMinMax = getMinMax(contracts, false); // Longer isn't necessarily better
+    const _contractMinMax = getMinMax(contracts, false); // Longer isn't necessarily better
 
     // Renewable
     const renewables = plans.map((p) => p.renewable_percentage);

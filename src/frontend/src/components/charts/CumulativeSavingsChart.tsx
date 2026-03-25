@@ -133,7 +133,7 @@ export const CumulativeSavingsChart: React.FC<CumulativeSavingsChartProps> = ({
           <Tooltip
             content={
               <ChartTooltip
-                formatter={(value, name) => formatCurrency(Number(value))}
+                formatter={(value, _name) => formatCurrency(Number(value))}
                 labelFormatter={(label) => label}
               />
             }

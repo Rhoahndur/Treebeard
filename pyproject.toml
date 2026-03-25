@@ -33,8 +33,17 @@ select = [
     "SIM", # flake8-simplify
 ]
 ignore = [
-    "E501", # line too long (handled by formatter)
+    "E501",   # line too long (handled by formatter)
+    "B008",   # function call in argument defaults (standard FastAPI Depends/Query)
+    "E712",   # == True/False comparisons (required by SQLAlchemy filter())
+    "SIM102", # collapsible-if (style preference)
+    "SIM108", # if-else-block → ternary (style preference)
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"src/backend/models/*.py" = ["F821"]            # SQLAlchemy string-based relationship refs
+"src/backend/scripts/*.py" = ["E402", "F841"]   # Path setup before imports; seed assigns
+"src/backend/monitoring/*.py" = ["F401"]        # Conditional imports for optional deps
 
 [tool.ruff.lint.isort]
 known-first-party = ["api", "config", "models", "schemas", "services", "monitoring"]

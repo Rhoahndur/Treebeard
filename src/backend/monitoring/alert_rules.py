@@ -15,13 +15,13 @@ Alert Severity Levels:
 
 import logging
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class AlertSeverity(str, Enum):
+class AlertSeverity(StrEnum):
     """Alert severity levels."""
 
     CRITICAL = "critical"
@@ -31,7 +31,7 @@ class AlertSeverity(str, Enum):
     INFO = "info"
 
 
-class NotificationChannel(str, Enum):
+class NotificationChannel(StrEnum):
     """Notification channels."""
 
     PAGERDUTY = "pagerduty"

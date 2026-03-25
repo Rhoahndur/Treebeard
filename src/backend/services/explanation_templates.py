@@ -342,7 +342,7 @@ def get_context_aware_message(
     # Variable rate warning
     if plan.plan_type == "variable":
         # Get rate range if available
-        rate_info = plan.rate_structure.get("base_rate", "")
+        _rate_info = plan.rate_structure.get("base_rate", "")
         return (
             "This is a variable rate plan, which means your rate can change monthly. "
             "While it starts competitive, your costs could increase if market rates rise. "

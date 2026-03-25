@@ -2,6 +2,7 @@
 Audit middleware for automatically logging admin API calls.
 """
 
+import contextlib
 import logging
 from collections.abc import Callable
 
@@ -90,10 +91,8 @@ class AuditMiddleware(BaseHTTPMiddleware):
                     )
 
                     # Close the session
-                    try:
+                    with contextlib.suppress(StopIteration):
                         next(db_gen)
-                    except StopIteration:
-                        pass
 
                 except Exception as e:
                     logger.error(f"Failed to log admin action: {e}", exc_info=True)

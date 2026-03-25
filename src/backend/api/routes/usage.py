@@ -102,7 +102,7 @@ async def upload_usage(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to upload usage data: {str(exc)}",
-        )
+        ) from exc
 
 
 @router.get(

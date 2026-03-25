@@ -4,14 +4,14 @@ Role-Based Access Control (RBAC).
 Implements permission checking and role-based authorization.
 """
 
-from enum import Enum
+from enum import StrEnum
 
 from fastapi import HTTPException, status
 
 from models.user import User
 
 
-class Permission(str, Enum):
+class Permission(StrEnum):
     """
     User permissions.
     """

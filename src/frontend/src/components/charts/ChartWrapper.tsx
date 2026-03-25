@@ -23,7 +23,7 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
   height = 300,
   className = '',
   ariaLabel,
-  showLegend = true,
+  showLegend: _showLegend = true,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);

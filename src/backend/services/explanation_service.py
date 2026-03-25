@@ -25,6 +25,13 @@ from schemas.explanation_schemas import (
     UserPreferences,
 )
 
+try:
+    from anthropic import AsyncAnthropic
+    from anthropic.types import Message
+except ImportError:
+    AsyncAnthropic = None  # type: ignore[assignment, misc]
+    Message = None  # type: ignore[assignment, misc]
+
 # Import OpenAI service
 from .explanation_service_openai import OpenAIExplanationService
 from .explanation_templates import (

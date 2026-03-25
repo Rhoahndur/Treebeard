@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import analytics, { AnalyticsService } from './analytics';
+import { AnalyticsService } from './analytics';
 
 describe('AnalyticsService', () => {
   let analyticsService: AnalyticsService;

@@ -26,14 +26,6 @@ export interface CostComparisonChartProps {
   height?: number;
 }
 
-interface MonthlyComparison {
-  month: string;
-  monthLabel: string;
-  currentCost: number;
-  recommendedCost: number;
-  savings: number;
-}
-
 export const CostComparisonChart: React.FC<CostComparisonChartProps> = ({
   recommendedPlan,
   currentPlanCost,
@@ -48,7 +40,7 @@ export const CostComparisonChart: React.FC<CostComparisonChartProps> = ({
     // Get last 12 months of usage
     const last12Months = usageData.slice(-12);
 
-    return last12Months.map((data, index) => {
+    return last12Months.map((data, _index) => {
       const date = new Date(data.month);
       const monthLabel = date.toLocaleDateString('en-US', {
         month: 'short',
@@ -132,7 +124,7 @@ export const CostComparisonChart: React.FC<CostComparisonChartProps> = ({
           <Tooltip
             content={
               <ChartTooltip
-                formatter={(value, name) => formatCurrency(Number(value))}
+                formatter={(value, _name) => formatCurrency(Number(value))}
                 labelFormatter={(label) => `Month: ${label}`}
               />
             }

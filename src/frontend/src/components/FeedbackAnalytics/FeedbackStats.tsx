@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { ThumbsUp, ThumbsDown, MessageSquare, TrendingUp, BarChart3 } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, TrendingUp, BarChart3 } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { FeedbackStats as FeedbackStatsType } from '@/types/feedback';
 

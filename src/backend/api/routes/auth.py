@@ -226,7 +226,7 @@ async def refresh_token(refresh_token: str, db: DBSession):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",
-        )
+        ) from None
 
 
 @router.get(

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { FileDown } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { Button } from '@/components/design-system';

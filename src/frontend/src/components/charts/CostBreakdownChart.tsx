@@ -146,7 +146,7 @@ export const CostBreakdownChart: React.FC<CostBreakdownChartProps> = ({
           <Legend
             verticalAlign="bottom"
             height={36}
-            formatter={(value, entry: any) => {
+            formatter={(value, _entry: any) => {
               const item = chartData.find((d) => d.name === value);
               return `${value}: ${formatCurrency(item?.value || 0)}`;
             }}

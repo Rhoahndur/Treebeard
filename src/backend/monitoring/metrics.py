@@ -17,7 +17,7 @@ Metrics tracked:
 import logging
 import time
 from contextlib import contextmanager
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from config.settings import settings
@@ -25,7 +25,7 @@ from config.settings import settings
 logger = logging.getLogger(__name__)
 
 
-class MetricType(str, Enum):
+class MetricType(StrEnum):
     """Metric types."""
 
     COUNTER = "counter"

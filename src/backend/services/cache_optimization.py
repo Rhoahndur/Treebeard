@@ -509,7 +509,7 @@ class OptimizedCacheService:
         Returns:
             Key pattern category
         """
-        for pattern_name, pattern in self.KEY_PATTERNS.items():
+        for pattern_name, _pattern in self.KEY_PATTERNS.items():
             if pattern_name in key:
                 return pattern_name
         return "other"

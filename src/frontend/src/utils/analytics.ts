@@ -157,9 +157,9 @@ class AnalyticsService {
       if (!a.__SV) {
         const b = window;
         try {
-          let c, l, i;
+          let _c, _l, _i;
           const f = 'load';
-          const p = b.location;
+          const _p = b.location;
           const n = b.document;
           const s = n.getElementsByTagName('script')[0];
           const h = n.createElement('script');
@@ -171,7 +171,9 @@ class AnalyticsService {
           h.addEventListener(f, function() {
             a.init(e);
           });
-        } catch (g) {}
+        } catch (_g) {
+          // intentionally empty - Mixpanel load failure is non-critical
+        }
       }
     })(this.config.mixpanelToken, (window as any).mixpanel);
 

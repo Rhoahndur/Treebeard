@@ -13,14 +13,12 @@ import {
   Loader2,
   MessageSquare,
   Search,
-  Filter,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { FeedbackStats, FeedbackChart, FeedbackTable } from '@/components/FeedbackAnalytics';
 import { apiClient } from '@/api/client';
 import type {
   FeedbackAnalyticsResponse,
-  FeedbackRecord,
   SentimentType,
 } from '@/types/feedback';
 

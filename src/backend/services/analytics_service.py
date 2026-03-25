@@ -9,7 +9,7 @@ import hashlib
 import logging
 import time
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
@@ -17,7 +17,7 @@ from uuid import UUID
 logger = logging.getLogger(__name__)
 
 
-class EventType(str, Enum):
+class EventType(StrEnum):
     """Analytics event types"""
     # API Events
     API_REQUEST = "api_request"
@@ -43,7 +43,7 @@ class EventType(str, Enum):
     FILE_UPLOAD_FAILED = "file_upload_failed"
 
 
-class AnalyticsBackend(str, Enum):
+class AnalyticsBackend(StrEnum):
     """Supported analytics backends"""
     MIXPANEL = "mixpanel"
     LOGGING = "logging"

@@ -27,7 +27,7 @@ export const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
 
   const { submitPlanFeedback, submitRecommendationFeedback, isSubmitting, error, isSuccess, reset } =
     useFeedback({
-      onSuccess: (response) => {
+      onSuccess: (_response) => {
         onSuccess?.();
         // Auto-hide success message after 3 seconds
         setTimeout(() => {

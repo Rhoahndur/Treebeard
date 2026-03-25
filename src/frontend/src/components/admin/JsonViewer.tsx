@@ -24,7 +24,7 @@ export interface JsonViewerProps {
  */
 export const JsonViewer: React.FC<JsonViewerProps> = ({
   data,
-  defaultExpanded = true,
+  defaultExpanded: _defaultExpanded = true,
   maxHeight = '400px',
 }) => {
   const [copied, setCopied] = useState(false);
@@ -95,7 +95,7 @@ export const CollapsibleJsonViewer: React.FC<CollapsibleJsonProps> = ({
 }) => {
   const [expanded, setExpanded] = useState(level < 2);
 
-  const indent = level * 16;
+  const _indent = level * 16;
 
   if (data === null) {
     return <span className="text-purple-400">null</span>;

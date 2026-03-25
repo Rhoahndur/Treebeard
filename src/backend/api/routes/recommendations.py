@@ -470,7 +470,7 @@ async def generate_recommendations(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to generate recommendations: {str(exc)}",
-        )
+        ) from exc
 
 
 @router.get(
@@ -506,7 +506,7 @@ async def get_user_recommendations(
         )
 
     # Get recommendations from database
-    recommendations = (
+    _recommendations = (
         db.query(Recommendation)
         .filter(Recommendation.user_id == user_id)
         .order_by(Recommendation.generated_at.desc())

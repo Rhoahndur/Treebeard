@@ -9,7 +9,7 @@ including scoring, ranking, and switching optimization.
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
@@ -59,7 +59,7 @@ class UserPreferences:
 # COST CALCULATION SCHEMAS (Story 2.2)
 # ============================================================================
 
-class RateType(str, Enum):
+class RateType(StrEnum):
     """Energy plan rate structure types."""
     FIXED = "fixed"
     TIERED = "tiered"
