@@ -231,7 +231,7 @@ class OpenAIExplanationService:
                 )
 
                 # Extract text from response
-                explanation = response.choices[0].message.content.strip()
+                explanation = response.choices[0].message.content.strip()  # type: ignore[union-attr]
 
                 # Validate response
                 if len(explanation) < 50:
@@ -422,7 +422,7 @@ Generate the explanation now (just the explanation text, no labels):"""
         """Retrieve cached explanation if available."""
         try:
             cache_key = self._generate_cache_key(plan, user_profile, preferences, current_plan)
-            cached_data = await self.redis_client.get(cache_key)
+            cached_data = await self.redis_client.get(cache_key)  # type: ignore[union-attr]
 
             if cached_data:
                 data = json.loads(cached_data)
@@ -445,7 +445,7 @@ Generate the explanation now (just the explanation text, no labels):"""
         try:
             cache_key = self._generate_cache_key(plan, user_profile, preferences, current_plan)
             data = explanation.dict()
-            await self.redis_client.setex(cache_key, self.cache_ttl, json.dumps(data))
+            await self.redis_client.setex(cache_key, self.cache_ttl, json.dumps(data))  # type: ignore[union-attr]
         except Exception as e:
             logger.warning(f"Cache storage failed: {e}")
 

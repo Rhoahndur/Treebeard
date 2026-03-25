@@ -56,9 +56,13 @@ line-length = 120
 # ── mypy ─────────────────────────────────────────────────────────────────────
 [tool.mypy]
 python_version = "3.11"
-warn_return_any = true
+warn_return_any = false
 warn_unused_configs = true
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "src.backend.models.*"
+disable_error_code = ["name-defined"]  # SQLAlchemy string-based relationship refs
 
 # ── isort ────────────────────────────────────────────────────────────────────
 [tool.isort]

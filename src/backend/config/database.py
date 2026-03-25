@@ -126,11 +126,11 @@ def get_pool_status() -> dict:
     """
     pool = engine.pool
     return {
-        "pool_size": pool.size(),
-        "checked_in": pool.checkedin(),
-        "checked_out": pool.checkedout(),
-        "overflow": pool.overflow(),
-        "total_connections": pool.size() + pool.overflow(),
+        "pool_size": pool.size(),  # type: ignore[attr-defined]
+        "checked_in": pool.checkedin(),  # type: ignore[attr-defined]
+        "checked_out": pool.checkedout(),  # type: ignore[attr-defined]
+        "overflow": pool.overflow(),  # type: ignore[attr-defined]
+        "total_connections": pool.size() + pool.overflow(),  # type: ignore[attr-defined]
     }
 
 

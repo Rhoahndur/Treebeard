@@ -233,7 +233,7 @@ class ClaudeExplanationService:
                 )
 
                 # Extract text from response
-                explanation = response.content[0].text.strip()
+                explanation = response.content[0].text.strip()  # type: ignore[union-attr]
 
                 # Validate response
                 if len(explanation) < 50:

@@ -23,7 +23,6 @@ export interface CostBreakdownProps {
 
 export const CostBreakdown: React.FC<CostBreakdownProps> = ({
   plan,
-  _currentPlanCost,
   monthlyBreakdown,
 }) => {
   const [showDetails, setShowDetails] = useState(false);

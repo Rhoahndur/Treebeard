@@ -69,7 +69,7 @@ class GenerateRecommendationRequest(BaseModel):
 
     user_data: UserDataRequest = Field(..., description="User location and property data")
     usage_data: list[MonthlyUsageData] = Field(
-        ..., min_items=3, max_items=24, description="12 months of usage data (3-24 months)"
+        ..., min_length=3, max_length=24, description="12 months of usage data (3-24 months)"
     )
     preferences: UserPreferencesRequest = Field(..., description="User preferences")
     current_plan: CurrentPlanRequest | None = Field(None, description="Current plan")

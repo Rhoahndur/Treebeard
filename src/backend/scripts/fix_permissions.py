@@ -59,7 +59,7 @@ if not connected:
 
 # Grant permissions
 try:
-    cursor = conn.cursor()
+    cursor = conn.cursor()  # type: ignore[union-attr]
 
     commands = [
         "GRANT ALL ON SCHEMA public TO treebeard;",
@@ -78,7 +78,7 @@ try:
             print(f"⚠ {cmd} - {e}")
 
     cursor.close()
-    conn.close()
+    conn.close()  # type: ignore[union-attr]
 
     print("\n" + "=" * 60)
     print("✓ Permissions fixed successfully!")

@@ -294,9 +294,9 @@ class OptimizedCacheService:
         try:
             keys = self._client.keys(pattern)
             if keys:
-                deleted = self._client.delete(*keys)
+                deleted = self._client.delete(*keys)  # type: ignore[misc]
                 logger.info(f"Cache DELETE PATTERN: {pattern} ({deleted} keys)")
-                return deleted
+                return deleted  # type: ignore[return-value]
             return 0
         except Exception as e:
             logger.error(f"Cache delete pattern error for {pattern}: {e}")
@@ -335,7 +335,7 @@ class OptimizedCacheService:
             return -2
 
         try:
-            return self._client.ttl(key)
+            return self._client.ttl(key)  # type: ignore[return-value]
         except Exception as e:
             logger.error(f"Cache TTL error for key {key}: {e}")
             return -2
@@ -390,10 +390,10 @@ class OptimizedCacheService:
                 info = self._client.info("stats")
                 stats_dict.update(
                     {
-                        "redis_keyspace_hits": info.get("keyspace_hits", 0),
-                        "redis_keyspace_misses": info.get("keyspace_misses", 0),
-                        "connected_clients": info.get("connected_clients", 0),
-                        "used_memory_human": self._client.info("memory").get("used_memory_human", "0"),
+                        "redis_keyspace_hits": info.get("keyspace_hits", 0),  # type: ignore[union-attr]
+                        "redis_keyspace_misses": info.get("keyspace_misses", 0),  # type: ignore[union-attr]
+                        "connected_clients": info.get("connected_clients", 0),  # type: ignore[union-attr]
+                        "used_memory_human": self._client.info("memory").get("used_memory_human", "0"),  # type: ignore[union-attr]
                     }
                 )
             except Exception as e:

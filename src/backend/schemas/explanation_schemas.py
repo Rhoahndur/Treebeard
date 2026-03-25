@@ -38,7 +38,7 @@ class UserPreferences(BaseModel):
             "renewable": self.renewable_priority,
             "rating": self.rating_priority,
         }
-        return max(prefs, key=prefs.get)
+        return max(prefs, key=prefs.get)  # type: ignore[arg-type]
 
     def get_persona_type(self) -> str:
         """Determine user persona based on preferences."""

@@ -43,7 +43,7 @@ class CacheWarmingService:
             cache_service: Cache service instance (uses global if not provided)
         """
         self.cache = cache_service or get_optimized_cache()
-        self.warming_stats = {
+        self.warming_stats: dict[str, datetime | int | None] = {
             "last_full_warm": None,
             "last_plan_warm": None,
             "last_profile_warm": None,
@@ -144,7 +144,7 @@ class CacheWarmingService:
 
         except Exception as e:
             logger.error(f"Error warming popular plans: {e}")
-            self.warming_stats["errors"] += 1
+            self.warming_stats["errors"] += 1  # type: ignore[operator]
 
         return warmed_count
 
@@ -189,7 +189,7 @@ class CacheWarmingService:
 
         except Exception as e:
             logger.error(f"Error warming user profiles: {e}")
-            self.warming_stats["errors"] += 1
+            self.warming_stats["errors"] += 1  # type: ignore[operator]
 
         return warmed_count
 
@@ -233,7 +233,7 @@ class CacheWarmingService:
 
         except Exception as e:
             logger.error(f"Error warming recommendations: {e}")
-            self.warming_stats["errors"] += 1
+            self.warming_stats["errors"] += 1  # type: ignore[operator]
 
         return warmed_count
 
@@ -256,7 +256,7 @@ class CacheWarmingService:
 
         except Exception as e:
             logger.error(f"Error refreshing cache: {e}")
-            self.warming_stats["errors"] += 1
+            self.warming_stats["errors"] += 1  # type: ignore[operator]
 
     async def schedule_periodic_warming(self, interval_minutes: int = 60):
         """
@@ -274,7 +274,7 @@ class CacheWarmingService:
                 logger.info("Periodic cache warming completed")
             except Exception as e:
                 logger.error(f"Error in periodic warming: {e}")
-                self.warming_stats["errors"] += 1
+                self.warming_stats["errors"] += 1  # type: ignore[operator]
 
     def get_warming_stats(self) -> dict[str, Any]:
         """
@@ -285,13 +285,19 @@ class CacheWarmingService:
         """
         return {
             "last_full_warm": (
-                self.warming_stats["last_full_warm"].isoformat() if self.warming_stats["last_full_warm"] else None
+                self.warming_stats["last_full_warm"].isoformat()  # type: ignore[union-attr]
+                if self.warming_stats["last_full_warm"]
+                else None
             ),
             "last_plan_warm": (
-                self.warming_stats["last_plan_warm"].isoformat() if self.warming_stats["last_plan_warm"] else None
+                self.warming_stats["last_plan_warm"].isoformat()  # type: ignore[union-attr]
+                if self.warming_stats["last_plan_warm"]
+                else None
             ),
             "last_profile_warm": (
-                self.warming_stats["last_profile_warm"].isoformat() if self.warming_stats["last_profile_warm"] else None
+                self.warming_stats["last_profile_warm"].isoformat()  # type: ignore[union-attr]
+                if self.warming_stats["last_profile_warm"]
+                else None
             ),
             "total_items_warmed": self.warming_stats["total_items_warmed"],
             "errors": self.warming_stats["errors"],

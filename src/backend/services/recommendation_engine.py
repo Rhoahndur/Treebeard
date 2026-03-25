@@ -422,7 +422,7 @@ def get_recommendations(
 
 
 def analyze_switching_timing(
-    current_plan: CurrentPlan, recommended_plans: list[RankedPlan], today: date = None
+    current_plan: CurrentPlan, recommended_plans: list[RankedPlan], today: date | None = None
 ) -> SwitchingAnalysis:
     """
     Analyze switching costs and optimal timing.

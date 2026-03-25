@@ -161,7 +161,7 @@ class UsageAnalysisService:
             )
 
         # Group data by season
-        season_data = {season: [] for season in SeasonType}
+        season_data: dict[SeasonType, list[float]] = {season: [] for season in SeasonType}
 
         for usage in usage_data:
             month = usage.month.month

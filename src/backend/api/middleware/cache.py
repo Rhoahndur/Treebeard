@@ -29,7 +29,7 @@ class CacheMiddleware(BaseHTTPMiddleware):
         self,
         app,
         default_ttl: int = 300,  # 5 minutes
-        cacheable_paths: list = None,
+        cacheable_paths: list | None = None,
     ):
         """
         Initialize cache middleware.
@@ -106,7 +106,7 @@ class CacheMiddleware(BaseHTTPMiddleware):
             try:
                 # Get response body
                 response_body = b""
-                async for chunk in response.body_iterator:
+                async for chunk in response.body_iterator:  # type: ignore[attr-defined]
                     response_body += chunk
 
                 # Cache response data

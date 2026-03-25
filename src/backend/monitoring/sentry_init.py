@@ -109,9 +109,9 @@ def _sanitize_dict(data: dict[str, Any]) -> dict[str, Any]:
         if any(sensitive in key.lower() for sensitive in SENSITIVE_KEYS):
             sanitized[key] = "[REDACTED]"
         elif isinstance(value, dict):
-            sanitized[key] = _sanitize_dict(value)
+            sanitized[key] = _sanitize_dict(value)  # type: ignore[assignment]
         elif isinstance(value, list):
-            sanitized[key] = [
+            sanitized[key] = [  # type: ignore[assignment]
                 _sanitize_dict(item) if isinstance(item, dict) else _sanitize_value(item) for item in value
             ]
         else:

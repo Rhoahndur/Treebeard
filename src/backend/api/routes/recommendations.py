@@ -8,6 +8,7 @@ Story 6.3: Enhanced to include risk detection and stay recommendations.
 
 import logging
 from datetime import timedelta
+from typing import Any
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, HTTPException, status
@@ -151,7 +152,7 @@ async def generate_recommendations(
 
         # Step 3: Calculate savings for each plan (Story 2.4)
         savings_service = SavingsCalculatorService()
-        plan_responses = []
+        plan_responses: list[dict[str, Any]] = []
 
         # Step 4: Generate explanations (Story 2.7)
         from config.settings import settings

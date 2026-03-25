@@ -126,7 +126,7 @@ class MetricsCollector:
 
         try:
             if self.backend == "datadog":
-                self._client.increment(metric_name, value=value, tags=tags, sample_rate=sample_rate)
+                self._client.increment(metric_name, value=value, tags=tags, sample_rate=sample_rate)  # type: ignore[union-attr]
             elif self.backend == "prometheus":
                 # Prometheus counter implementation
                 pass
@@ -150,7 +150,7 @@ class MetricsCollector:
 
         try:
             if self.backend == "datadog":
-                self._client.gauge(metric_name, value, tags=tags, sample_rate=sample_rate)
+                self._client.gauge(metric_name, value, tags=tags, sample_rate=sample_rate)  # type: ignore[union-attr]
             elif self.backend == "prometheus":
                 # Prometheus gauge implementation
                 pass
@@ -176,7 +176,7 @@ class MetricsCollector:
 
         try:
             if self.backend == "datadog":
-                self._client.histogram(metric_name, value, tags=tags, sample_rate=sample_rate)
+                self._client.histogram(metric_name, value, tags=tags, sample_rate=sample_rate)  # type: ignore[union-attr]
             elif self.backend == "prometheus":
                 # Prometheus histogram implementation
                 pass
@@ -206,7 +206,7 @@ class MetricsCollector:
 
         try:
             if self.backend == "datadog":
-                self._client.timing(metric_name, value, tags=tags, sample_rate=sample_rate)
+                self._client.timing(metric_name, value, tags=tags, sample_rate=sample_rate)  # type: ignore[union-attr]
             elif self.backend == "prometheus":
                 # Prometheus histogram for timing
                 pass
@@ -249,7 +249,7 @@ class MetricsCollector:
 
         try:
             if self.backend == "datadog":
-                self._client.set(metric_name, value, tags=tags)
+                self._client.set(metric_name, value, tags=tags)  # type: ignore[union-attr]
             else:
                 logger.debug(f"METRIC [set] {metric_name}={value} tags={tags}")
         except Exception as e:

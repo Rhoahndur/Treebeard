@@ -112,7 +112,7 @@ class CacheService:
 
             if cached_data:
                 # Deserialize from JSON
-                _profile_dict = json.loads(cached_data)
+                _profile_dict = json.loads(cached_data)  # type: ignore[arg-type]
                 # Note: In production, you'd have a proper deserialization method
                 # For now, we'll just return None if cache is hit but can't deserialize
                 # The caller will recompute and cache again
@@ -271,9 +271,9 @@ class CacheService:
             return {
                 "enabled": True,
                 "status": "connected",
-                "keyspace_hits": info.get("keyspace_hits", 0),
-                "keyspace_misses": info.get("keyspace_misses", 0),
-                "connected_clients": info.get("connected_clients", 0),
+                "keyspace_hits": info.get("keyspace_hits", 0),  # type: ignore[union-attr]
+                "keyspace_misses": info.get("keyspace_misses", 0),  # type: ignore[union-attr]
+                "connected_clients": info.get("connected_clients", 0),  # type: ignore[union-attr]
             }
         except Exception as e:
             return {
@@ -295,7 +295,7 @@ class CacheService:
             pattern = f"{self.KEY_PREFIX}:*"
             keys = self._client.keys(pattern)
             if keys:
-                return self._client.delete(*keys)
+                return self._client.delete(*keys)  # type: ignore[misc, return-value]
             return 0
 
         except Exception as e:
@@ -311,7 +311,7 @@ class CacheService:
         if not self.enabled or not self._client:
             return None
         try:
-            return self._client.get(key)
+            return self._client.get(key)  # type: ignore[return-value]
         except Exception:
             return None
 
@@ -344,7 +344,7 @@ class CacheService:
         if not self.enabled or not self._client:
             return 0
         try:
-            return self._client.incr(key)
+            return self._client.incr(key)  # type: ignore[return-value]
         except Exception:
             return 0
 

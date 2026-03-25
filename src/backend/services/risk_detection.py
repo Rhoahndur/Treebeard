@@ -541,7 +541,7 @@ class RiskDetectionService:
         # Trigger 5: Contract ends soon + high ETF in recommended plan
         days_until_end = None
         if current_plan.contract_end_date:
-            days_until_end = (current_plan.contract_end_date - datetime.now().date()).days
+            days_until_end = (current_plan.contract_end_date - datetime.now()).days
             if (
                 days_until_end < self.config.contract_ending_soon_days
                 and top_plan.early_termination_fee > self.config.high_etf_threshold

@@ -32,7 +32,7 @@ class UsageDataPoint(BaseModel):
 class UploadUsageRequest(BaseModel):
     """Upload usage data request."""
 
-    usage_data: list[UsageDataPoint] = Field(..., min_items=1, max_items=24, description="Usage data (1-24 months)")
+    usage_data: list[UsageDataPoint] = Field(..., min_length=1, max_length=24, description="Usage data (1-24 months)")
 
 
 # Endpoints

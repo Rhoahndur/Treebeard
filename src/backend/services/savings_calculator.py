@@ -682,7 +682,7 @@ class SavingsCalculatorService:
         current_plan: ComparisonPlan,
     ) -> list[TradeOffNote]:
         """Generate trade-off notes comparing plans."""
-        trade_offs = []
+        trade_offs: list[TradeOffNote] = []
 
         if len(plans) < 2:
             return trade_offs
