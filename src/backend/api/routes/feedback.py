@@ -7,11 +7,11 @@ Story 8.2: Feedback API Endpoints
 """
 
 import logging
-from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Request, status
 
+from api.auth_dependencies import CurrentAdminUser, DBSession, OptionalUser
 from schemas.feedback_schemas import (
     FeedbackAnalyticsResponse,
     FeedbackSearchParams,
@@ -21,8 +21,7 @@ from schemas.feedback_schemas import (
     PlanFeedbackCreate,
     RecommendationFeedbackCreate,
 )
-from services.feedback_service import FeedbackService, create_feedback_service
-from api.auth_dependencies import CurrentAdminUser, DBSession, OptionalUser
+from services.feedback_service import create_feedback_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -323,11 +322,11 @@ async def get_feedback_analytics(
 async def search_feedback(
     db: DBSession,
     current_admin: CurrentAdminUser,
-    plan_id: Optional[UUID] = None,
-    min_rating: Optional[int] = None,
-    max_rating: Optional[int] = None,
-    has_text: Optional[bool] = None,
-    sentiment: Optional[str] = None,
+    plan_id: UUID | None = None,
+    min_rating: int | None = None,
+    max_rating: int | None = None,
+    has_text: bool | None = None,
+    sentiment: str | None = None,
     limit: int = 100,
     offset: int = 0,
 ):
@@ -427,12 +426,12 @@ async def export_feedback_csv(
         from fastapi.responses import StreamingResponse
 
         from models.feedback import Feedback
-        from models.plan import Plan
+        from models.plan import PlanCatalog
 
         # Query all feedback with plan details
         feedbacks = (
-            db.query(Feedback, Plan)
-            .outerjoin(Plan, Feedback.plan_id == Plan.id)
+            db.query(Feedback, PlanCatalog)
+            .outerjoin(PlanCatalog, Feedback.plan_id == PlanCatalog.id)
             .order_by(Feedback.created_at.desc())
             .all()
         )
