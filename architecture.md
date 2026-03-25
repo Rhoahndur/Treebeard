@@ -1,4 +1,4 @@
-# AI Energy Plan Recommendation Agent - Architecture Diagrams
+# TreeBeard - System Architecture
 
 ## System Architecture Overview
 
@@ -9,90 +9,99 @@ graph TB
         MOBILE[Mobile Browser]
     end
 
-    subgraph "CDN Layer"
-        CDN[CloudFront/Cloud CDN]
+    subgraph "Frontend - React/Vite"
+        REACT[React Application<br/>TypeScript + Tailwind]
+        STATIC[Static Assets<br/>Vite Build]
     end
 
-    subgraph "Frontend Layer"
-        REACT[React Application]
-        STATIC[Static Assets]
-    end
-
-    subgraph "API Gateway"
-        APIGW[API Gateway/Load Balancer]
-        AUTH[Authentication Service]
+    subgraph "Middleware Pipeline"
+        REQID[Request ID]
+        LOGGING[Logging]
+        AUDIT[Audit Logging]
+        CACHE_MW[Response Cache]
         RATELIMIT[Rate Limiter]
+        ERRHANDLER[Error Handler]
     end
 
-    subgraph "Backend Services"
-        API[FastAPI Backend]
+    subgraph "Backend - FastAPI"
+        API[FastAPI Router]
+        AUTH[JWT Authentication]
+        RBAC[Role-Based Access Control]
+    end
+
+    subgraph "Business Services"
         RECOMMEND[Recommendation Engine]
-        ANALYZE[Usage Analysis Service]
+        ANALYZE[Usage Analysis]
         EXPLAIN[Explanation Generator]
-        CALC[Cost Calculator]
-        RISK[Risk Detection Service]
+        CALC[Savings Calculator]
+        RISK[Risk Detection]
+        SCORE[Scoring Service]
+        FEEDBACK_SVC[Feedback Service]
+        ADMIN_SVC[Admin Service]
     end
 
-    subgraph "AI/ML Layer"
-        CLAUDE[Claude API]
-        ML[ML Models]
+    subgraph "AI Layer"
+        OPENAI[OpenAI API<br/>gpt-4o-mini]
+        CLAUDE[Claude API<br/>Anthropic]
     end
 
     subgraph "Data Layer"
-        POSTGRES[(PostgreSQL)]
+        POSTGRES[(PostgreSQL 15+)]
         REDIS[(Redis Cache)]
-        S3[Object Storage]
     end
 
-    subgraph "External Services"
-        UTILITY[Utility APIs]
-        SUPPLIER[Supplier Data APIs]
-        ANALYTICS[Analytics Service]
-        MONITORING[Monitoring/APM]
-        SENTRY[Error Tracking]
+    subgraph "Observability"
+        SENTRY[Sentry<br/>Error Tracking]
+        DATADOG[DataDog<br/>APM + Metrics]
+        PAGERDUTY[PagerDuty<br/>Alerting]
+        SLACK_ALERT[Slack<br/>Notifications]
     end
 
-    WEB --> CDN
-    MOBILE --> CDN
-    CDN --> REACT
-    CDN --> STATIC
-    
-    REACT --> APIGW
-    APIGW --> AUTH
-    APIGW --> RATELIMIT
-    RATELIMIT --> API
-    
-    API --> RECOMMEND
-    API --> ANALYZE
-    API --> EXPLAIN
-    API --> CALC
-    API --> RISK
-    
-    RECOMMEND --> ML
+    WEB --> REACT
+    MOBILE --> REACT
+    REACT --> STATIC
+
+    REACT --> REQID
+    REQID --> LOGGING
+    LOGGING --> AUDIT
+    AUDIT --> CACHE_MW
+    CACHE_MW --> RATELIMIT
+    RATELIMIT --> ERRHANDLER
+    ERRHANDLER --> API
+
+    API --> AUTH
+    AUTH --> RBAC
+    RBAC --> RECOMMEND
+    RBAC --> ANALYZE
+    RBAC --> ADMIN_SVC
+
+    RECOMMEND --> SCORE
+    RECOMMEND --> CALC
+    RECOMMEND --> RISK
+    RECOMMEND --> EXPLAIN
+
+    EXPLAIN --> OPENAI
     EXPLAIN --> CLAUDE
-    
+
     API --> POSTGRES
     API --> REDIS
-    API --> S3
-    
     ANALYZE --> POSTGRES
     CALC --> POSTGRES
     RECOMMEND --> POSTGRES
     RECOMMEND --> REDIS
-    
-    API --> UTILITY
-    API --> SUPPLIER
-    API --> ANALYTICS
-    API --> MONITORING
+
     API --> SENTRY
+    API --> DATADOG
+    DATADOG --> PAGERDUTY
+    DATADOG --> SLACK_ALERT
 
     style WEB fill:#e1f5ff
     style MOBILE fill:#e1f5ff
-    style CDN fill:#fff3e0
     style REACT fill:#e8f5e9
     style API fill:#f3e5f5
     style POSTGRES fill:#ffebee
     style REDIS fill:#fff9c4
+    style OPENAI fill:#e0f2f1
     style CLAUDE fill:#e0f2f1
 ```
 
@@ -101,114 +110,146 @@ graph TB
 ```mermaid
 graph TB
     subgraph "Frontend Components"
-        LANDING[Landing Page]
-        ONBOARD[Onboarding Flow]
-        PREFFORM[Preference Form]
-        UPLOAD[Data Upload]
-        RESULTS[Results Display]
-        COMPARE[Comparison View]
-        CHARTS[Visualization Charts]
+        ONBOARD[Onboarding Flow<br/>4-step wizard]
+        UPLOAD[File Upload<br/>CSV parser]
+        PREFS[Preference Sliders<br/>Weighted priorities]
+        RESULTS[Results Page<br/>Top 3 plans]
+        COMPARE[Comparison View<br/>Side-by-side]
+        CHARTS[Charts<br/>7 visualization types]
+        SCENARIOS[Scenario Analysis<br/>What-if]
+        ADMIN_UI[Admin Dashboard<br/>Users/Plans/Audit]
+        FEEDBACK_UI[Feedback Widget]
+        EXPORT[Export<br/>PDF/CSV]
     end
 
     subgraph "API Endpoints"
-        AUTH_EP[/auth/*]
-        USER_EP[/users/*]
-        REC_EP[/recommendations/*]
-        PLAN_EP[/plans/*]
-        UPLOAD_EP[/usage/*]
-        FEEDBACK_EP[/feedback/*]
+        AUTH_EP[/auth/*<br/>register, login, refresh]
+        USER_EP[/users/*<br/>profile, preferences]
+        REC_EP[/recommendations/*<br/>generate, retrieve]
+        PLAN_EP[/plans/*<br/>catalog, details]
+        UPLOAD_EP[/usage/*<br/>upload, history]
+        FEEDBACK_EP[/feedback/*<br/>submit, analytics]
+        ADMIN_EP[/admin/*<br/>users, plans, stats, audit]
+        HEALTH_EP[/health<br/>readiness probe]
     end
 
     subgraph "Business Logic Layer"
         subgraph "Core Engine"
-            PROFILER[Usage Profiler]
-            MATCHER[Plan Matcher]
-            RANKER[Plan Ranker]
-            SCORER[Scoring Algorithm]
+            PROFILER[Usage Profiler<br/>usage_analysis.py]
+            MATCHER[Plan Matcher<br/>recommendation_engine.py]
+            RANKER[Plan Ranker<br/>scoring_service.py]
         end
-        
+
         subgraph "Calculators"
-            COST_CALC[Cost Calculator]
-            SAVINGS_CALC[Savings Calculator]
+            COST_CALC[Cost Calculator<br/>4 rate types]
+            SAVINGS_CALC[Savings Calculator<br/>savings_calculator.py]
             BREAKEVEN[Break-even Analyzer]
         end
-        
+
         subgraph "AI Services"
-            NLG[Explanation Generator]
-            PERSONALIZE[Personalization Engine]
+            NLG_CLAUDE[Claude Explanations<br/>explanation_service.py]
+            NLG_OPENAI[OpenAI Explanations<br/>explanation_service_openai.py]
         end
-        
-        subgraph "Safety"
-            VALIDATOR[Data Validator]
-            RISK_DETECT[Risk Detector]
+
+        subgraph "Safety & Quality"
+            RISK_DETECT[Risk Detector<br/>risk_detection.py]
             QUALITY[Data Quality Checker]
         end
     end
 
-    subgraph "Data Access Layer"
-        USER_DAO[User DAO]
-        USAGE_DAO[Usage DAO]
-        PLAN_DAO[Plan DAO]
-        PREF_DAO[Preference DAO]
-        CACHE_SERVICE[Cache Service]
+    subgraph "Infrastructure Services"
+        CACHE_SVC[Cache Service<br/>cache_service.py]
+        CACHE_WARM[Cache Warming<br/>cache_warming.py]
+        CACHE_OPT[Cache Optimization<br/>cache_optimization.py]
+        ANALYTICS_SVC[Analytics Service<br/>analytics_service.py]
+        AUDIT_SVC[Audit Service<br/>audit_service.py]
+        FEEDBACK_SVC[Feedback Service<br/>feedback_service.py]
     end
 
     subgraph "Data Storage"
-        USER_DB[(Users Table)]
+        USER_DB[(Users)]
         USAGE_DB[(Usage History)]
         PLAN_DB[(Plan Catalog)]
         PREF_DB[(Preferences)]
         REC_DB[(Recommendations)]
         FEEDBACK_DB[(Feedback)]
+        AUDIT_DB[(Audit Logs)]
         CACHE[(Redis)]
     end
 
-    LANDING --> ONBOARD
-    ONBOARD --> PREFFORM
-    ONBOARD --> UPLOAD
-    PREFFORM --> REC_EP
-    UPLOAD --> UPLOAD_EP
-    RESULTS --> COMPARE
-    RESULTS --> CHARTS
+    ONBOARD --> AUTH_EP
+    ONBOARD --> UPLOAD_EP
+    PREFS --> USER_EP
+    RESULTS --> REC_EP
+    COMPARE --> PLAN_EP
+    FEEDBACK_UI --> FEEDBACK_EP
+    ADMIN_UI --> ADMIN_EP
 
     REC_EP --> PROFILER
     PROFILER --> MATCHER
     MATCHER --> RANKER
-    RANKER --> SCORER
-    
-    SCORER --> COST_CALC
+
+    RANKER --> COST_CALC
     COST_CALC --> SAVINGS_CALC
     SAVINGS_CALC --> BREAKEVEN
-    
-    RANKER --> NLG
-    NLG --> PERSONALIZE
-    
-    PROFILER --> VALIDATOR
+
+    RANKER --> NLG_CLAUDE
+    RANKER --> NLG_OPENAI
     RANKER --> RISK_DETECT
-    VALIDATOR --> QUALITY
+    PROFILER --> QUALITY
 
-    PROFILER --> USAGE_DAO
-    MATCHER --> PLAN_DAO
-    SCORER --> PREF_DAO
-    
-    USAGE_DAO --> USAGE_DB
-    PLAN_DAO --> PLAN_DB
-    PREF_DAO --> PREF_DB
-    USER_DAO --> USER_DB
-    
-    CACHE_SERVICE --> CACHE
-    PLAN_DAO --> CACHE_SERVICE
-    RANKER --> CACHE_SERVICE
+    PROFILER --> USAGE_DB
+    MATCHER --> PLAN_DB
+    RANKER --> PREF_DB
 
-    style LANDING fill:#e3f2fd
+    CACHE_SVC --> CACHE
+    MATCHER --> CACHE_SVC
+    RANKER --> CACHE_SVC
+
+    style ONBOARD fill:#e3f2fd
     style RESULTS fill:#e8f5e9
     style PROFILER fill:#fff3e0
     style MATCHER fill:#f3e5f5
-    style NLG fill:#e0f2f1
+    style NLG_CLAUDE fill:#e0f2f1
     style CACHE fill:#fff9c4
 ```
 
-## Data Flow Diagram - Recommendation Generation
+## Middleware Pipeline
+
+Requests pass through 6 middleware layers in order before reaching route handlers:
+
+```mermaid
+flowchart LR
+    REQ[Incoming<br/>Request] --> M1[RequestID<br/>Middleware]
+    M1 --> M2[Logging<br/>Middleware]
+    M2 --> M3[Audit<br/>Middleware]
+    M3 --> M4[Cache<br/>Middleware]
+    M4 --> M5[Rate Limit<br/>Middleware]
+    M5 --> M6[Error Handler<br/>Middleware]
+    M6 --> ROUTE[Route<br/>Handler]
+    ROUTE --> RES[Response]
+
+    style REQ fill:#e3f2fd
+    style M1 fill:#fff3e0
+    style M2 fill:#fff3e0
+    style M3 fill:#fff3e0
+    style M4 fill:#fff3e0
+    style M5 fill:#fff3e0
+    style M6 fill:#fff3e0
+    style ROUTE fill:#e8f5e9
+    style RES fill:#e8f5e9
+```
+
+| Middleware | Purpose | Details |
+|-----------|---------|---------|
+| **RequestID** | Tracing | Adds `X-Request-ID` header for distributed tracing |
+| **Logging** | Observability | Logs all requests/responses with timing |
+| **Audit** | Compliance | Records admin actions to audit_logs table |
+| **Cache** | Performance | HTTP response caching (1hr plans, 24hr recommendations) |
+| **Rate Limit** | Protection | 100 req/min per user, 1000 req/hr per IP |
+| **Error Handler** | Reliability | Structured error responses, Sentry integration |
+
+## Data Flow - Recommendation Generation
 
 ```mermaid
 sequenceDiagram
@@ -218,14 +259,15 @@ sequenceDiagram
     participant Analyzer
     participant Matcher
     participant Calculator
+    participant RiskDetector
     participant ExplainGen
     participant Database
     participant Cache
-    participant ClaudeAPI
+    participant AI as Claude/OpenAI
 
     User->>Frontend: Complete onboarding
-    Frontend->>API: POST /recommendations/generate
-    
+    Frontend->>API: POST /api/v1/recommendations/generate
+
     API->>Cache: Check cached recommendations
     alt Cache Hit
         Cache-->>API: Return cached data
@@ -233,43 +275,49 @@ sequenceDiagram
     else Cache Miss
         API->>Database: Fetch user data
         Database-->>API: User, usage, preferences
-        
+
         API->>Analyzer: Analyze usage patterns
         Analyzer->>Analyzer: Detect seasonal patterns
-        Analyzer->>Analyzer: Calculate projections
-        Analyzer-->>API: Usage profile
-        
+        Analyzer->>Analyzer: Classify user profile
+        Analyzer->>Analyzer: Project 12-month usage
+        Analyzer-->>API: Usage profile + confidence score
+
         API->>Database: Fetch plan catalog
-        Database-->>API: Available plans
-        
+        Database-->>API: Active plans for ZIP code
+
         API->>Matcher: Match plans to profile
-        Matcher->>Matcher: Score each plan
-        Matcher->>Matcher: Apply preference weights
+        Matcher->>Matcher: Calculate cost per rate type
+        Matcher->>Matcher: Score: cost, flexibility, renewable, rating
+        Matcher->>Matcher: Apply user preference weights
         Matcher->>Matcher: Rank plans
-        Matcher-->>API: Top 3 plans
-        
+        Matcher-->>API: Top 3 plans with scores
+
         API->>Calculator: Calculate costs & savings
-        Calculator->>Calculator: Project annual costs
-        Calculator->>Calculator: Compare to current
-        Calculator->>Calculator: Calculate break-even
-        Calculator-->>API: Cost analysis
-        
+        Calculator->>Calculator: Annual cost projections
+        Calculator->>Calculator: Monthly breakdown
+        Calculator->>Calculator: Break-even analysis
+        Calculator-->>API: Savings analysis
+
+        API->>RiskDetector: Detect risk factors
+        RiskDetector->>RiskDetector: Check ETF, data quality, volatility
+        RiskDetector-->>API: Risk flags + stay recommendation
+
         API->>ExplainGen: Generate explanations
-        ExplainGen->>ClaudeAPI: Request explanation
-        ClaudeAPI-->>ExplainGen: Generated text
-        ExplainGen->>ExplainGen: Personalize message
-        ExplainGen-->>API: Explanations
-        
+        ExplainGen->>AI: Request personalized explanation
+        AI-->>ExplainGen: Generated text
+        ExplainGen->>ExplainGen: Check readability
+        ExplainGen-->>API: Plan explanations
+
         API->>Database: Store recommendations
         API->>Cache: Cache results (24h TTL)
-        API-->>Frontend: Return recommendations
+        API-->>Frontend: Return top 3 + savings + risks
     end
-    
+
     Frontend->>Frontend: Render plan cards
     Frontend-->>User: Display recommendations
 ```
 
-## Database Schema Diagram
+## Database Schema
 
 ```mermaid
 erDiagram
@@ -278,31 +326,27 @@ erDiagram
     USERS ||--|| CURRENT_PLANS : has
     USERS ||--o{ RECOMMENDATIONS : receives
     USERS ||--o{ FEEDBACK : provides
-    
+    USERS ||--o{ AUDIT_LOGS : generates
+
     RECOMMENDATIONS ||--|{ RECOMMENDATION_PLANS : contains
-    PLAN_CATALOG ||--o{ RECOMMENDATION_PLANS : includes
-    PLAN_CATALOG }o--|| SUPPLIERS : from
-    
+    PLAN_CATALOG ||--o{ RECOMMENDATION_PLANS : "recommended in"
+    SUPPLIERS ||--o{ PLAN_CATALOG : offers
+    RECOMMENDATION_PLANS ||--o{ FEEDBACK : receives
+
     USERS {
         uuid id PK
-        string email
+        string email UK
+        string hashed_password
         string name
         string zip_code
         string property_type
+        boolean is_admin
+        boolean is_active
+        boolean consent_given
         timestamp created_at
         timestamp updated_at
-        boolean consent_given
     }
-    
-    USAGE_HISTORY {
-        uuid id PK
-        uuid user_id FK
-        date usage_date
-        decimal kwh_consumed
-        string data_source
-        timestamp created_at
-    }
-    
+
     USER_PREFERENCES {
         uuid id PK
         uuid user_id FK
@@ -312,18 +356,41 @@ erDiagram
         int rating_priority
         timestamp updated_at
     }
-    
+
     CURRENT_PLANS {
         uuid id PK
         uuid user_id FK
         string supplier_name
+        string plan_name
         decimal current_rate
         date contract_end_date
         decimal early_termination_fee
         date plan_start_date
         timestamp created_at
     }
-    
+
+    USAGE_HISTORY {
+        uuid id PK
+        uuid user_id FK
+        date usage_date
+        decimal kwh_consumed
+        string data_source
+        decimal data_quality_score
+        timestamp created_at
+    }
+
+    SUPPLIERS {
+        uuid id PK
+        string supplier_name
+        decimal average_rating
+        int review_count
+        string website
+        string logo_url
+        string phone
+        boolean is_active
+        timestamp created_at
+    }
+
     PLAN_CATALOG {
         uuid id PK
         uuid supplier_id FK
@@ -335,40 +402,32 @@ erDiagram
         decimal renewable_percentage
         decimal monthly_fee
         decimal connection_fee
-        string[] available_regions
+        text[] available_regions
         boolean is_active
+        timestamp created_at
         timestamp last_updated
     }
-    
-    SUPPLIERS {
-        uuid id PK
-        string supplier_name
-        decimal average_rating
-        int review_count
-        string website
-        timestamp created_at
-    }
-    
+
     RECOMMENDATIONS {
         uuid id PK
         uuid user_id FK
         jsonb usage_profile
         timestamp generated_at
-        timestamp expires_at
     }
-    
+
     RECOMMENDATION_PLANS {
         uuid id PK
         uuid recommendation_id FK
         uuid plan_id FK
         int rank
         decimal composite_score
+        jsonb score_breakdown
         decimal projected_annual_cost
         decimal projected_annual_savings
         text explanation
         jsonb risk_flags
     }
-    
+
     FEEDBACK {
         uuid id PK
         uuid user_id FK
@@ -380,65 +439,89 @@ erDiagram
         decimal sentiment_score
         timestamp created_at
     }
+
+    AUDIT_LOGS {
+        uuid id PK
+        uuid user_id FK
+        string action
+        string resource_type
+        string resource_id
+        jsonb details
+        string ip_address
+        string request_id
+        timestamp created_at
+    }
+```
+
+### Rate Structure Types (JSONB)
+
+The `plan_catalog.rate_structure` field supports four plan types:
+
+```
+Fixed:          { "type": "fixed", "rate_per_kwh": 0.12 }
+Tiered:         { "type": "tiered", "tiers": [{ "limit": 500, "rate": 0.10 }, { "limit": null, "rate": 0.14 }] }
+Time-of-Use:    { "type": "tou", "peak_rate": 0.15, "off_peak_rate": 0.08, "peak_hours": "2pm-8pm" }
+Variable:       { "type": "variable", "base_rate": 0.11, "adjustment_factor": 0.02 }
 ```
 
 ## Recommendation Algorithm Flow
 
 ```mermaid
 flowchart TD
-    START([Start Recommendation Process]) --> LOAD_DATA[Load User Data]
-    LOAD_DATA --> CHECK_DATA{Data Complete?}
-    
+    START([Start Recommendation]) --> LOAD_DATA[Load User Data]
+    LOAD_DATA --> CHECK_DATA{Data >= 3 months?}
+
     CHECK_DATA -->|No| FLAG_QUALITY[Flag Data Quality Issues]
     CHECK_DATA -->|Yes| ANALYZE
     FLAG_QUALITY --> ANALYZE[Analyze Usage Patterns]
-    
-    ANALYZE --> SEASONAL[Detect Seasonal Patterns]
-    SEASONAL --> CLASSIFY[Classify User Profile]
-    CLASSIFY --> PROJECT[Project 12-Month Usage]
-    
-    PROJECT --> LOAD_PLANS[Load Available Plans]
-    LOAD_PLANS --> FILTER[Filter by Region]
-    
+
+    ANALYZE --> SEASONAL[Detect Seasonal Patterns<br/>Summer/Winter ratios]
+    SEASONAL --> CLASSIFY[Classify User Profile<br/>Baseline / Seasonal / High-use / Variable]
+    CLASSIFY --> PROJECT[Project 12-Month Usage<br/>+ Confidence Score]
+
+    PROJECT --> LOAD_PLANS[Load Active Plans]
+    LOAD_PLANS --> FILTER[Filter by ZIP Code Region]
+
     FILTER --> SCORE_LOOP{More Plans?}
-    SCORE_LOOP -->|Yes| CALC_COST[Calculate Plan Cost]
+    SCORE_LOOP -->|Yes| CALC_COST[Calculate Plan Cost<br/>Fixed / Tiered / TOU / Variable]
     CALC_COST --> SCORE_FACTORS[Score Multiple Factors]
-    
-    SCORE_FACTORS --> COST_SCORE[Cost Score]
-    SCORE_FACTORS --> FLEX_SCORE[Flexibility Score]
-    SCORE_FACTORS --> RENEW_SCORE[Renewable Score]
-    SCORE_FACTORS --> RATING_SCORE[Rating Score]
-    
-    COST_SCORE --> COMPOSITE[Calculate Composite Score]
+
+    SCORE_FACTORS --> COST_SCORE[Cost Score<br/>Annual cost vs current]
+    SCORE_FACTORS --> FLEX_SCORE[Flexibility Score<br/>Contract length + exit fees]
+    SCORE_FACTORS --> RENEW_SCORE[Renewable Score<br/>Green energy %]
+    SCORE_FACTORS --> RATING_SCORE[Rating Score<br/>Supplier customer rating]
+
+    COST_SCORE --> COMPOSITE[Composite Score]
     FLEX_SCORE --> COMPOSITE
     RENEW_SCORE --> COMPOSITE
     RATING_SCORE --> COMPOSITE
-    
-    COMPOSITE --> WEIGHT[Apply User Weights]
+
+    COMPOSITE --> WEIGHT[Apply User Preference Weights]
     WEIGHT --> STORE_SCORE[Store Plan Score]
     STORE_SCORE --> SCORE_LOOP
-    
+
     SCORE_LOOP -->|No| RANK[Rank All Plans]
-    RANK --> CHECK_CONTRACT[Check Contract Timing]
-    CHECK_CONTRACT --> CALC_SWITCH[Calculate Switching Costs]
-    CALC_SWITCH --> SELECT_TOP[Select Top 3]
-    
+    RANK --> SELECT_TOP[Select Top 3]
+
     SELECT_TOP --> DETECT_RISK[Detect Risk Factors]
     DETECT_RISK --> HIGH_ETF{High ETF?}
     HIGH_ETF -->|Yes| ADD_WARNING[Add ETF Warning]
     HIGH_ETF -->|No| LOW_SAVINGS
-    
+
     ADD_WARNING --> LOW_SAVINGS{Low Savings?}
     LOW_SAVINGS -->|Yes| ADD_WARNING2[Add Savings Warning]
-    LOW_SAVINGS -->|No| GEN_EXPLAIN
-    
-    ADD_WARNING2 --> GEN_EXPLAIN[Generate Explanations]
-    GEN_EXPLAIN --> PERSONALIZE[Personalize Messages]
-    PERSONALIZE --> CHECK_STAY{Stay Better?}
-    
-    CHECK_STAY -->|Yes| RECOMMEND_STAY[Recommend Current Plan]
-    CHECK_STAY -->|No| RETURN_RECS[Return Top 3 Plans]
-    
+    LOW_SAVINGS -->|No| MORE_RISKS
+
+    ADD_WARNING2 --> MORE_RISKS{Other Risks?<br/>Data quality, volatility,<br/>contract timing}
+    MORE_RISKS -->|Yes| ADD_MORE[Add Risk Flags]
+    MORE_RISKS -->|No| GEN_EXPLAIN
+
+    ADD_MORE --> GEN_EXPLAIN[Generate AI Explanations]
+    GEN_EXPLAIN --> CHECK_STAY{Risks > Benefits?}
+
+    CHECK_STAY -->|Yes| RECOMMEND_STAY[Recommend Current Plan<br/>+ Risk Explanation]
+    CHECK_STAY -->|No| RETURN_RECS[Return Top 3 Plans<br/>+ Scores + Savings + Risks]
+
     RECOMMEND_STAY --> END([End])
     RETURN_RECS --> END
 
@@ -452,255 +535,190 @@ flowchart TD
 
 ## Deployment Architecture
 
+The application currently deploys to **Railway.app** using Nixpacks builds:
+
 ```mermaid
 graph TB
-    subgraph "Production Environment - AWS/GCP"
-        subgraph "Region: US-East"
-            subgraph "Availability Zone 1"
-                LB1[Load Balancer]
-                API1[API Server 1]
-                API2[API Server 2]
-                WORKER1[Background Worker 1]
-            end
-            
-            subgraph "Availability Zone 2"
-                API3[API Server 3]
-                API4[API Server 4]
-                WORKER2[Background Worker 2]
-            end
-            
-            subgraph "Managed Services"
-                RDS[(RDS PostgreSQL<br/>Multi-AZ)]
-                ELASTICACHE[(ElastiCache Redis<br/>Cluster Mode)]
-                S3_PROD[S3 Bucket]
-            end
+    subgraph "Railway.app Platform"
+        subgraph "Frontend Service"
+            FE_BUILD[Nixpacks Build<br/>npm install + vite build]
+            FE_SERVE[Vite Preview<br/>Port 8080]
         end
-        
-        subgraph "CDN & Edge"
-            CLOUDFRONT[CloudFront Distribution]
-            WAF[Web Application Firewall]
-        end
-        
-        subgraph "Monitoring"
-            CLOUDWATCH[CloudWatch]
-            DATADOG[DataDog APM]
-            SENTRY_PROD[Sentry]
-        end
-    end
-    
-    subgraph "Staging Environment"
-        LB_STAGE[Load Balancer]
-        API_STAGE[API Server]
-        RDS_STAGE[(RDS PostgreSQL)]
-        REDIS_STAGE[(Redis)]
-    end
-    
-    subgraph "CI/CD Pipeline"
-        GITHUB[GitHub Repository]
-        ACTIONS[GitHub Actions]
-        TEST[Automated Tests]
-        BUILD[Build & Package]
-        DEPLOY[Deploy to Staging]
-        APPROVE[Manual Approval]
-        PROD_DEPLOY[Deploy to Production]
-    end
-    
-    subgraph "External Services"
-        CLAUDE_API[Claude API]
-        UTILITY_API[Utility APIs]
-        SUPPLIER_API[Supplier APIs]
-        ANALYTICS_EXT[Google Analytics]
-    end
-    
-    CLOUDFRONT --> WAF
-    WAF --> LB1
-    LB1 --> API1
-    LB1 --> API2
-    LB1 --> API3
-    LB1 --> API4
-    
-    API1 --> RDS
-    API2 --> RDS
-    API3 --> RDS
-    API4 --> RDS
-    
-    API1 --> ELASTICACHE
-    API2 --> ELASTICACHE
-    API3 --> ELASTICACHE
-    API4 --> ELASTICACHE
-    
-    API1 --> S3_PROD
-    WORKER1 --> RDS
-    WORKER2 --> RDS
-    
-    API1 --> CLOUDWATCH
-    API1 --> DATADOG
-    API1 --> SENTRY_PROD
-    
-    API1 --> CLAUDE_API
-    API1 --> UTILITY_API
-    API1 --> SUPPLIER_API
-    
-    GITHUB --> ACTIONS
-    ACTIONS --> TEST
-    TEST --> BUILD
-    BUILD --> DEPLOY
-    DEPLOY --> LB_STAGE
-    LB_STAGE --> API_STAGE
-    API_STAGE --> RDS_STAGE
-    API_STAGE --> REDIS_STAGE
-    
-    DEPLOY --> APPROVE
-    APPROVE --> PROD_DEPLOY
-    PROD_DEPLOY --> LB1
 
-    style CLOUDFRONT fill:#ff9800
-    style RDS fill:#e91e63
-    style ELASTICACHE fill:#ffc107
-    style API1 fill:#4caf50
-    style DATADOG fill:#2196f3
-    style GITHUB fill:#333
+        subgraph "Backend Service"
+            BE_BUILD[Nixpacks Build<br/>pip install]
+            BE_SERVE[Uvicorn<br/>Port 8000]
+        end
+
+        subgraph "Managed Services"
+            RW_PG[(Railway PostgreSQL)]
+            RW_REDIS[(Railway Redis)]
+        end
+    end
+
+    subgraph "External Services"
+        OPENAI_API[OpenAI API<br/>gpt-4o-mini]
+        CLAUDE_API[Claude API<br/>Anthropic]
+    end
+
+    subgraph "Monitoring"
+        SENTRY[Sentry<br/>Error Tracking]
+        DATADOG[DataDog<br/>APM + Metrics]
+        PAGERDUTY[PagerDuty<br/>On-call Alerts]
+        SLACK[Slack<br/>Notifications]
+    end
+
+    subgraph "Source Control"
+        GITHUB[GitHub Repository]
+    end
+
+    GITHUB -->|git push| FE_BUILD
+    GITHUB -->|git push| BE_BUILD
+    FE_BUILD --> FE_SERVE
+    BE_BUILD --> BE_SERVE
+
+    FE_SERVE -->|/api proxy| BE_SERVE
+
+    BE_SERVE --> RW_PG
+    BE_SERVE --> RW_REDIS
+
+    BE_SERVE --> OPENAI_API
+    BE_SERVE --> CLAUDE_API
+
+    BE_SERVE --> SENTRY
+    BE_SERVE --> DATADOG
+    DATADOG --> PAGERDUTY
+    DATADOG --> SLACK
+
+    style FE_SERVE fill:#e8f5e9
+    style BE_SERVE fill:#f3e5f5
+    style RW_PG fill:#ffebee
+    style RW_REDIS fill:#fff9c4
+    style GITHUB fill:#333,color:#fff
+```
+
+### Future Scaling Path
+
+For production scale, the architecture is designed to migrate to cloud infrastructure:
+
+```mermaid
+graph LR
+    LB[Load Balancer]
+
+    subgraph "API Tier"
+        API1[API Instance 1]
+        API2[API Instance 2]
+        APIN[API Instance N]
+    end
+
+    subgraph "Data Tier"
+        PRIMARY[(Primary DB)]
+        REPLICA[(Read Replica)]
+        CACHE[(Redis Cluster)]
+    end
+
+    LB --> API1
+    LB --> API2
+    LB --> APIN
+
+    API1 --> PRIMARY
+    API2 --> REPLICA
+    APIN --> REPLICA
+
+    API1 --> CACHE
+    API2 --> CACHE
+    APIN --> CACHE
+
+    style LB fill:#ff9800
+    style PRIMARY fill:#e91e63
+    style CACHE fill:#ffc107
 ```
 
 ## Security Architecture
 
 ```mermaid
 graph TB
-    subgraph "Internet"
-        USER[End User]
-        ATTACKER[Potential Attacker]
+    subgraph "Application Security - Implemented"
+        AUTH[JWT Authentication<br/>HS256 + bcrypt]
+        RATELIMIT[Rate Limiting<br/>Per-user + Per-IP]
+        INPUTVAL[Input Validation<br/>Pydantic models]
+        RBAC[Role-Based Access<br/>USER + ADMIN roles]
+        CORS_SEC[CORS<br/>Configured origins]
     end
-    
-    subgraph "Edge Security"
-        DDOS[DDoS Protection<br/>CloudFlare]
-        WAF[Web Application Firewall]
-        CDN[CDN with SSL/TLS]
-    end
-    
-    subgraph "Application Security"
-        APIGW[API Gateway]
-        AUTH[Authentication<br/>JWT/OAuth2]
-        RATELIMIT[Rate Limiting]
-        INPUTVAL[Input Validation]
-        RBAC[Role-Based Access]
-    end
-    
-    subgraph "Data Security"
-        ENCRYPT_TRANSIT[Encryption in Transit<br/>TLS 1.3]
-        ENCRYPT_REST[Encryption at Rest<br/>AES-256]
-        TOKENIZE[PII Tokenization]
-        HASH[Password Hashing<br/>bcrypt]
-    end
-    
-    subgraph "Network Security"
-        VPC[Virtual Private Cloud]
-        SUBNET_PUB[Public Subnet]
-        SUBNET_PRIV[Private Subnet]
-        SUBNET_DATA[Data Subnet]
-        NACL[Network ACLs]
-        SG[Security Groups]
-    end
-    
-    subgraph "Monitoring & Response"
-        IDS[Intrusion Detection]
-        AUDIT[Audit Logging]
-        ALERT[Security Alerts]
-        INCIDENT[Incident Response]
-    end
-    
-    subgraph "Compliance"
-        GDPR[GDPR Controls]
-        CCPA[CCPA Controls]
-        SOC2[SOC 2 Controls]
-    end
-    
-    USER --> DDOS
-    ATTACKER -.Block.-> DDOS
-    DDOS --> WAF
-    WAF --> CDN
-    CDN --> APIGW
-    
-    APIGW --> AUTH
-    APIGW --> RATELIMIT
-    APIGW --> INPUTVAL
-    AUTH --> RBAC
-    
-    APIGW --> VPC
-    VPC --> SUBNET_PUB
-    SUBNET_PUB --> SUBNET_PRIV
-    SUBNET_PRIV --> SUBNET_DATA
-    
-    NACL --> SUBNET_PUB
-    SG --> SUBNET_PRIV
-    SG --> SUBNET_DATA
-    
-    SUBNET_DATA --> ENCRYPT_REST
-    APIGW --> ENCRYPT_TRANSIT
-    ENCRYPT_REST --> TOKENIZE
-    AUTH --> HASH
-    
-    SUBNET_PRIV --> IDS
-    IDS --> AUDIT
-    AUDIT --> ALERT
-    ALERT --> INCIDENT
-    
-    ENCRYPT_REST --> GDPR
-    TOKENIZE --> CCPA
-    AUDIT --> SOC2
 
-    style DDOS fill:#f44336
-    style WAF fill:#ff5722
+    subgraph "Data Security - Implemented"
+        HASH[Password Hashing<br/>bcrypt]
+        TOKEN[JWT Tokens<br/>24hr access + 7day refresh]
+        AUDIT[Audit Logging<br/>Admin action trail]
+        CONSENT[GDPR Consent<br/>User consent tracking]
+    end
+
+    subgraph "Monitoring - Implemented"
+        SENTRY[Sentry<br/>Error tracking]
+        DATADOG_SEC[DataDog<br/>APM + anomaly detection]
+        ALERT_SEC[Alerting<br/>PagerDuty + Slack]
+    end
+
+    subgraph "Infrastructure Security - Railway"
+        RAILWAY_TLS[TLS Termination<br/>Railway-managed SSL]
+        RAILWAY_ISO[Network Isolation<br/>Private networking]
+        ENV_VARS[Environment Variables<br/>Secret management]
+    end
+
+    AUTH --> RBAC
+    AUTH --> TOKEN
+    AUTH --> HASH
+    RATELIMIT --> ALERT_SEC
+    INPUTVAL --> AUTH
+    AUDIT --> CONSENT
+    SENTRY --> ALERT_SEC
+    DATADOG_SEC --> ALERT_SEC
+
     style AUTH fill:#4caf50
-    style ENCRYPT_REST fill:#2196f3
-    style GDPR fill:#9c27b0
+    style HASH fill:#2196f3
+    style SENTRY fill:#ff9800
+    style RAILWAY_TLS fill:#9c27b0
 ```
 
 ## Caching Strategy
 
 ```mermaid
 graph LR
-    subgraph "Request Flow with Caching"
-        REQ[API Request] --> CHECK_CACHE{Cache Hit?}
-        
-        CHECK_CACHE -->|Yes| RETURN_CACHED[Return Cached Data]
+    subgraph "Request Flow"
+        REQ[API Request] --> CHECK_CACHE{Redis<br/>Cache Hit?}
+
+        CHECK_CACHE -->|Yes| RETURN_CACHED[Return Cached<br/>Data]
         CHECK_CACHE -->|No| PROCESS[Process Request]
-        
+
         PROCESS --> QUERY_DB[Query Database]
         QUERY_DB --> COMPUTE[Compute Results]
-        COMPUTE --> STORE_CACHE[Store in Cache]
+        COMPUTE --> STORE_CACHE[Store in Redis]
         STORE_CACHE --> RETURN_FRESH[Return Fresh Data]
     end
-    
-    subgraph "Cache Layers"
-        L1[L1: Browser Cache<br/>Static Assets]
-        L2[L2: CDN Cache<br/>Public Content]
-        L3[L3: API Response Cache<br/>Redis]
-        L4[L4: Database Query Cache<br/>PostgreSQL]
-    end
-    
+
     subgraph "Cache Keys & TTL"
         KEY1["plan_catalog:{region}<br/>TTL: 1 hour"]
         KEY2["recommendations:{user_id}<br/>TTL: 24 hours"]
         KEY3["user_profile:{user_id}<br/>TTL: 24 hours"]
-        KEY4["analysis:{user_id}<br/>TTL: 1 week"]
+        KEY4["usage_analysis:{user_id}<br/>TTL: 7 days"]
+        KEY5["explanation:{plan_id}:{user_id}<br/>TTL: 24 hours"]
     end
-    
+
     subgraph "Cache Invalidation"
         INV1[User Data Change] --> CLEAR1[Clear User Caches]
         INV2[Catalog Update] --> CLEAR2[Clear Plan Caches]
         INV3[Preference Change] --> CLEAR3[Clear Recommendation Cache]
-        INV4[Manual Trigger] --> CLEAR4[Clear All Caches]
+        INV4[Admin Trigger] --> CLEAR4[Clear All via /admin/cache]
     end
-    
-    REQ --> L1
-    L1 --> L2
-    L2 --> L3
-    L3 --> L4
-    
+
+    subgraph "Resilience"
+        FALLBACK[Redis Unavailable<br/>→ Graceful Fallback<br/>→ Direct DB Queries]
+    end
+
     style CHECK_CACHE fill:#fff3e0
     style RETURN_CACHED fill:#c8e6c9
-    style L3 fill:#fff9c4
     style KEY2 fill:#e1f5fe
+    style FALLBACK fill:#fce4ec
 ```
 
 ## Monitoring & Observability
@@ -708,279 +726,143 @@ graph LR
 ```mermaid
 graph TB
     subgraph "Application"
-        API[API Services]
-        FRONTEND[Frontend App]
-        WORKERS[Background Workers]
+        API[FastAPI Backend]
+        FRONTEND[React Frontend]
     end
-    
-    subgraph "Metrics Collection"
-        METRICS[Custom Metrics]
-        TRACES[Distributed Traces]
-        LOGS[Application Logs]
-        ERRORS[Error Events]
+
+    subgraph "Data Collection"
+        METRICS[Custom Metrics<br/>API duration, DB queries,<br/>cache hits, recommendations]
+        TRACES[Distributed Traces<br/>Request ID correlation]
+        LOGS[Structured Logs<br/>JSON format]
+        ERRORS[Error Events<br/>Stack traces]
     end
-    
-    subgraph "Monitoring Tools"
+
+    subgraph "Monitoring Stack"
         APM[DataDog APM]
         SENTRY[Sentry]
-        CLOUDWATCH[CloudWatch]
-        ANALYTICS[Google Analytics]
     end
-    
-    subgraph "Dashboards"
-        PERF_DASH[Performance Dashboard]
-        BIZ_DASH[Business Metrics Dashboard]
-        ERROR_DASH[Error Dashboard]
-        INFRA_DASH[Infrastructure Dashboard]
+
+    subgraph "Dashboards - Grafana"
+        PERF_DASH[Application Performance]
+        BIZ_DASH[Business Metrics]
+        INFRA_DASH[Infrastructure]
+        HEALTH_DASH[Service Health]
     end
-    
+
     subgraph "Alerting"
-        ALERT_RULES[Alert Rules]
-        PAGERDUTY[PagerDuty]
-        SLACK[Slack Notifications]
-        EMAIL[Email Alerts]
+        CRITICAL[Critical Alerts<br/>Error rate >5%<br/>Latency P95 >3s<br/>DB/Redis down]
+        WARNING[Warning Alerts<br/>Error rate >2%<br/>Cache hit <60%<br/>Slow queries]
     end
-    
-    subgraph "Key Metrics"
-        LATENCY[API Latency<br/>P50, P95, P99]
-        THROUGHPUT[Requests/sec]
-        ERROR_RATE[Error Rate]
-        CONVERSION[Conversion Rate]
-        UPTIME[Uptime %]
-        CACHE_HIT[Cache Hit Rate]
+
+    subgraph "Channels"
+        PD[PagerDuty<br/>Critical → on-call]
+        SL[Slack<br/>All alerts]
     end
-    
+
     API --> METRICS
     API --> TRACES
     API --> LOGS
     API --> ERRORS
-    FRONTEND --> METRICS
-    WORKERS --> LOGS
-    
+
     METRICS --> APM
     TRACES --> APM
-    LOGS --> CLOUDWATCH
     ERRORS --> SENTRY
-    FRONTEND --> ANALYTICS
-    
+    LOGS --> APM
+
     APM --> PERF_DASH
-    ANALYTICS --> BIZ_DASH
-    SENTRY --> ERROR_DASH
-    CLOUDWATCH --> INFRA_DASH
-    
-    PERF_DASH --> LATENCY
-    PERF_DASH --> THROUGHPUT
-    BIZ_DASH --> CONVERSION
-    ERROR_DASH --> ERROR_RATE
-    INFRA_DASH --> UPTIME
-    PERF_DASH --> CACHE_HIT
-    
-    APM --> ALERT_RULES
-    SENTRY --> ALERT_RULES
-    CLOUDWATCH --> ALERT_RULES
-    
-    ALERT_RULES --> PAGERDUTY
-    ALERT_RULES --> SLACK
-    ALERT_RULES --> EMAIL
+    APM --> BIZ_DASH
+    APM --> INFRA_DASH
+    APM --> HEALTH_DASH
+
+    APM --> CRITICAL
+    SENTRY --> CRITICAL
+    APM --> WARNING
+
+    CRITICAL --> PD
+    CRITICAL --> SL
+    WARNING --> SL
 
     style API fill:#4caf50
     style METRICS fill:#2196f3
     style APM fill:#ff9800
-    style PERF_DASH fill:#9c27b0
-    style ALERT_RULES fill:#f44336
-```
-
-## Integration Architecture
-
-```mermaid
-graph TB
-    subgraph "Internal System"
-        API[API Server]
-        SCHEDULER[Job Scheduler]
-        WEBHOOK[Webhook Handler]
-    end
-    
-    subgraph "External Integrations"
-        UTILITY[Utility Smart Meter API<br/>OAuth 2.0]
-        SUPPLIER[Supplier Data Feed<br/>REST API]
-        CLAUDE[Claude AI API<br/>API Key]
-        PAYMENT[Payment Gateway<br/>Stripe (Future)]
-    end
-    
-    subgraph "Analytics & Marketing"
-        GA[Google Analytics<br/>Tracking]
-        MIXPANEL[Mixpanel<br/>Events]
-        MAILCHIMP[Email Marketing<br/>MailChimp]
-        INTERCOM[Support Chat<br/>Intercom]
-    end
-    
-    subgraph "Infrastructure Services"
-        TWILIO[SMS Notifications<br/>Twilio]
-        SENDGRID[Email Service<br/>SendGrid]
-        S3_EXT[File Storage<br/>S3]
-        CLOUDINARY[Image CDN<br/>Cloudinary]
-    end
-    
-    subgraph "Integration Patterns"
-        SYNC[Synchronous<br/>REST Calls]
-        ASYNC[Asynchronous<br/>Job Queue]
-        BATCH[Batch Processing<br/>Daily/Hourly]
-        STREAM[Real-time<br/>Webhooks]
-    end
-    
-    API --> UTILITY
-    SCHEDULER --> SUPPLIER
-    API --> CLAUDE
-    
-    API --> GA
-    API --> MIXPANEL
-    WEBHOOK --> MAILCHIMP
-    API --> INTERCOM
-    
-    API --> TWILIO
-    API --> SENDGRID
-    API --> S3_EXT
-    API --> CLOUDINARY
-    
-    API -.uses.-> SYNC
-    SCHEDULER -.uses.-> ASYNC
-    SCHEDULER -.uses.-> BATCH
-    WEBHOOK -.uses.-> STREAM
-
-    style UTILITY fill:#4caf50
-    style CLAUDE fill:#00bcd4
-    style GA fill:#ff9800
-    style SYNC fill:#e1f5fe
-    style ASYNC fill:#fff9c4
+    style CRITICAL fill:#f44336
+    style WARNING fill:#ff9800
 ```
 
 ---
 
 ## Architecture Decision Records (ADRs)
 
-### ADR-001: Database Choice - PostgreSQL
-**Decision:** Use PostgreSQL as the primary database  
-**Rationale:**
-- Strong ACID compliance for transactional data
-- Excellent JSON/JSONB support for flexible plan structures
-- Mature ecosystem and tooling
-- Good performance for read-heavy workloads
-- Built-in full-text search capabilities
+### ADR-001: Database - PostgreSQL
+**Decision:** PostgreSQL as the primary database
+- ACID compliance for transactional data
+- JSONB support for flexible plan rate structures
+- Array types for region filtering (`available_regions text[]`)
+- GIN indexes for efficient array containment queries
+- Mature migration tooling (Alembic)
 
-### ADR-002: Caching Strategy - Redis
-**Decision:** Use Redis for distributed caching  
-**Rationale:**
-- In-memory performance for sub-millisecond response times
-- Support for complex data structures
-- Built-in TTL and expiration
-- Widely supported and stable
-- Good clustering support for scalability
+### ADR-002: Cache - Redis
+**Decision:** Redis for distributed caching with graceful fallback
+- Sub-millisecond response times for cached data
+- Built-in TTL and key expiration
+- Graceful degradation when unavailable (direct DB queries)
+- Cache warming for frequently accessed data
 
 ### ADR-003: API Framework - FastAPI
-**Decision:** Use FastAPI (Python) for backend API  
-**Rationale:**
+**Decision:** FastAPI (Python) for the backend API
 - Native async support for high concurrency
-- Automatic API documentation (OpenAPI/Swagger)
-- Strong typing with Pydantic
-- Python ecosystem for ML/data science
-- High performance comparable to Node.js
+- Automatic OpenAPI/Swagger documentation
+- Strong typing with Pydantic validation
+- Python ecosystem for data processing (Pandas, NumPy, SciPy)
+- Middleware pipeline for cross-cutting concerns
 
-### ADR-004: Frontend Framework - React
-**Decision:** Use React for frontend development  
-**Rationale:**
-- Large ecosystem and community
-- Component reusability
-- Strong accessibility support
-- Good performance with virtual DOM
-- Wide talent pool
+### ADR-004: Frontend - React + Vite
+**Decision:** React 18 with TypeScript and Vite
+- Component-based architecture for complex UI (onboarding wizard, comparison views, charts)
+- Vite for fast development builds and optimized production bundles
+- Tailwind CSS for consistent design system
+- Code splitting by vendor (react, UI, charts) for cache efficiency
 
-### ADR-005: AI Service - Claude API
-**Decision:** Use Claude API for explanation generation  
-**Rationale:**
-- Superior natural language generation
-- Strong instruction-following
-- Context window size supports full recommendation context
-- Reliability and low latency
-- Strong safety and alignment
+### ADR-005: AI Explanations - Dual Provider
+**Decision:** Support both OpenAI and Claude API for explanation generation
+- OpenAI (gpt-4o-mini) as the current primary provider
+- Claude API integration ready for migration
+- Template-based fallback when both APIs unavailable
+- Readability scoring (Fleisch-Kincaid) for explanation quality
+- 24-hour caching to minimize API costs
 
-### ADR-006: Cloud Provider - AWS or GCP
-**Decision:** Use AWS or GCP (configurable)  
-**Rationale:**
-- Both provide comprehensive managed services
-- Strong global infrastructure
-- Good compliance certifications (GDPR, SOC 2)
-- Mature monitoring and logging tools
-- Competitive pricing with reserved instances
-
-### ADR-007: Deployment Strategy - Containerized with Kubernetes
-**Decision:** Use Docker containers with Kubernetes orchestration  
-**Rationale:**
-- Consistent environments across dev/stage/prod
-- Easy horizontal scaling
-- Rolling updates with zero downtime
-- Resource isolation and limits
-- Strong ecosystem (Helm, operators)
+### ADR-006: Deployment - Railway.app
+**Decision:** Railway.app with Nixpacks builds for MVP deployment
+- Simple git-push deployment workflow
+- Managed PostgreSQL and Redis services
+- Automatic TLS termination
+- Environment variable management
+- Designed for future migration to AWS/GCP for production scale
 
 ---
 
-## Scalability Considerations
+## Performance Targets
 
-### Horizontal Scaling
-```mermaid
-graph LR
-    LB[Load Balancer]
-    
-    subgraph "API Tier - Auto-scaling"
-        API1[API Pod 1]
-        API2[API Pod 2]
-        API3[API Pod 3]
-        APIN[API Pod N]
-    end
-    
-    subgraph "Worker Tier - Auto-scaling"
-        W1[Worker 1]
-        W2[Worker 2]
-        WN[Worker N]
-    end
-    
-    subgraph "Data Tier"
-        PRIMARY[(Primary DB)]
-        REPLICA1[(Read Replica 1)]
-        REPLICA2[(Read Replica 2)]
-        CACHE[(Redis Cluster)]
-    end
-    
-    LB --> API1
-    LB --> API2
-    LB --> API3
-    LB --> APIN
-    
-    API1 --> PRIMARY
-    API2 --> REPLICA1
-    API3 --> REPLICA2
-    
-    API1 --> CACHE
-    API2 --> CACHE
-    API3 --> CACHE
-    
-    W1 --> PRIMARY
-    W2 --> PRIMARY
-    
-    style LB fill:#ff9800
-    style PRIMARY fill:#e91e63
-    style CACHE fill:#ffc107
-```
+| Metric | Target |
+|--------|--------|
+| API Response Time | < 2 seconds (P95) |
+| Page Load Time | < 1 second |
+| Cache Hit Rate | > 80% |
+| Database Query Time | < 100ms (P95) |
+| Slow Query Threshold | > 100ms (logged) |
+| Concurrent Users | 10,000+ |
+| Uptime SLA | 99.9% |
 
-### Performance Targets
-- **API Response Time:** < 2 seconds (P95)
-- **Page Load Time:** < 1 second
-- **Concurrent Users:** 10,000+
-- **Cache Hit Rate:** > 80%
-- **Database Query Time:** < 100ms (P95)
-- **Uptime SLA:** 99.9%
+## Key Configuration
 
----
-
-**End of Architecture Diagrams**
-
-These diagrams provide comprehensive views of the system architecture from multiple perspectives: system overview, component details, data flow, deployment, security, and scalability.
+| Setting | Default | Source |
+|---------|---------|--------|
+| Database Pool | 5 connections + 10 overflow | `config/settings.py` |
+| Pool Recycle | 3600s (1 hour) | `config/database.py` |
+| JWT Expiry | 24 hours | `config/settings.py` |
+| Cache TTL | 24 hours | `config/settings.py` |
+| Rate Limit (user) | 100 req/min | Middleware config |
+| Rate Limit (IP) | 1000 req/hr | Middleware config |
+| Max Recommendations | 3 | `config/settings.py` |
+| Min Usage Data | 3 months | `config/settings.py` |
+| Preferred Usage Data | 12 months | `config/settings.py` |
