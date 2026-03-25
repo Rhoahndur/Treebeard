@@ -10,22 +10,21 @@ Author: Backend Dev #4
 Note: Uses mock data for Story 2.2 until contract is published
 """
 
-import pytest
-from datetime import datetime, date
+from datetime import date, datetime
 from decimal import Decimal
 from uuid import uuid4
 
-from src.backend.services.savings_calculator import SavingsCalculatorService
+import pytest
+from src.backend.schemas.plan import PlanCatalogResponse, SupplierResponse
 from src.backend.schemas.savings_schemas import (
+    PlanComparison,
     RankedPlan,
     RecommendationResult,
     SavingsAnalysis,
-    PlanComparison,
 )
-from src.backend.schemas.plan import PlanCatalogResponse, SupplierResponse
-from src.backend.schemas.user import CurrentPlanResponse
 from src.backend.schemas.usage_schemas import UsageProjection
-
+from src.backend.schemas.user import CurrentPlanResponse
+from src.backend.services.savings_calculator import SavingsCalculatorService
 
 # ===== FIXTURES =====
 

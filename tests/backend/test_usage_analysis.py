@@ -13,21 +13,20 @@ Test coverage targets:
 Target: >80% code coverage
 """
 
-import pytest
-from datetime import date, datetime, timedelta
-from decimal import Decimal
-import statistics
-
-import sys
 import os
+import statistics
+import sys
+from datetime import date, datetime
+
+import pytest
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
 from backend.schemas.usage_analysis import (
     MonthlyUsage,
-    UserProfileType,
     SeasonType,
+    UserProfileType,
 )
 from backend.services.usage_analysis import UsageAnalysisService
 

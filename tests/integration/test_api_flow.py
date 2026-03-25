@@ -12,18 +12,16 @@ Tests the end-to-end flow of the TreeBeard API:
 Epic 3 - Story 3.2 Integration Tests
 """
 
-import pytest
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from decimal import Decimal
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
 from src.backend.api.main import app
 from src.backend.config.database import Base, get_db
 from src.backend.models.plan import PlanCatalog, Supplier
-from src.backend.models.user import User
-
 
 # Test database setup
 SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///./test.db"

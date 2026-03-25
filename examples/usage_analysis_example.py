@@ -6,8 +6,8 @@ This example demonstrates how to use the Usage Pattern Analysis service.
 Run with: python3 examples/usage_analysis_example.py
 """
 
-import sys
 import os
+import sys
 from datetime import date
 
 # Add src to path
@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 # pip install numpy scipy
 
 try:
-    from backend.schemas.usage_analysis import MonthlyUsage, UserProfileType, SeasonType
+    from backend.schemas.usage_analysis import MonthlyUsage, SeasonType, UserProfileType
     from backend.services.usage_analysis import UsageAnalysisService
 except ImportError as e:
     print(f"Error: {e}")
@@ -55,24 +55,24 @@ def example_1_baseline_user():
     profile = service.analyze_usage_patterns(usage_data, user_id="baseline_user_001")
 
     # Display results
-    print(f"\n📊 Analysis Results:")
+    print("\n📊 Analysis Results:")
     print(f"  Profile Type: {profile.profile_type.value}")
     print(f"  Mean Usage: {profile.statistics.mean_kwh:.1f} kWh/month")
     print(f"  Annual Total: {profile.statistics.total_annual_kwh:.1f} kWh")
     print(f"  Variation (CV): {profile.statistics.coefficient_of_variation:.3f}")
     print(f"  Confidence: {profile.overall_confidence:.2%}")
 
-    print(f"\n📈 Projection:")
+    print("\n📈 Projection:")
     print(f"  Projected Annual: {profile.projection.projected_annual_kwh:.1f} kWh")
     print(f"  Method: {profile.projection.method}")
     print(f"  Confidence: {profile.projection.confidence_score:.2%}")
 
-    print(f"\n🌡️  Seasonal Analysis:")
+    print("\n🌡️  Seasonal Analysis:")
     print(f"  Has Seasonal Pattern: {profile.seasonal_analysis.has_seasonal_pattern}")
     print(f"  Summer/Winter Ratio: {profile.seasonal_analysis.summer_to_winter_ratio:.2f}")
 
     if profile.warnings:
-        print(f"\n⚠️  Warnings:")
+        print("\n⚠️  Warnings:")
         for warning in profile.warnings:
             print(f"  - {warning}")
 
@@ -105,24 +105,24 @@ def example_2_seasonal_user():
     profile = service.analyze_usage_patterns(usage_data, user_id="seasonal_user_001")
 
     # Display results
-    print(f"\n📊 Analysis Results:")
+    print("\n📊 Analysis Results:")
     print(f"  Profile Type: {profile.profile_type.value}")
     print(f"  Mean Usage: {profile.statistics.mean_kwh:.1f} kWh/month")
     print(f"  Annual Total: {profile.statistics.total_annual_kwh:.1f} kWh")
     print(f"  Min/Max: {profile.statistics.min_kwh:.1f} / {profile.statistics.max_kwh:.1f} kWh")
 
-    print(f"\n🌡️  Seasonal Analysis:")
+    print("\n🌡️  Seasonal Analysis:")
     print(f"  Has Seasonal Pattern: {profile.seasonal_analysis.has_seasonal_pattern}")
     print(f"  Dominant Season: {profile.seasonal_analysis.dominant_season.value if profile.seasonal_analysis.dominant_season else 'None'}")
     print(f"  Summer/Winter Ratio: {profile.seasonal_analysis.summer_to_winter_ratio:.2f}x")
     print(f"  Peak/Average Ratio: {profile.seasonal_analysis.peak_to_avg_ratio:.2f}x")
 
-    print(f"\n📆 Seasonal Patterns:")
+    print("\n📆 Seasonal Patterns:")
     for pattern in profile.seasonal_analysis.patterns:
         print(f"  {pattern.season.value.upper():8s}: {pattern.avg_kwh:6.0f} kWh avg "
               f"(peak in {pattern.peak_month}: {pattern.peak_kwh:.0f} kWh)")
 
-    print(f"\n📈 Projection for Next 12 Months:")
+    print("\n📈 Projection for Next 12 Months:")
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     for i, (month, kwh) in enumerate(zip(months, profile.projection.projected_monthly_kwh)):
@@ -149,19 +149,19 @@ def example_3_new_customer():
         regional_avg_kwh=regional_avg
     )
 
-    print(f"\n📊 Analysis Results:")
+    print("\n📊 Analysis Results:")
     print(f"  Profile Type: {profile.profile_type.value}")
     print(f"  Estimated Usage: {profile.statistics.mean_kwh:.1f} kWh/month")
-    print(f"  Source: Regional Average")
+    print("  Source: Regional Average")
     print(f"  Confidence: {profile.overall_confidence:.2%}")
 
-    print(f"\n⚠️  Warnings:")
+    print("\n⚠️  Warnings:")
     for warning in profile.warnings:
         print(f"  - {warning}")
 
-    print(f"\n💡 Recommendation:")
-    print(f"  Use conservative estimates for plan selection")
-    print(f"  Re-analyze after 3+ months of actual usage data")
+    print("\n💡 Recommendation:")
+    print("  Use conservative estimates for plan selection")
+    print("  Re-analyze after 3+ months of actual usage data")
 
 
 def example_4_integration_with_scoring():
@@ -204,14 +204,14 @@ def example_4_integration_with_scoring():
         MockPlan("Budget Basic", 0.13, False),
     ]
 
-    print(f"\n📊 User Profile:")
+    print("\n📊 User Profile:")
     print(f"  Type: {profile.profile_type.value}")
     print(f"  Projected Annual: {profile.projection.projected_annual_kwh:.0f} kWh")
     print(f"  Has Seasonal Pattern: {profile.seasonal_analysis.has_seasonal_pattern}")
     if profile.seasonal_analysis.dominant_season:
         print(f"  Peak Season: {profile.seasonal_analysis.dominant_season.value}")
 
-    print(f"\n💰 Plan Cost Estimates:")
+    print("\n💰 Plan Cost Estimates:")
     for plan in plans:
         # Base cost calculation
         estimated_cost = profile.projection.projected_annual_kwh * plan.rate_per_kwh

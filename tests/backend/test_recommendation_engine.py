@@ -9,29 +9,21 @@ Tests cover:
 Target: >80% code coverage
 """
 
-import pytest
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 from uuid import uuid4
 
-from src.backend.schemas.recommendation_schemas import (
-    UserPreferences,
-    PlanScores,
-    CostBreakdown,
-    RankedPlan,
-    SwitchingAnalysis
-)
+import pytest
+from src.backend.schemas.recommendation_schemas import CostBreakdown, PlanScores, RankedPlan, UserPreferences
 from src.backend.schemas.usage_analysis import UsageProjection
 from src.backend.services import scoring_service
 from src.backend.services.recommendation_engine import (
-    calculate_plan_cost,
     _calculate_fixed_cost,
     _calculate_tiered_cost,
     _calculate_time_of_use_cost,
     _calculate_variable_cost,
-    analyze_switching_timing
+    analyze_switching_timing,
 )
-
 
 # ============================================================================
 # FIXTURES

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Test with exact user parameters."""
 
-import requests
 import json
 from datetime import datetime, timedelta
+
+import requests
 
 BASE_URL = "http://localhost:8888/api/v1"
 
@@ -66,7 +67,7 @@ rec_data = {
     "include_risks": True
 }
 
-print(f"\n📤 Sending request...")
+print("\n📤 Sending request...")
 rec_response = requests.post(
     f"{BASE_URL}/recommendations/generate",
     json=rec_data,

@@ -12,27 +12,25 @@ Tests coverage:
 Author: Backend Dev #4
 """
 
-import pytest
-from datetime import datetime, date, timedelta
+from datetime import date, datetime
 from decimal import Decimal
-from uuid import uuid4, UUID
+from uuid import uuid4
 
-from src.backend.services.savings_calculator import SavingsCalculatorService
+import pytest
+from src.backend.schemas.plan import (
+    PlanCatalogResponse,
+    SupplierResponse,
+)
 from src.backend.schemas.savings_schemas import (
-    ComparisonPlan,
     CostRange,
     MonthlyCost,
     PlanComparison,
     RankedPlan,
     SavingsAnalysis,
 )
-from src.backend.schemas.plan import (
-    PlanCatalogResponse,
-    SupplierResponse,
-)
-from src.backend.schemas.user import CurrentPlanResponse
 from src.backend.schemas.usage_schemas import UsageProjection
-
+from src.backend.schemas.user import CurrentPlanResponse
+from src.backend.services.savings_calculator import SavingsCalculatorService
 
 # ===== FIXTURES =====
 

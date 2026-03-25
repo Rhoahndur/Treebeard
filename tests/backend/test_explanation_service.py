@@ -2,22 +2,19 @@
 Tests for explanation generation service (Stories 2.6, 2.7, 2.8).
 """
 
-import asyncio
 import json
-from datetime import datetime
 from decimal import Decimal
-from typing import Dict, Any
-from uuid import UUID, uuid4
+from typing import Any
+from unittest.mock import AsyncMock, patch
+from uuid import uuid4
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
-
 from src.backend.schemas.explanation_schemas import (
+    CurrentPlan,
+    PersonaType,
+    PlanExplanation,
     RankedPlan,
     UserPreferences,
-    CurrentPlan,
-    PlanExplanation,
-    PersonaType,
 )
 from src.backend.services.explanation_service import ClaudeExplanationService
 from src.backend.services.explanation_templates import (
@@ -25,12 +22,11 @@ from src.backend.services.explanation_templates import (
     get_context_aware_message,
 )
 
-
 # ========== Fixtures ==========
 
 
 @pytest.fixture
-def mock_user_profile() -> Dict[str, Any]:
+def mock_user_profile() -> dict[str, Any]:
     """Create mock usage profile."""
     return {
         "profile_type": "seasonal",

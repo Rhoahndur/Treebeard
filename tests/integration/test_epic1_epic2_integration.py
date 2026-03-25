@@ -16,20 +16,19 @@ Author: Integration Test Suite
 Date: 2025-11-10
 """
 
-import pytest
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from decimal import Decimal
-from uuid import uuid4, UUID
-import asyncio
-from typing import List, Dict
+from uuid import uuid4
+
+import pytest
 
 # Import all the components we're testing
 try:
     from src.backend.schemas.usage_analysis import (
         MonthlyUsage,
         UsageProfile,
-        UserProfileType,
         UsageProjection,
+        UserProfileType,
     )
     from src.backend.services.usage_analysis import UsageAnalysisService
 except ImportError:
@@ -40,6 +39,8 @@ try:
     from src.backend.schemas.recommendation_schemas import (
         RankedPlan,
         RecommendationResult,
+    )
+    from src.backend.schemas.recommendation_schemas import (
         UserPreferences as RecUserPreferences,
     )
     from src.backend.services.recommendation_engine import RecommendationEngine
@@ -49,9 +50,9 @@ except ImportError:
 
 try:
     from src.backend.schemas.savings_schemas import (
-        SavingsAnalysis,
-        PlanComparison,
         CurrentPlan,
+        PlanComparison,
+        SavingsAnalysis,
     )
     from src.backend.services.savings_calculator import SavingsCalculator
 except ImportError:
@@ -61,6 +62,8 @@ except ImportError:
 try:
     from src.backend.schemas.explanation_schemas import (
         PlanExplanation,
+    )
+    from src.backend.schemas.explanation_schemas import (
         UserPreferences as ExplUserPreferences,
     )
     from src.backend.services.explanation_service import ClaudeExplanationService
@@ -75,7 +78,7 @@ except ImportError:
 # ============================================================================
 
 @pytest.fixture
-def mock_usage_data() -> List[MonthlyUsage]:
+def mock_usage_data() -> list[MonthlyUsage]:
     """Generate 12 months of realistic usage data (seasonal pattern)."""
     base_date = date(2024, 1, 1)
 
@@ -119,7 +122,7 @@ def mock_current_plan() -> CurrentPlan:
 
 
 @pytest.fixture
-def mock_user_preferences() -> Dict:
+def mock_user_preferences() -> dict:
     """Mock user preferences (budget-conscious)."""
     return {
         "cost_priority": 50,
@@ -130,7 +133,7 @@ def mock_user_preferences() -> Dict:
 
 
 @pytest.fixture
-def mock_plans() -> List[Dict]:
+def mock_plans() -> list[dict]:
     """Mock energy plans for testing."""
     return [
         {
@@ -253,7 +256,7 @@ class TestUsageToRecommendationIntegration:
         assert hasattr(usage_profile, 'projected_monthly_kwh')
         assert hasattr(usage_profile, 'profile_type')
 
-        print(f"✅ Step 2: Usage profile has required fields for recommendation engine")
+        print("✅ Step 2: Usage profile has required fields for recommendation engine")
         print(f"   - Projected annual: {usage_profile.projected_annual_kwh} kWh")
         print(f"   - Profile type: {usage_profile.profile_type}")
 
@@ -303,7 +306,7 @@ class TestRecommendationToSavingsIntegration:
         assert hasattr(ranked_plan, 'connection_fee')
         assert hasattr(ranked_plan, 'early_termination_fee')
 
-        print(f"✅ RankedPlan schema compatible with SavingsCalculator")
+        print("✅ RankedPlan schema compatible with SavingsCalculator")
         print(f"   - Plan: {ranked_plan.plan_name}")
         print(f"   - Projected cost: ${ranked_plan.projected_annual_cost}")
 
@@ -366,7 +369,7 @@ class TestRecommendationToExplanationIntegration:
         assert explanation.persona_type in ['budget_conscious', 'eco_conscious',
                                             'flexibility_focused', 'balanced']
 
-        print(f"✅ Explanation generated successfully")
+        print("✅ Explanation generated successfully")
         print(f"   - Persona: {explanation.persona_type}")
         print(f"   - Readability: {explanation.readability_score:.1f}")
         print(f"   - Text preview: {explanation.explanation_text[:100]}...")
@@ -410,13 +413,13 @@ class TestEndToEndIntegration:
         assert usage_profile is not None
         assert usage_profile.projected_annual_kwh > 0
 
-        print(f"✅ Generated usage profile:")
+        print("✅ Generated usage profile:")
         print(f"   - Type: {usage_profile.profile_type}")
         print(f"   - Annual usage: {usage_profile.projected_annual_kwh} kWh")
         print(f"   - Confidence: {usage_profile.confidence_score:.1%}")
 
         # ========== STEP 2: Create Mock Ranked Plans (Story 2.2) ==========
-        print(f"\n🏆 STEP 2: Creating Ranked Plans (Story 2.2)...")
+        print("\n🏆 STEP 2: Creating Ranked Plans (Story 2.2)...")
 
         # Note: In production, this would use RecommendationEngine.get_recommendations()
         # For integration test, we create mock ranked plans
@@ -449,7 +452,7 @@ class TestEndToEndIntegration:
             print(f"   #{plan.rank}: {plan.plan_name} (score: {plan.composite_score:.1f})")
 
         # ========== STEP 3: Calculate Savings (Story 2.4) ==========
-        print(f"\n💰 STEP 3: Calculating Savings (Story 2.4)...")
+        print("\n💰 STEP 3: Calculating Savings (Story 2.4)...")
 
         # Create mock projection for savings calculator
         projection = UsageProjection(
@@ -470,7 +473,7 @@ class TestEndToEndIntegration:
         assert savings is not None
         assert hasattr(savings, 'annual_savings')
 
-        print(f"✅ Calculated savings for top plan:")
+        print("✅ Calculated savings for top plan:")
         print(f"   - Recommended cost: ${savings.projected_annual_cost}")
         print(f"   - Current cost: ${savings.current_annual_cost}")
         print(f"   - Annual savings: ${savings.annual_savings} ({savings.savings_percentage}%)")
@@ -478,7 +481,7 @@ class TestEndToEndIntegration:
             print(f"   - Break-even: {savings.break_even_months} months")
 
         # ========== STEP 4: Generate Explanations (Story 2.7) ==========
-        print(f"\n🤖 STEP 4: Generating AI Explanations (Story 2.7)...")
+        print("\n🤖 STEP 4: Generating AI Explanations (Story 2.7)...")
 
         preferences = ExplUserPreferences(**mock_user_preferences)
         template_service = TemplateExplanationGenerator()
@@ -492,7 +495,7 @@ class TestEndToEndIntegration:
 
         assert len(explanations) == 3
 
-        print(f"✅ Generated explanations for all 3 plans:")
+        print("✅ Generated explanations for all 3 plans:")
         for i, expl in enumerate(explanations):
             print(f"\n   Plan #{i+1}: {ranked_plans[i].plan_name}")
             print(f"   Persona: {expl.persona_type}")
@@ -502,11 +505,11 @@ class TestEndToEndIntegration:
 
         # ========== VALIDATION: Complete Result ==========
         print(f"\n{'='*70}")
-        print(f"✅ INTEGRATION TEST PASSED")
+        print("✅ INTEGRATION TEST PASSED")
         print(f"{'='*70}")
-        print(f"Complete recommendation result includes:")
+        print("Complete recommendation result includes:")
         print(f"  ✓ Usage analysis with {usage_profile.confidence_score:.1%} confidence")
-        print(f"  ✓ Top 3 ranked plans with composite scores")
+        print("  ✓ Top 3 ranked plans with composite scores")
         print(f"  ✓ Savings calculation showing ${savings.annual_savings} annual savings")
         print(f"  ✓ Personalized AI explanations ({explanations[0].persona_type})")
         print(f"{'='*70}\n")
@@ -569,7 +572,7 @@ class TestDataContracts:
             assert field in UsageProfile.__annotations__, \
                 f"Missing required field '{field}' in UsageProfile"
 
-        print(f"✅ Story 1.4 contract validated: All required fields present")
+        print("✅ Story 1.4 contract validated: All required fields present")
 
     @pytest.mark.skipif(RecommendationEngine is None, reason="Story 2.2 not available")
     def test_story_2_2_contract_schema(self):
@@ -587,7 +590,7 @@ class TestDataContracts:
             assert field in RankedPlan.__annotations__, \
                 f"Missing required field '{field}' in RankedPlan"
 
-        print(f"✅ Story 2.2 contract validated: All required fields present")
+        print("✅ Story 2.2 contract validated: All required fields present")
 
 
 # ============================================================================

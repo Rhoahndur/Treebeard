@@ -8,9 +8,9 @@ service without requiring all project dependencies.
 Run with: python3 test_usage_analysis_standalone.py
 """
 
-from datetime import date
-import sys
 import os
+import sys
+from datetime import date
 
 # Add src to path for imports - bypass __init__.py by importing modules directly
 src_path = os.path.join(os.path.dirname(__file__), '..', '..', 'src')
@@ -156,9 +156,9 @@ def test_performance():
 
     print(f"  ✓ Analysis completed in {elapsed_ms:.1f}ms")
     if elapsed_ms < 100:
-        print(f"  ✓ Performance target met (<100ms)")
+        print("  ✓ Performance target met (<100ms)")
     else:
-        print(f"  ⚠ Performance target missed (target: <100ms)")
+        print("  ⚠ Performance target missed (target: <100ms)")
 
 
 def test_data_quality():
@@ -196,7 +196,7 @@ def test_serialization():
     assert "profile_type" in profile_dict
     assert "statistics" in profile_dict
     assert "seasonal_analysis" in profile_dict
-    print(f"  ✓ Profile serialized to dictionary")
+    print("  ✓ Profile serialized to dictionary")
     print(f"  ✓ Keys present: {len(profile_dict)} top-level fields")
 
 

@@ -12,21 +12,20 @@ Usage:
     python scripts/analyze_queries.py --mode indexes
 """
 
-import sys
 import argparse
+import sys
+from datetime import datetime
 from pathlib import Path
-from datetime import datetime, timedelta
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from backend.config.database import (
-    engine,
+    get_db_session,
     get_pool_status,
     health_check_db,
-    get_db_session,
 )
-from sqlalchemy import text, inspect
+from sqlalchemy import text
 
 
 def analyze_slow_queries(threshold_ms: int = 100):
@@ -89,12 +88,12 @@ def analyze_pool_status():
     try:
         status = get_pool_status()
 
-        print(f"Pool Configuration:")
+        print("Pool Configuration:")
         print(f"  Pool Size: {status['pool_size']}")
         print(f"  Total Connections: {status['total_connections']}")
         print()
 
-        print(f"Current Usage:")
+        print("Current Usage:")
         print(f"  Checked Out: {status['checked_out']}")
         print(f"  Checked In: {status['checked_in']}")
         print(f"  Overflow: {status['overflow']}")
@@ -153,7 +152,7 @@ def analyze_indexes():
                         print(f"⚠️  {i}. {row.tablename}.{row.indexname}")
                         print(f"    Scans: {row.idx_scan}")
                         print(f"    Size: {row.index_size}")
-                        print(f"    Status: UNUSED - Consider dropping")
+                        print("    Status: UNUSED - Consider dropping")
                     else:
                         print(f"✓ {i}. {row.tablename}.{row.indexname}")
                         print(f"    Scans: {row.idx_scan}")
@@ -202,7 +201,7 @@ def analyze_indexes():
                     print(f"   Avg Rows per Seq Scan: {row.avg_seq_read:.0f}")
 
                     if ratio > 50:
-                        print(f"   ⚠️  Consider adding indexes to improve performance")
+                        print("   ⚠️  Consider adding indexes to improve performance")
                     print()
 
     except Exception as e:

@@ -12,16 +12,16 @@ Usage:
     python scripts/warm_cache.py --mode recommendations --days 1
 """
 
-import sys
-import asyncio
 import argparse
+import asyncio
+import sys
 from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from backend.services.cache_warming import get_cache_warming_service
 from backend.services.cache_optimization import get_optimized_cache
+from backend.services.cache_warming import get_cache_warming_service
 
 
 async def warm_full_cache(service, args):
@@ -77,7 +77,7 @@ async def show_stats(service, args):
     print(f"  Errors: {stats['errors']}")
 
     if 'used_memory_human' in stats:
-        print(f"\nRedis Stats:")
+        print("\nRedis Stats:")
         print(f"  Memory Used: {stats['used_memory_human']}")
         print(f"  Connected Clients: {stats['connected_clients']}")
 

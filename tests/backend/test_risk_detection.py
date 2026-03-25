@@ -7,15 +7,15 @@ Tests all 7+ risk detection rules and stay recommendation logic.
 Author: Backend Dev #7
 """
 
-import pytest
 from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import uuid4
 
+import pytest
 from src.backend.schemas.recommendation_schemas import (
+    CostBreakdown,
     PlanScores,
     RankedPlan,
-    CostBreakdown,
     UserPreferences,
 )
 from src.backend.schemas.risk_schemas import (
@@ -27,12 +27,12 @@ from src.backend.schemas.risk_schemas import (
 from src.backend.schemas.savings_schemas import SavingsAnalysis
 from src.backend.schemas.usage_analysis import (
     DataQualityMetrics,
+    OutlierDetection,
+    PeakOffPeakAnalysis,
+    SeasonalAnalysis,
     UsageProfile,
     UsageProjection,
     UsageStatistics,
-    SeasonalAnalysis,
-    PeakOffPeakAnalysis,
-    OutlierDetection,
     UserProfileType,
 )
 from src.backend.services.risk_detection import (
@@ -40,7 +40,6 @@ from src.backend.services.risk_detection import (
     RiskDetectionService,
     create_risk_detection_service,
 )
-
 
 # ============================================================================
 # FIXTURES
@@ -846,10 +845,10 @@ class TestStayRecommendation:
     ):
         """Test stay recommendation due to multiple critical risks."""
         from src.backend.schemas.risk_schemas import (
-            RiskWarning,
-            RiskType,
-            RiskSeverity,
             RiskCategory,
+            RiskSeverity,
+            RiskType,
+            RiskWarning,
         )
 
         # Create multiple critical risks
@@ -972,10 +971,10 @@ class TestRiskDetectionIntegration:
     def test_risk_summary_calculation(self, risk_service, sample_plan):
         """Test risk summary calculation."""
         from src.backend.schemas.risk_schemas import (
-            RiskWarning,
-            RiskType,
-            RiskSeverity,
             RiskCategory,
+            RiskSeverity,
+            RiskType,
+            RiskWarning,
         )
 
         risks = [

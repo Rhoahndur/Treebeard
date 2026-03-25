@@ -5,27 +5,27 @@ Tests scoring functions without database dependencies.
 Target: >80% code coverage for scoring_service.py
 """
 
-import pytest
-from datetime import date, datetime
+import os
+import sys
 from decimal import Decimal
 
-import sys
-import os
+import pytest
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
 # Direct imports to avoid email_validator dependency issue
-from backend.schemas.recommendation_schemas import UserPreferences, PlanScores
+from backend.schemas.recommendation_schemas import UserPreferences
 from backend.schemas.usage_analysis import UsageProjection
 from backend.services.scoring_service import (
+    calculate_composite_score,
     calculate_cost_score,
     calculate_flexibility_score,
-    calculate_renewable_score,
     calculate_rating_score,
-    calculate_composite_score,
-    score_plan
+    calculate_renewable_score,
+    score_plan,
 )
+
 
 # For convenience
 class scoring_service:

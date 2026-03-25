@@ -3,9 +3,10 @@
 Complete end-to-end test of recommendations flow with all fixes applied.
 """
 
-import requests
 import json
 from datetime import datetime, timedelta
+
+import requests
 
 BASE_URL = "http://localhost:8888/api/v1"
 
@@ -89,12 +90,12 @@ def test_recommendations_flow():
         print(f"\nResponse status: {rec_response.status_code}")
 
         if rec_response.status_code != 200:
-            print(f"❌ Recommendations generation failed!")
+            print("❌ Recommendations generation failed!")
             print(f"Response: {rec_response.text}")
             return False
 
         result = rec_response.json()
-        print(f"✅ Recommendations generated successfully!")
+        print("✅ Recommendations generated successfully!")
 
         # Step 3: Validate response structure
         print("\n[3/3] Validating response structure...")
@@ -130,7 +131,7 @@ def test_recommendations_flow():
                 if 'projected_annual_savings' in plan and plan['projected_annual_savings'] is not None:
                     print(f"    Annual Savings: ${plan['projected_annual_savings']:.2f}")
                 else:
-                    print(f"    Annual Savings: Not calculated")
+                    print("    Annual Savings: Not calculated")
 
                 if 'break_even_months' in plan and plan['break_even_months'] is not None:
                     print(f"    Break-even: {plan['break_even_months']} months")
@@ -139,7 +140,7 @@ def test_recommendations_flow():
                 if 'explanation' in plan:
                     print(f"    Explanation: {plan['explanation'][:100]}...")
                 else:
-                    print(f"    ⚠️  No explanation generated")
+                    print("    ⚠️  No explanation generated")
 
         # Check usage analysis
         if "profile_type" in result["usage_analysis"]:
