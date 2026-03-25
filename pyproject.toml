@@ -1,0 +1,58 @@
+[project]
+name = "treebeard"
+version = "1.0.0"
+description = "TreeBeard Energy Plan Recommendation System"
+requires-python = ">=3.11"
+
+# ── pytest ───────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "src/backend"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+markers = [
+    "asyncio: mark test as async",
+]
+
+# ── ruff ─────────────────────────────────────────────────────────────────────
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+src = ["src/backend"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501", # line too long (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["api", "config", "models", "schemas", "services", "monitoring"]
+
+# ── black ────────────────────────────────────────────────────────────────────
+[tool.black]
+target-version = ["py311"]
+line-length = 120
+
+# ── mypy ─────────────────────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+# ── isort ────────────────────────────────────────────────────────────────────
+[tool.isort]
+profile = "black"
+line_length = 120
+known_first_party = ["api", "config", "models", "schemas", "services", "monitoring"]
