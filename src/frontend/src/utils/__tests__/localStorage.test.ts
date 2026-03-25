@@ -34,14 +34,15 @@ describe('localStorage Utilities', () => {
   };
 
   beforeEach(() => {
+    vi.restoreAllMocks();
     localStorage.clear();
-    vi.clearAllMocks();
   });
 
   describe('saveOnboardingData', () => {
     it('should save data to localStorage', () => {
+      const spy = vi.spyOn(Storage.prototype, 'setItem');
       saveOnboardingData(mockData);
-      expect(localStorage.setItem).toHaveBeenCalled();
+      expect(spy).toHaveBeenCalled();
     });
   });
 
@@ -86,8 +87,9 @@ describe('localStorage Utilities', () => {
 
   describe('clearOnboardingData', () => {
     it('should clear data from localStorage', () => {
+      const spy = vi.spyOn(Storage.prototype, 'removeItem');
       clearOnboardingData();
-      expect(localStorage.removeItem).toHaveBeenCalled();
+      expect(spy).toHaveBeenCalled();
     });
   });
 

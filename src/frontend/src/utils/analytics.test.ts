@@ -90,6 +90,8 @@ describe('AnalyticsService', () => {
         cookieConsent: true,
         debug: true,
       });
+      // Re-mock gtag since initializeGA4() replaces the spy with a real function
+      (window as any).gtag = vi.fn();
     });
 
     it('should track custom events', () => {
@@ -295,6 +297,7 @@ describe('AnalyticsService', () => {
         ga4MeasurementId: 'G-XXXXXXXXXX',
         cookieConsent: true,
       });
+      (window as any).gtag = vi.fn();
     });
 
     it('should set user properties', () => {

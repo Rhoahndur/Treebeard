@@ -28,7 +28,7 @@ from src.backend.schemas.savings_schemas import (
     RankedPlan,
     SavingsAnalysis,
 )
-from src.backend.schemas.usage_schemas import UsageProjection
+from src.backend.schemas.usage_analysis import UsageProjection
 from src.backend.schemas.user import CurrentPlanResponse
 from src.backend.services.savings_calculator import SavingsCalculatorService
 
