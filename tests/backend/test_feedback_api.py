@@ -133,11 +133,33 @@ class TestSubmitPlanFeedback:
 class TestSubmitRecommendationFeedback:
     """Tests for POST /api/v1/feedback/recommendation endpoint."""
 
-    def test_submit_recommendation_feedback(self, client: TestClient):
+    def test_submit_recommendation_feedback(self, client: TestClient, db: Session):
         """Test submitting recommendation feedback."""
-        recommendation_id = uuid4()
+        from datetime import datetime, timedelta
+
+        from src.backend.models.recommendation import Recommendation
+
+        # Create prerequisite records for FK constraints
+        user = User(
+            id=uuid4(), email="rec_fb@test.com", name="Rec FB User",
+            hashed_password="hashed", zip_code="10001",
+            property_type="residential", is_active=True, is_admin=False,
+        )
+        db.add(user)
+        db.flush()
+
+        recommendation = Recommendation(
+            id=uuid4(), user_id=user.id,
+            usage_profile={"profile_type": "test"},
+            generated_at=datetime.utcnow(),
+            expires_at=datetime.utcnow() + timedelta(days=30),
+            algorithm_version="1.0.0",
+        )
+        db.add(recommendation)
+        db.commit()
+
         feedback_data = {
-            "recommendation_id": str(recommendation_id),
+            "recommendation_id": str(recommendation.id),
             "rating": 5,
             "feedback_text": "Very helpful recommendations!",
             "feedback_type": "helpful",

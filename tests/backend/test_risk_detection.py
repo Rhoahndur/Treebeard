@@ -41,6 +41,7 @@ from src.backend.services.risk_detection import (
     create_risk_detection_service,
 )
 
+
 def _make_monthly_breakdown(annual_cost: Decimal, year: int = 2026) -> list[MonthlyCost]:
     """Build 12 MonthlyCost items splitting annual_cost evenly across months."""
     monthly = (annual_cost / 12).quantize(Decimal("0.01"))

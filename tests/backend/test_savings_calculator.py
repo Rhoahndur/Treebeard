@@ -21,16 +21,17 @@ from src.backend.schemas.plan import (
     PlanCatalogResponse,
     SupplierResponse,
 )
-from src.backend.schemas.savings_schemas import (
+from src.backend.schemas.usage_analysis import UsageProjection
+from src.backend.schemas.user import CurrentPlanResponse
+from src.backend.services.savings_calculator import SavingsCalculatorService
+
+from schemas.savings_schemas import (
     CostRange,
     MonthlyCost,
     PlanComparison,
     RankedPlan,
     SavingsAnalysis,
 )
-from src.backend.schemas.usage_analysis import UsageProjection
-from src.backend.schemas.user import CurrentPlanResponse
-from src.backend.services.savings_calculator import SavingsCalculatorService
 
 # ===== FIXTURES =====
 
@@ -307,7 +308,10 @@ class TestBreakEvenAnalysis:
         mock_recommended_plan_variable,
         mock_usage_projection,
     ):
-        """Test break-even when no ETF exists."""
+        """Test break-even when no ETF exists on current plan."""
+        # Override current plan to have zero ETF for this test
+        mock_current_plan.early_termination_fee = Decimal("0.00")
+
         result = savings_service.calculate_annual_savings(
             current_plan=mock_current_plan,
             recommended_plan=mock_recommended_plan_variable,
@@ -530,6 +534,9 @@ class TestPlanComparison:
         """Test trade-off analysis generation."""
         user_id = uuid4()
 
+        # Lower fixed plan rate so it becomes cheapest while variable remains most flexible
+        mock_recommended_plan_fixed.rate_structure = {"type": "fixed", "rate_per_kwh": 8.0}
+
         ranked_plans = [
             RankedPlan(
                 plan_id=mock_recommended_plan_fixed.id,
@@ -539,7 +546,7 @@ class TestPlanComparison:
                 flexibility_score=Decimal("0.85"),
                 renewable_score=Decimal("1.0"),
                 rating_score=Decimal("0.90"),
-                projected_annual_cost=Decimal("1200.00"),
+                projected_annual_cost=Decimal("1050.00"),
             ),
             RankedPlan(
                 plan_id=mock_recommended_plan_variable.id,

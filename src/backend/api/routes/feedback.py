@@ -424,12 +424,13 @@ async def export_feedback_csv(
         from fastapi.responses import StreamingResponse
 
         from models.feedback import Feedback
-        from models.plan import PlanCatalog
+        from models.plan import PlanCatalog, Supplier
 
-        # Query all feedback with plan details
+        # Query all feedback with plan and supplier details
         feedbacks = (
-            db.query(Feedback, PlanCatalog)
+            db.query(Feedback, PlanCatalog, Supplier.supplier_name)
             .outerjoin(PlanCatalog, Feedback.plan_id == PlanCatalog.id)
+            .outerjoin(Supplier, PlanCatalog.supplier_id == Supplier.id)
             .order_by(Feedback.created_at.desc())
             .all()
         )
@@ -456,7 +457,7 @@ async def export_feedback_csv(
         )
 
         # Write rows
-        for feedback, plan in feedbacks:
+        for feedback, plan, supplier_name in feedbacks:
             writer.writerow(
                 [
                     str(feedback.id),
@@ -464,7 +465,7 @@ async def export_feedback_csv(
                     str(feedback.recommendation_id) if feedback.recommendation_id else "",
                     str(feedback.plan_id) if feedback.plan_id else "",
                     plan.plan_name if plan else "",
-                    plan.supplier_name if plan else "",
+                    supplier_name or "",
                     feedback.rating,
                     feedback.feedback_type,
                     feedback.feedback_text or "",

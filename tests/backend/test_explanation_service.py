@@ -9,20 +9,29 @@ from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
-from src.backend.schemas.explanation_schemas import (
+
+from schemas.explanation_schemas import (
     CurrentPlan,
+    ExplanationMetrics,
     PersonaType,
     PlanExplanation,
     RankedPlan,
     UserPreferences,
 )
-from src.backend.services.explanation_service import ClaudeExplanationService
-from src.backend.services.explanation_templates import (
+from services.explanation_service import ClaudeExplanationService
+from services.explanation_templates import (
     TemplateExplanationGenerator,
     get_context_aware_message,
 )
 
 # ========== Fixtures ==========
+
+
+@pytest.fixture(autouse=True)
+def _mock_anthropic():
+    """Mock AsyncAnthropic so tests run without the anthropic package installed."""
+    with patch("services.explanation_service.AsyncAnthropic"):
+        yield
 
 
 @pytest.fixture
@@ -466,9 +475,14 @@ class TestClaudeExplanationService:
             redis_client=mock_redis,
         )
 
-        # Mock scan_iter to return some keys
+        # Mock scan_iter as async generator (used with `async for`)
         mock_keys = [b"explanation:abc123", b"explanation:def456"]
-        mock_redis.scan_iter = AsyncMock(return_value=iter(mock_keys))
+
+        async def _mock_scan_iter(*args, **kwargs):
+            for key in mock_keys:
+                yield key
+
+        mock_redis.scan_iter = _mock_scan_iter
 
         deleted = await service.invalidate_cache()
 
@@ -489,7 +503,7 @@ class TestClaudeExplanationService:
             "create",
             side_effect=Exception("Force fallback"),
         ):
-            explanations = await service.bulk_generate_explanations(
+            explanations = await service.generate_bulk_explanations(
                 plans=plans,
                 user_profile=mock_user_profile,
                 preferences=balanced_preferences,

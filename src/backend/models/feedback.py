@@ -30,20 +30,20 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
 
     __tablename__ = "feedback"
 
-    user_id: Mapped[UUID] = mapped_column(
+    user_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True),
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
         index=True,
-        comment="Reference to the user providing feedback",
+        comment="Reference to the user providing feedback (null for anonymous)",
     )
 
-    recommendation_id: Mapped[UUID] = mapped_column(
+    recommendation_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True),
-        ForeignKey("recommendations.id", ondelete="CASCADE"),
-        nullable=False,
+        ForeignKey("recommendations.id", ondelete="SET NULL"),
+        nullable=True,
         index=True,
-        comment="Reference to the recommendation session",
+        comment="Reference to the recommendation session (null for plan-only feedback)",
     )
 
     recommended_plan_id: Mapped[UUID | None] = mapped_column(
@@ -85,9 +85,9 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
     )
 
     # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="feedback")
+    user: Mapped[Optional["User"]] = relationship("User", back_populates="feedback")
 
-    recommendation: Mapped["Recommendation"] = relationship("Recommendation")
+    recommendation: Mapped[Optional["Recommendation"]] = relationship("Recommendation")
 
     recommended_plan: Mapped[Optional["RecommendationPlan"]] = relationship(
         "RecommendationPlan", back_populates="feedback"

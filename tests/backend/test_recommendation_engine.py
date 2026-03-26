@@ -410,14 +410,13 @@ class TestCompositeScoring:
 
     def test_composite_score_invalid_preferences_raises(self):
         """Test that invalid preferences raise ValueError."""
-        invalid_prefs = UserPreferences(
-            cost_priority=50,
-            flexibility_priority=30,
-            renewable_priority=10,
-            rating_priority=5  # Sum = 95, not 100
-        )
-
         with pytest.raises(ValueError, match="must sum to 100"):
+            invalid_prefs = UserPreferences(
+                cost_priority=50,
+                flexibility_priority=30,
+                renewable_priority=10,
+                rating_priority=5  # Sum = 95, not 100
+            )
             scoring_service.calculate_composite_score(
                 cost_score=50.0,
                 flexibility_score=50.0,
@@ -483,10 +482,10 @@ class TestTieredRateCostCalculation:
         }
         cost = _calculate_tiered_cost(rate_structure, 2500.0)
         # Tier 1: 1000 kWh @ 8¢ = $80
-        # Tier 2: 1000 kWh @ 10¢ = $100
-        # Tier 3: 500 kWh @ 12¢ = $60
-        # Total: $240
-        assert cost == Decimal('240.00')
+        # Tier 2: 1500 kWh @ 10¢ = $150 (remaining 1500 fits within 2000 cap)
+        # Tier 3: not reached
+        # Total: $230
+        assert cost == Decimal('230.00')
 
     def test_tiered_rate_exact_tier_boundary(self):
         """Test usage exactly at tier boundary."""

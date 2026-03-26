@@ -11,11 +11,11 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import and_, func
+from sqlalchemy import and_, case, func
 from sqlalchemy.orm import Session
 
 from models.feedback import Feedback
-from models.plan import PlanCatalog
+from models.plan import PlanCatalog, Supplier
 from models.recommendation import RecommendationPlan
 from schemas.feedback_schemas import (
     FeedbackAnalyticsResponse,
@@ -311,16 +311,17 @@ class FeedbackService:
             self.db.query(
                 Feedback.plan_id,
                 PlanCatalog.plan_name,
-                PlanCatalog.supplier_name,
+                Supplier.supplier_name,
                 func.count(Feedback.id).label("total_feedback"),
                 func.avg(Feedback.rating).label("avg_rating"),
-                func.sum(func.case((Feedback.rating >= 4, 1), else_=0)).label("thumbs_up"),
-                func.sum(func.case((Feedback.rating <= 2, 1), else_=0)).label("thumbs_down"),
+                func.sum(case((Feedback.rating >= 4, 1), else_=0)).label("thumbs_up"),
+                func.sum(case((Feedback.rating <= 2, 1), else_=0)).label("thumbs_down"),
                 func.max(Feedback.created_at).label("most_recent"),
             )
             .join(PlanCatalog, Feedback.plan_id == PlanCatalog.id)
+            .join(Supplier, PlanCatalog.supplier_id == Supplier.id)
             .filter(Feedback.plan_id.isnot(None))
-            .group_by(Feedback.plan_id, PlanCatalog.plan_name, PlanCatalog.supplier_name)
+            .group_by(Feedback.plan_id, PlanCatalog.plan_name, Supplier.supplier_name)
             .order_by(func.count(Feedback.id).desc())
             .limit(limit)
             .all()
