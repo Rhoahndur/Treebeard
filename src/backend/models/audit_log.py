@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Any, Optional
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, Index, String, Text, func
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -67,7 +67,9 @@ class AuditLog(Base, UUIDPrimaryKeyMixin):
     )
 
     details: Mapped[dict[str, Any] | None] = mapped_column(
-        JSONB, nullable=True, comment="Action-specific details in JSON format (e.g., old/new values)"
+        JSONB().with_variant(JSON, "sqlite"),
+        nullable=True,
+        comment="Action-specific details in JSON format (e.g., old/new values)",
     )
 
     ip_address: Mapped[str | None] = mapped_column(

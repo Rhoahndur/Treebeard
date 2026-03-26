@@ -59,7 +59,13 @@ def sample_usage_projection():
         projected_monthly_kwh=[850.0, 820.0, 780.0, 900.0, 950.0, 1400.0,
                                1600.0, 1500.0, 1000.0, 850.0, 800.0, 820.0],
         projected_annual_kwh=12270.0,
-        confidence_score=0.85
+        confidence_lower=[765.0, 738.0, 702.0, 810.0, 855.0, 1260.0,
+                          1440.0, 1350.0, 900.0, 765.0, 720.0, 738.0],
+        confidence_upper=[935.0, 902.0, 858.0, 990.0, 1045.0, 1540.0,
+                          1760.0, 1650.0, 1100.0, 935.0, 880.0, 902.0],
+        confidence_score=0.85,
+        method="historical_average",
+        assumptions=["test assumption"]
     )
 
 

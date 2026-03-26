@@ -7,7 +7,8 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import ARRAY, Boolean, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, func
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, func
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -97,7 +98,9 @@ class PlanCatalog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
 
     rate_structure: Mapped[dict[str, Any]] = mapped_column(
-        JSONB, nullable=False, comment="Rate structure in JSON format (supports multiple rate types)"
+        JSONB().with_variant(JSON, "sqlite"),
+        nullable=False,
+        comment="Rate structure in JSON format (supports multiple rate types)",
     )
 
     contract_length_months: Mapped[int] = mapped_column(
@@ -125,7 +128,9 @@ class PlanCatalog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
 
     available_regions: Mapped[list[str]] = mapped_column(
-        ARRAY(String(10)), nullable=False, comment="List of ZIP codes or regions where plan is available"
+        ARRAY(String(10)).with_variant(JSON, "sqlite"),
+        nullable=False,
+        comment="List of ZIP codes or regions where plan is available",
     )
 
     is_active: Mapped[bool] = mapped_column(

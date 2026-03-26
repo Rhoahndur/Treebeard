@@ -24,7 +24,7 @@ from src.backend.schemas.risk_schemas import (
     RiskType,
     StayRecommendationTrigger,
 )
-from src.backend.schemas.savings_schemas import SavingsAnalysis
+from src.backend.schemas.savings_schemas import MonthlyCost, SavingsAnalysis
 from src.backend.schemas.usage_analysis import (
     DataQualityMetrics,
     OutlierDetection,
@@ -40,6 +40,21 @@ from src.backend.services.risk_detection import (
     RiskDetectionService,
     create_risk_detection_service,
 )
+
+def _make_monthly_breakdown(annual_cost: Decimal, year: int = 2026) -> list[MonthlyCost]:
+    """Build 12 MonthlyCost items splitting annual_cost evenly across months."""
+    monthly = (annual_cost / 12).quantize(Decimal("0.01"))
+    return [
+        MonthlyCost(
+            month=m,
+            year=year,
+            projected_kwh=Decimal("1000.00"),
+            energy_cost=monthly,
+            total_cost=monthly,
+        )
+        for m in range(1, 13)
+    ]
+
 
 # ============================================================================
 # FIXTURES
@@ -117,7 +132,7 @@ def sample_savings():
         current_annual_cost=Decimal("1500.00"),
         annual_savings=Decimal("300.00"),
         savings_percentage=Decimal("20.00"),
-        monthly_breakdown=[],
+        monthly_breakdown=_make_monthly_breakdown(Decimal("1200.00")),
         total_cost_of_ownership=Decimal("1200.00"),
         tco_current_plan=Decimal("1500.00"),
         contract_length_months=12,
@@ -332,7 +347,7 @@ class TestLowSavingsRule:
             current_annual_cost=Decimal("1500.00"),
             annual_savings=Decimal("50.00"),  # Low savings
             savings_percentage=Decimal("3.33"),  # <5%
-            monthly_breakdown=[],
+            monthly_breakdown=_make_monthly_breakdown(Decimal("1450.00")),
             total_cost_of_ownership=Decimal("1450.00"),
             tco_current_plan=Decimal("1500.00"),
             contract_length_months=12,
@@ -357,7 +372,7 @@ class TestLowSavingsRule:
             current_annual_cost=Decimal("1500.00"),
             annual_savings=Decimal("150.00"),  # Above $100
             savings_percentage=Decimal("4.5"),  # <5%
-            monthly_breakdown=[],
+            monthly_breakdown=_make_monthly_breakdown(Decimal("1350.00")),
             total_cost_of_ownership=Decimal("1350.00"),
             tco_current_plan=Decimal("1500.00"),
             contract_length_months=12,
@@ -381,7 +396,7 @@ class TestLowSavingsRule:
             current_annual_cost=Decimal("1500.00"),
             annual_savings=Decimal("300.00"),
             savings_percentage=Decimal("20.00"),  # >5%
-            monthly_breakdown=[],
+            monthly_breakdown=_make_monthly_breakdown(Decimal("1200.00")),
             total_cost_of_ownership=Decimal("1200.00"),
             tco_current_plan=Decimal("1500.00"),
             contract_length_months=12,
@@ -647,7 +662,7 @@ class TestBreakEvenRule:
             current_annual_cost=Decimal("1500.00"),
             annual_savings=Decimal("100.00"),
             savings_percentage=Decimal("6.67"),
-            monthly_breakdown=[],
+            monthly_breakdown=_make_monthly_breakdown(Decimal("1400.00")),
             total_cost_of_ownership=Decimal("1400.00"),
             tco_current_plan=Decimal("1500.00"),
             contract_length_months=12,
@@ -672,7 +687,7 @@ class TestBreakEvenRule:
             current_annual_cost=Decimal("1500.00"),
             annual_savings=Decimal("100.00"),
             savings_percentage=Decimal("6.67"),
-            monthly_breakdown=[],
+            monthly_breakdown=_make_monthly_breakdown(Decimal("1400.00")),
             total_cost_of_ownership=Decimal("1400.00"),
             tco_current_plan=Decimal("1500.00"),
             contract_length_months=12,
@@ -707,7 +722,7 @@ class TestNegativeSavingsRule:
             current_annual_cost=Decimal("1500.00"),
             annual_savings=Decimal("-100.00"),  # Negative savings
             savings_percentage=Decimal("-6.67"),
-            monthly_breakdown=[],
+            monthly_breakdown=_make_monthly_breakdown(Decimal("1600.00")),
             total_cost_of_ownership=Decimal("1600.00"),
             tco_current_plan=Decimal("1500.00"),
             contract_length_months=12,
@@ -786,7 +801,7 @@ class TestStayRecommendation:
             current_annual_cost=Decimal("1500.00"),
             annual_savings=Decimal("50.00"),
             savings_percentage=Decimal("3.33"),
-            monthly_breakdown=[],
+            monthly_breakdown=_make_monthly_breakdown(Decimal("1450.00")),
             total_cost_of_ownership=Decimal("1450.00"),
             tco_current_plan=Decimal("1500.00"),
             contract_length_months=12,
@@ -819,7 +834,7 @@ class TestStayRecommendation:
             current_annual_cost=Decimal("1500.00"),
             annual_savings=Decimal("200.00"),
             savings_percentage=Decimal("13.33"),
-            monthly_breakdown=[],
+            monthly_breakdown=_make_monthly_breakdown(Decimal("1300.00")),
             total_cost_of_ownership=Decimal("1300.00"),
             tco_current_plan=Decimal("1500.00"),
             contract_length_months=12,
@@ -895,7 +910,7 @@ class TestStayRecommendation:
             current_annual_cost=Decimal("1500.00"),
             annual_savings=Decimal("20.00"),  # Minimal savings
             savings_percentage=Decimal("1.33"),  # <2%
-            monthly_breakdown=[],
+            monthly_breakdown=_make_monthly_breakdown(Decimal("1480.00")),
             total_cost_of_ownership=Decimal("1480.00"),
             tco_current_plan=Decimal("1500.00"),
             contract_length_months=12,

@@ -34,6 +34,70 @@ from src.backend.config.database import get_db
 from src.backend.models.base import Base
 from src.backend.models.user import User
 
+# Routes and auth_dependencies import get_db via the short path (config.database),
+# which is a DIFFERENT function object from src.backend.config.database.get_db.
+# We must override BOTH so FastAPI's dependency_overrides matches.
+import config.database as _short_db_mod
+
+_get_db_short = _short_db_mod.get_db
+
+
+class _AwaitableResult:
+    """A tiny wrapper that makes a pre-computed value awaitable.
+
+    ``await _AwaitableResult(val)`` returns *val* immediately, but
+    the object can also be used directly without ``await``.
+    """
+    __slots__ = ("_value",)
+
+    def __init__(self, value):
+        self._value = value
+
+    def __await__(self):
+        return self._value
+        yield  # pragma: no cover – makes this a generator function
+
+
+class AsyncSessionWrapper:
+    """Wraps a synchronous SQLAlchemy session so that both ``db.execute(...)``
+    (sync) and ``await db.execute(...)`` (async) work transparently.
+
+    This lets the async admin/audit service functions AND the sync
+    feedback service run against the same in-memory SQLite session
+    during tests without needing an async driver.
+    """
+
+    def __init__(self, sync_session):
+        self._sync = sync_session
+
+    # --- dual-mode methods (work with and without ``await``) ---
+
+    def execute(self, *args, **kwargs):
+        result = self._sync.execute(*args, **kwargs)
+        return _AwaitableResult(result)
+
+    def commit(self):
+        result = self._sync.commit()
+        return _AwaitableResult(result)
+
+    def refresh(self, instance, attribute_names=None, **kwargs):
+        if attribute_names is not None:
+            result = self._sync.refresh(instance, attribute_names=attribute_names, **kwargs)
+        else:
+            result = self._sync.refresh(instance, **kwargs)
+        return _AwaitableResult(result)
+
+    def close(self):
+        result = self._sync.close()
+        return _AwaitableResult(result)
+
+    def add(self, instance, _warn=True):
+        return self._sync.add(instance, _warn=_warn)
+
+    def __getattr__(self, name):
+        return getattr(self._sync, name)
+
+
 engine = create_engine(
     "sqlite://",
     connect_args={"check_same_thread": False},
@@ -69,11 +133,16 @@ def db():
 
 @pytest.fixture()
 def client(db):
-    """FastAPI TestClient with get_db overridden to use the test session."""
-    def _override():
-        yield db
+    """FastAPI TestClient with get_db overridden to use the async-wrapped test session."""
+    wrapped = AsyncSessionWrapper(db)
 
+    def _override():
+        yield wrapped
+
+    # Override BOTH the long-path and short-path get_db references so every
+    # Depends(get_db) resolves to the test session regardless of import path.
     app.dependency_overrides[get_db] = _override
+    app.dependency_overrides[_get_db_short] = _override
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
@@ -81,12 +150,12 @@ def client(db):
 
 @pytest.fixture()
 def async_db(db):
-    """Alias for the synchronous session, usable in @pytest.mark.asyncio tests.
+    """Async-compatible wrapper around the synchronous test session.
 
-    SQLite has no async driver, but the async service functions perform
-    synchronous ORM operations internally, so a sync session works fine.
+    SQLite has no async driver, but this wrapper makes ``await db.execute()``
+    and related calls work so that async service functions can be tested.
     """
-    return db
+    return AsyncSessionWrapper(db)
 
 
 @pytest.fixture()

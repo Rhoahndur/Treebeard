@@ -7,7 +7,7 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, Numeric, Text, func
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, Numeric, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -40,7 +40,9 @@ class Recommendation(Base, UUIDPrimaryKeyMixin):
     )
 
     usage_profile: Mapped[dict[str, Any]] = mapped_column(
-        JSONB, nullable=False, comment="Analyzed usage patterns and projections used for recommendations"
+        JSONB().with_variant(JSON, "sqlite"),
+        nullable=False,
+        comment="Analyzed usage patterns and projections used for recommendations",
     )
 
     generated_at: Mapped[datetime] = mapped_column(
@@ -156,7 +158,9 @@ class RecommendationPlan(Base, UUIDPrimaryKeyMixin):
     )
 
     risk_flags: Mapped[dict[str, Any] | None] = mapped_column(
-        JSONB, nullable=True, comment="Risk warnings and alerts for this plan"
+        JSONB().with_variant(JSON, "sqlite"),
+        nullable=True,
+        comment="Risk warnings and alerts for this plan",
     )
 
     created_at: Mapped[datetime] = mapped_column(
