@@ -1,9 +1,10 @@
 """
-AI-powered explanation generation service using Claude API.
+AI-powered explanation generation service.
 
-This service generates personalized, natural language explanations for
-energy plan recommendations using Anthropic's Claude API with fallback
-to template-based generation.
+Provides a factory function to create explanation services that generate
+personalized, natural language explanations for energy plan recommendations.
+Supports OpenRouter (free tier) and OpenAI with fallback to template-based
+generation.
 
 Stories: 2.6 (API Integration), 2.7 (Personalization), 2.8 (Caching)
 """
@@ -578,19 +579,55 @@ Generate the explanation now. Do not include labels or headers, just the explana
 
 
 def create_explanation_service(
-    api_key: str,
+    api_key: str | None = None,
     redis_client: Any | None = None,
+    base_url: str | None = None,
+    model: str | None = None,
     **kwargs,
 ) -> OpenAIExplanationService:
     """
     Factory function to create explanation service.
 
+    Resolves API configuration in priority order:
+    1. Explicit parameters passed to this function
+    2. OpenRouter settings (if OPENROUTER_API_KEY is set)
+    3. OpenAI settings (OPENAI_API_KEY)
+    4. Falls back to template-based explanations when no API key is available
+
     Args:
-        api_key: OpenAI API key
+        api_key: API key override
         redis_client: Optional Redis client
+        base_url: Base URL override (e.g. OpenRouter)
+        model: Model override
         **kwargs: Additional configuration
 
     Returns:
         Configured OpenAIExplanationService
     """
-    return OpenAIExplanationService(api_key=api_key, redis_client=redis_client, **kwargs)
+    from config.settings import settings
+
+    # Resolve API key and provider settings
+    # Priority: explicit args > OpenRouter > OpenAI > template fallback
+    provider = None
+    if api_key is None:
+        if settings.openrouter_api_key:
+            api_key = settings.openrouter_api_key
+            base_url = base_url or settings.openrouter_base_url
+            model = model or settings.openrouter_model
+            provider = "openrouter"
+        else:
+            api_key = settings.openai_api_key or ""
+            model = model or settings.openai_model
+            provider = "openai"
+
+    if model is None:
+        model = settings.openai_model
+
+    return OpenAIExplanationService(
+        api_key=api_key,
+        redis_client=redis_client,
+        base_url=base_url,
+        model=model,
+        provider=provider,
+        **kwargs,
+    )
