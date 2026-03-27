@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { OnboardingPage } from '@/pages/OnboardingPage';
 import { ResultsPage } from '@/pages/ResultsPage';
+import { ComparisonPage } from '@/pages/ComparisonPage';
+import { ScenarioPage } from '@/pages/ScenarioPage';
 import { RequireAdmin } from '@/components/auth/RequireAdmin';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Dashboard } from '@/pages/admin/Dashboard';
@@ -8,6 +10,7 @@ import { Users } from '@/pages/admin/Users';
 import { Recommendations } from '@/pages/admin/Recommendations';
 import { Plans } from '@/pages/admin/Plans';
 import { AuditLogs } from '@/pages/admin/AuditLogs';
+import { FeedbackDashboard } from '@/pages/FeedbackDashboard';
 import '@/styles/index.css';
 
 // Wrapper component to read navigation state and pass to ResultsPage
@@ -26,6 +29,8 @@ function App() {
           <Route path="/" element={<Navigate to="/onboarding" replace />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/results" element={<ResultsPageWrapper />} />
+          <Route path="/comparison" element={<ComparisonPage />} />
+          <Route path="/scenarios" element={<ScenarioPage />} />
 
           {/* Admin Routes */}
           <Route
@@ -42,6 +47,7 @@ function App() {
             <Route path="recommendations" element={<Recommendations />} />
             <Route path="plans" element={<Plans />} />
             <Route path="audit-logs" element={<AuditLogs />} />
+            <Route path="feedback" element={<FeedbackDashboard />} />
           </Route>
 
           {/* 404 Page */}
