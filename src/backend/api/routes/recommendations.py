@@ -8,7 +8,6 @@ Story 6.3: Enhanced to include risk detection and stay recommendations.
 
 import logging
 from datetime import timedelta
-from typing import Any
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, HTTPException, status
@@ -36,7 +35,6 @@ from services.risk_detection import (
 from services.risk_detection import (
     create_risk_detection_service,
 )
-from services.savings_calculator import SavingsCalculatorService
 from services.usage_analysis import UsageAnalysisService
 
 router = APIRouter()
@@ -150,17 +148,8 @@ async def generate_recommendations(
             extra={"plans_analyzed": recommendation_result.total_plans_analyzed},
         )
 
-        # Step 3: Calculate savings for each plan (Story 2.4)
-        savings_service = SavingsCalculatorService()
-        plan_responses: list[dict[str, Any]] = []
-
         # Step 4: Generate explanations (Story 2.7)
-        from config.settings import settings
-
-        explanation_service = create_explanation_service(
-            api_key=settings.openai_api_key,
-            redis_client=None,  # Will use default from cache service
-        )
+        explanation_service = create_explanation_service()
 
         # Step 3.5: Calculate savings for all plans (needed for risk detection)
         from decimal import Decimal
@@ -298,7 +287,7 @@ async def generate_recommendations(
 
                 stay_recommendation = stay_rec
 
-            logger.info(f"Risk detection complete: {len(all_risk_warnings)} risks, " f"should_stay={should_stay}")
+            logger.info(f"Risk detection complete: {len(all_risk_warnings)} risks, should_stay={should_stay}")
 
         # Step 5: Query supplier websites and logos for all plans (to avoid N+1 queries)
         supplier_names = [plan.supplier_name for plan in recommendation_result.top_plans]
