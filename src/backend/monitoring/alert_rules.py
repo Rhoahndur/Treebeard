@@ -358,7 +358,7 @@ def format_alert_message(rule: AlertRule, current_value: float, context: dict[st
 **Threshold**: {rule.threshold}
 
 **Severity**: {rule.severity}
-**Tags**: {', '.join(rule.tags or [])}
+**Tags**: {", ".join(rule.tags or [])}
 """
 
     if rule.runbook_url:
