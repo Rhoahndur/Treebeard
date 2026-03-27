@@ -108,7 +108,7 @@ class PlanExplanation(BaseModel):
     trade_offs: list[str] = Field(default_factory=list, description="Important trade-offs or compromises")
     persona_type: str = Field(..., description="User persona type")
     readability_score: float = Field(..., ge=0, le=100, description="Flesch-Kincaid readability score")
-    generated_via: str = Field(..., description="Generation method: 'claude_api' or 'template'")
+    generated_via: str = Field(..., description="Generation method: 'openrouter', 'openai', or 'template'")
     generated_at: datetime = Field(default_factory=datetime.utcnow, description="When explanation was generated")
 
     model_config = {"from_attributes": True}
