@@ -1,0 +1,39 @@
+# EditorConfig — cross-IDE consistency
+# https://editorconfig.org
+
+root = true
+
+# Defaults for all files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Python (matches black / ruff config in pyproject.toml)
+[*.py]
+indent_size = 4
+max_line_length = 120
+
+# Frontend: JS / TS / JSX / TSX / CSS (matches .prettierrc tabWidth: 2)
+[*.{js,jsx,ts,tsx,css,scss}]
+indent_size = 2
+max_line_length = 100
+
+# Data / config files
+[*.{json,yaml,yml,toml}]
+indent_size = 2
+
+# HTML templates
+[*.html]
+indent_size = 2
+
+# Markdown — preserve trailing whitespace (used for line breaks)
+[*.md]
+trim_trailing_whitespace = false
+
+# Makefiles require tabs
+[Makefile]
+indent_style = tab
