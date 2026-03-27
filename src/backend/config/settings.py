@@ -55,7 +55,14 @@ class Settings(BaseSettings):
     recommendation_cache_ttl_seconds: int = Field(default=86400, description="Recommendation cache TTL (24 hours)")
     max_recommendations: int = Field(default=3, description="Maximum number of recommendations to return")
 
-    # External APIs
+    # External APIs — OpenRouter (preferred for demo, free tier)
+    openrouter_api_key: str | None = Field(None, description="OpenRouter API key (free tier available)")
+    openrouter_base_url: str = Field(default="https://openrouter.ai/api/v1", description="OpenRouter API base URL")
+    openrouter_model: str = Field(
+        default="google/gemini-2.0-flash-exp:free", description="OpenRouter model (free tier)"
+    )
+
+    # External APIs — OpenAI (fallback if OpenRouter not configured)
     openai_api_key: str | None = Field(None, description="OpenAI API key for explanation generation")
     openai_model: str = Field(default="gpt-4o-mini", description="OpenAI model to use")
 
