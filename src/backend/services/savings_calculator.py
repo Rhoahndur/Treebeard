@@ -430,12 +430,12 @@ class SavingsCalculatorService:
         # High ETF warning
         if switching_cost > Decimal("150"):
             warnings.append(
-                f"High early termination fee (${switching_cost}). " "Consider waiting until current contract ends."
+                f"High early termination fee (${switching_cost}). Consider waiting until current contract ends."
             )
 
         # Low savings warning
         if savings_percentage < Decimal("5") and savings_percentage >= 0:
-            warnings.append(f"Marginal savings ({savings_percentage:.1f}%). " "Switching may not be worth the effort.")
+            warnings.append(f"Marginal savings ({savings_percentage:.1f}%). Switching may not be worth the effort.")
 
         # Negative savings (more expensive)
         if savings_percentage < 0:
@@ -447,7 +447,7 @@ class SavingsCalculatorService:
         # Variable rate risk
         if is_variable_rate:
             warnings.append(
-                "Variable rate plan: actual costs may differ from projections. " "Consider rate volatility risk."
+                "Variable rate plan: actual costs may differ from projections. Consider rate volatility risk."
             )
 
         # Low confidence in usage projection

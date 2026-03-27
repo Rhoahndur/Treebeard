@@ -155,7 +155,7 @@ class FeedbackService:
         self.db.commit()
         self.db.refresh(feedback)
 
-        logger.info(f"Created feedback: rating={rating}, type={feedback_type}, " f"sentiment={sentiment_score}")
+        logger.info(f"Created feedback: rating={rating}, type={feedback_type}, sentiment={sentiment_score}")
 
         return feedback
 

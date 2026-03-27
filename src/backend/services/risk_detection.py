@@ -300,8 +300,7 @@ class RiskDetectionService:
                 severity=RiskSeverity.CRITICAL,
                 category=RiskCategory.DATA_QUALITY,
                 title="Low Data Confidence",
-                message=f"The usage data has low confidence ({confidence:.0%}). "
-                "Cost projections may not be accurate.",
+                message=f"The usage data has low confidence ({confidence:.0%}). Cost projections may not be accurate.",
                 mitigation="Try to provide more complete usage history. "
                 "Consider these recommendations as rough estimates.",
                 affected_plan_ids=[plan.plan_id],
@@ -318,7 +317,7 @@ class RiskDetectionService:
                 title="Data Quality Concerns",
                 message=f"Usage data is incomplete ({completeness:.0f}% complete, "
                 f"{confidence:.0%} confidence). Projections may vary.",
-                mitigation="Actual costs may differ from projections. " "Monitor your first few bills closely.",
+                mitigation="Actual costs may differ from projections. Monitor your first few bills closely.",
                 affected_plan_ids=[plan.plan_id],
                 risk_data={
                     "confidence_score": confidence,
@@ -368,7 +367,7 @@ class RiskDetectionService:
                 title="Long Contract vs Flexibility Preference",
                 message=f"This plan has a {plan.contract_length_months}-month contract, "
                 f"but you prioritized flexibility. This limits your ability to switch.",
-                mitigation="Consider a month-to-month plan or shorter contract " "if flexibility is important to you.",
+                mitigation="Consider a month-to-month plan or shorter contract if flexibility is important to you.",
                 affected_plan_ids=[plan.plan_id],
                 risk_data={
                     "contract_length": plan.contract_length_months,
@@ -414,7 +413,7 @@ class RiskDetectionService:
                 title="Very Long Break-Even Period",
                 message=f"It will take {break_even} months to recoup the "
                 f"${savings.switching_cost} switching cost. This is a very long payback period.",
-                mitigation="Consider waiting until your current contract ends " "to avoid the early termination fee.",
+                mitigation="Consider waiting until your current contract ends to avoid the early termination fee.",
                 affected_plan_ids=[plan.plan_id],
                 risk_data={
                     "break_even_months": break_even,

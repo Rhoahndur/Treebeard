@@ -107,8 +107,7 @@ def after_cursor_execute(conn, cursor, statement, parameters, context, executema
     # Log queries slower than 100ms (P95 target)
     if total_time > 0.1:
         logger.warning(
-            f"Slow query detected ({total_time * 1000:.2f}ms): "
-            f"{statement[:200]}{'...' if len(statement) > 200 else ''}"
+            f"Slow query detected ({total_time * 1000:.2f}ms): {statement[:200]}{'...' if len(statement) > 200 else ''}"
         )
 
 

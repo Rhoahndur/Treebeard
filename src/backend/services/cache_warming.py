@@ -82,7 +82,7 @@ class CacheWarmingService:
             self.warming_stats["last_full_warm"] = datetime.utcnow()
             self.warming_stats["total_items_warmed"] += total_warmed
 
-            logger.info(f"Cache warming completed in {duration:.2f}s. " f"Warmed {total_warmed} items total.")
+            logger.info(f"Cache warming completed in {duration:.2f}s. Warmed {total_warmed} items total.")
 
         except Exception as e:
             logger.error(f"Error during cache warming: {e}")

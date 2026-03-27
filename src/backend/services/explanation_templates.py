@@ -108,7 +108,7 @@ class TemplateExplanationGenerator:
             if plan.contract_length_months == 0:
                 benefits.append("with no long-term contract required")
             elif plan.early_termination_fee == 0:
-                benefits.append(f"with a {plan.contract_length_months}-month agreement " f"and no cancellation fee")
+                benefits.append(f"with a {plan.contract_length_months}-month agreement and no cancellation fee")
 
         # Rating benefit
         if preferences.rating_priority > 30 and plan.rating_score > 80:
