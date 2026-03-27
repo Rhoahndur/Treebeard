@@ -9,7 +9,7 @@ TreeBeard helps customers in deregulated energy markets find the best energy pla
 - **Usage Analysis** - Ingests 3-24 months of consumption data, detects seasonal patterns, classifies user profiles, and projects annual usage
 - **Multi-Factor Plan Scoring** - Scores plans across cost, flexibility, renewable percentage, and supplier rating, weighted by user preferences
 - **Savings Calculations** - Annual/monthly savings projections, break-even analysis for switching costs, and total cost of ownership comparisons
-- **AI Explanations** - Claude/OpenAI-powered natural language explanations personalized to user context
+- **AI Explanations** - OpenRouter/OpenAI/Claude-powered natural language explanations personalized to user context, with template fallback
 - **Risk Detection** - Flags high termination fees, low-savings situations, data quality issues, variable rate volatility, and contract timing risks
 - **Admin Dashboard** - Plan/supplier management, user administration, audit logs, system statistics
 - **Feedback System** - User feedback collection with sentiment analysis and analytics
@@ -42,7 +42,7 @@ TreeBeard helps customers in deregulated energy markets find the best energy pla
 | Validation | Pydantic 2.9 |
 | Data Processing | Pandas, NumPy, SciPy |
 | Auth | JWT (python-jose) + bcrypt |
-| AI | OpenAI API (gpt-4o-mini), Claude API support |
+| AI | OpenRouter (free tier, primary), OpenAI (fallback), Claude API, template fallback |
 
 ### Infrastructure
 | Component | Technology |
@@ -93,16 +93,26 @@ cp .env.example .env            # Set VITE_API_BASE_URL
 npm run dev                     # Starts on http://localhost:3000
 ```
 
+### Pre-commit Hooks (optional but recommended)
+```bash
+pip install pre-commit
+pre-commit install              # Installs git hooks for ruff, mypy, eslint, prettier
+pre-commit run --all-files      # Run all hooks manually
+```
+
 ### Other Commands
 ```bash
 # Frontend
 npm run build                   # Production build → dist/
 npm run preview                 # Preview production build on :8080
 npm run test                    # Run Vitest tests
+npm run lint                    # ESLint check
 npm run storybook               # Component library on :6006
 
 # Backend
-pytest                          # Run test suite
+pytest                          # Run test suite (from project root)
+ruff check src/backend          # Lint Python code
+ruff format src/backend         # Format Python code
 alembic revision --autogenerate -m "description"  # Create migration
 ```
 
@@ -139,8 +149,9 @@ TreeBeard/
 │   │   │   ├── usage_analysis.py         # Usage pattern profiling
 │   │   │   ├── savings_calculator.py     # Cost projections & savings
 │   │   │   ├── risk_detection.py         # Risk flagging & warnings
-│   │   │   ├── explanation_service.py    # AI explanation generation (Claude)
-│   │   │   ├── explanation_service_openai.py  # OpenAI fallback
+│   │   │   ├── explanation_service.py    # AI explanation factory + Claude provider
+│   │   │   ├── explanation_service_openai.py  # OpenAI/OpenRouter provider
+│   │   │   ├── explanation_templates.py  # Template-based fallback
 │   │   │   ├── scoring_service.py        # Plan scoring algorithm
 │   │   │   ├── feedback_service.py       # Feedback aggregation
 │   │   │   ├── cache_service.py          # Redis caching layer
@@ -150,49 +161,70 @@ TreeBeard/
 │   │   │   ├── audit_service.py          # Audit logging
 │   │   │   └── admin_service.py          # Admin operations
 │   │   ├── models/                     # SQLAlchemy ORM models
+│   │   ├── schemas/                    # Pydantic request/response schemas
 │   │   ├── config/
 │   │   │   ├── settings.py             # Pydantic Settings (env vars)
 │   │   │   └── database.py             # Connection pooling & setup
+│   │   ├── monitoring/                 # APM, Sentry, metrics, alerting
 │   │   ├── alembic/                    # Database migrations
 │   │   └── requirements.txt
 │   └── frontend/
 │       ├── src/
 │       │   ├── App.tsx                 # Root component + routing
-│       │   ├── api/                    # HTTP client & API services
+│       │   ├── api/                    # Axios HTTP client + API services
 │       │   ├── components/
 │       │   │   ├── design-system/      # Reusable UI (Button, Card, Badge, etc.)
 │       │   │   ├── PlanCard/           # Recommendation card display
-│       │   │   ├── OnboardingFlow/     # Registration wizard
+│       │   │   ├── OnboardingFlow/     # Registration wizard (4 steps)
 │       │   │   ├── FileUpload/         # CSV data upload
 │       │   │   ├── PreferenceSliders/  # Preference weight selectors
 │       │   │   ├── CostBreakdown/      # Cost analysis visualization
 │       │   │   ├── charts/             # 7+ chart types (usage, cost, savings, etc.)
 │       │   │   ├── comparison/         # Plan comparison view
-│       │   │   ├── FeedbackWidget/     # In-app feedback
-│       │   │   ├── admin/              # Admin panel components
-│       │   │   ├── auth/               # Login/signup flows
 │       │   │   ├── scenarios/          # What-if analysis
+│       │   │   ├── FeedbackWidget/     # In-app feedback
+│       │   │   ├── FeedbackAnalytics/  # Feedback dashboard charts/stats
+│       │   │   ├── admin/              # Admin panel components
+│       │   │   ├── auth/               # Route guards (RequireAdmin)
 │       │   │   └── export/             # PDF/CSV export
-│       │   ├── hooks/                  # Custom React hooks
+│       │   ├── hooks/                  # Custom React hooks (9 hooks)
 │       │   ├── pages/                  # Page components
+│       │   │   ├── OnboardingPage.tsx   # Registration wizard
+│       │   │   ├── ResultsPage.tsx      # Recommendation results
+│       │   │   ├── ComparisonPage.tsx   # Side-by-side plan comparison
+│       │   │   ├── ScenarioPage.tsx     # What-if scenario analysis
+│       │   │   ├── FeedbackDashboard.tsx # Feedback analytics (admin)
+│       │   │   └── admin/              # Admin pages (Dashboard, Users, Plans, etc.)
 │       │   ├── types/                  # TypeScript type definitions
-│       │   └── utils/                  # Formatters, validation, analytics
+│       │   └── utils/                  # Formatters, validation, analytics, CSV parsing
 │       ├── package.json
 │       ├── vite.config.ts
 │       ├── tailwind.config.js
 │       └── tsconfig.json
 ├── tests/
-│   ├── backend/                        # pytest test suite
+│   ├── backend/                        # pytest test suite (15 test files)
+│   │   ├── conftest.py                 # Shared fixtures (disabled_cache, etc.)
 │   │   ├── test_recommendation_engine.py
 │   │   ├── test_usage_analysis.py
+│   │   ├── test_usage_analysis_standalone.py
 │   │   ├── test_savings_calculator.py
 │   │   ├── test_risk_detection.py
+│   │   ├── test_scoring_standalone.py
 │   │   ├── test_explanation_service.py
+│   │   ├── test_explanation_templates.py
+│   │   ├── test_cache_service.py
+│   │   ├── test_cache_optimization.py
+│   │   ├── test_cache_warming.py
+│   │   ├── test_analytics_service.py
 │   │   ├── test_feedback_api.py
 │   │   ├── test_admin_api.py
-│   │   ├── test_audit_logging.py
-│   │   └── test_scoring_standalone.py
+│   │   └── test_audit_logging.py
+│   ├── integration/                    # Integration tests
+│   │   ├── test_api_flow.py
+│   │   ├── test_epic1_epic2_integration.py
+│   │   └── test_recommendation_savings.py
 │   └── frontend/                       # Vitest component tests
+├── .github/workflows/ci.yml           # GitHub Actions CI (lint + typecheck + test)
 ├── docs/                               # Technical documentation
 │   ├── contracts/                      # Interface contracts (12 files)
 │   ├── runbooks/                       # Incident response (5 runbooks)
@@ -211,7 +243,10 @@ TreeBeard/
 ├── dashboards/                         # Grafana dashboard JSON
 ├── migrations/                         # SQL performance indexes
 ├── scripts/                            # Utility scripts
-├── architecture.md                     # System architecture diagrams
+├── pyproject.toml                      # Python tool config (pytest, ruff, mypy, black)
+├── .pre-commit-config.yaml             # Pre-commit hooks (ruff, mypy, eslint, prettier)
+├── .editorconfig                       # Cross-IDE consistency settings
+├── ARCHITECTURE.md                     # System architecture diagrams
 ├── Procfile                            # Railway process config
 └── .bmad/                              # BMad Method agent/workflow config
 ```
@@ -261,7 +296,7 @@ See [docs/database-schema.md](docs/database-schema.md) for full schema documenta
 3. **Multi-Factor Scoring** - Score each plan on cost, flexibility, renewable %, and supplier rating, then apply user preference weights
 4. **Savings Calculation** - Compare against current plan, calculate annual savings, monthly breakdown, break-even timeline
 5. **Risk Detection** - Flag high ETF, low savings, data quality issues, contract timing risks; recommend staying if risks outweigh benefits
-6. **AI Explanations** - Generate personalized natural language explanations via Claude/OpenAI with template fallback
+6. **AI Explanations** - Generate personalized natural language explanations via OpenRouter/OpenAI/Claude with template fallback
 
 ---
 
@@ -282,7 +317,7 @@ See `.env.production.example` for required environment variables.
 
 | Document | Description |
 |----------|-------------|
-| [architecture.md](architecture.md) | System architecture with Mermaid diagrams |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture with Mermaid diagrams |
 | [docs/execution-plan.md](docs/execution-plan.md) | Epic/story breakdown and parallelization strategy |
 | [docs/database-schema.md](docs/database-schema.md) | Complete database schema documentation |
 | [docs/caching-strategy.md](docs/caching-strategy.md) | Redis caching design and TTL policies |
