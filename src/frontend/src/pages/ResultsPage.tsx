@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle, Sparkles } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { PlanCard } from '@/components/PlanCard/PlanCard';
 import { CostBreakdown } from '@/components/CostBreakdown/CostBreakdown';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
-import { SkeletonCard } from '@/components/design-system';
+import { SkeletonCard, Button } from '@/components/design-system';
 import type { GenerateRecommendationResponse, RankedPlan } from '@/types/recommendation';
 import { formatCurrency, formatNumber } from '@/utils/formatters';
 
@@ -19,6 +20,7 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
   isLoading = false,
   error = null,
 }) => {
+  const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState<RankedPlan | null>(null);
 
   useEffect(() => {
@@ -249,17 +251,27 @@ export const ResultsPage: React.FC<ResultsPageProps> = ({
               ? `Visit ${selectedPlan.supplier_name}'s website to sign up for your chosen plan`
               : 'Contact the supplier directly to sign up for your chosen plan'}
           </p>
-          <button
-            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => {
-              if (selectedPlan?.supplier_website) {
-                window.open(selectedPlan.supplier_website, '_blank', 'noopener,noreferrer');
-              }
-            }}
-            disabled={!selectedPlan?.supplier_website}
-          >
-            {selectedPlan?.supplier_website ? 'Visit Supplier Website' : 'Contact Supplier'}
-          </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => {
+                if (selectedPlan?.supplier_website) {
+                  window.open(selectedPlan.supplier_website, '_blank', 'noopener,noreferrer');
+                }
+              }}
+              disabled={!selectedPlan?.supplier_website}
+            >
+              {selectedPlan?.supplier_website ? 'Visit Supplier Website' : 'Contact Supplier'}
+            </Button>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => navigate('/scenarios', { state: { recommendation } })}
+            >
+              What-If Scenarios
+            </Button>
+          </div>
         </div>
       </div>
       </div>
