@@ -81,7 +81,7 @@ class Recommendation(Base, UUIDPrimaryKeyMixin):
     )
 
     def __repr__(self) -> str:
-        return f"<Recommendation(id={self.id}, user_id={self.user_id}, " f"generated_at={self.generated_at})>"
+        return f"<Recommendation(id={self.id}, user_id={self.user_id}, generated_at={self.generated_at})>"
 
 
 class RecommendationPlan(Base, UUIDPrimaryKeyMixin):

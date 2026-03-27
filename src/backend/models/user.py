@@ -199,4 +199,4 @@ class CurrentPlan(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
 
     def __repr__(self) -> str:
-        return f"<CurrentPlan(user_id={self.user_id}, " f"supplier={self.supplier_name}, rate={self.current_rate})>"
+        return f"<CurrentPlan(user_id={self.user_id}, supplier={self.supplier_name}, rate={self.current_rate})>"

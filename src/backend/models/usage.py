@@ -72,4 +72,4 @@ class UsageHistory(Base, UUIDPrimaryKeyMixin):
     )
 
     def __repr__(self) -> str:
-        return f"<UsageHistory(user_id={self.user_id}, " f"date={self.usage_date}, kwh={self.kwh_consumed})>"
+        return f"<UsageHistory(user_id={self.user_id}, date={self.usage_date}, kwh={self.kwh_consumed})>"

@@ -106,4 +106,4 @@ class Feedback(Base, UUIDPrimaryKeyMixin):
     )
 
     def __repr__(self) -> str:
-        return f"<Feedback(id={self.id}, user_id={self.user_id}, " f"rating={self.rating}, type={self.feedback_type})>"
+        return f"<Feedback(id={self.id}, user_id={self.user_id}, rating={self.rating}, type={self.feedback_type})>"

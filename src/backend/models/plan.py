@@ -63,7 +63,7 @@ class Supplier(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
 
     def __repr__(self) -> str:
-        return f"<Supplier(id={self.id}, name={self.supplier_name}, " f"rating={self.average_rating})>"
+        return f"<Supplier(id={self.id}, name={self.supplier_name}, rating={self.average_rating})>"
 
 
 class PlanCatalog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
