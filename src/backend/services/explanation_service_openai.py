@@ -51,7 +51,9 @@ class OpenAIExplanationService:
         self,
         api_key: str,
         redis_client: Any | None = None,
-        model: str = "gpt-4o-mini",  # Fast and cost-effective
+        model: str = "gpt-4o-mini",
+        base_url: str | None = None,
+        provider: str | None = None,
         max_tokens: int = 300,
         temperature: float = 0.7,
         timeout: float = 10.0,
@@ -62,9 +64,10 @@ class OpenAIExplanationService:
         Initialize the explanation service.
 
         Args:
-            api_key: OpenAI API key
+            api_key: API key (OpenAI or OpenRouter)
             redis_client: Optional Redis client for caching
-            model: OpenAI model to use (gpt-4o-mini, gpt-4o, gpt-3.5-turbo)
+            model: Model to use
+            base_url: Optional base URL override (e.g. OpenRouter)
             max_tokens: Maximum tokens for response
             temperature: Temperature for generation (0.7 = consistent but natural)
             timeout: Request timeout in seconds
@@ -74,14 +77,16 @@ class OpenAIExplanationService:
         self.api_key = api_key
         self.redis_client = redis_client
         self.model = model
+        self.base_url = base_url
+        self.provider = provider or ("openrouter" if base_url else "openai")
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.timeout = timeout
         self.max_retries = max_retries
         self.cache_ttl = cache_ttl
 
-        # Initialize OpenAI client
-        self.client = AsyncOpenAI(api_key=api_key, timeout=timeout)
+        # Initialize OpenAI-compatible client (works with OpenAI and OpenRouter)
+        self.client = AsyncOpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
 
         # Initialize template fallback
         self.template_generator = TemplateExplanationGenerator()
@@ -121,6 +126,10 @@ class OpenAIExplanationService:
                     self.metrics.cache_hits += 1
                     return cached
 
+            # Skip API call if no key configured
+            if not self.api_key:
+                raise ValueError("No API key configured")
+
             # Generate with OpenAI
             explanation_text = await self._generate_with_openai(plan, user_profile, preferences, current_plan)
 
@@ -133,7 +142,7 @@ class OpenAIExplanationService:
                 explanation_text=explanation_text,
                 persona_type=preferences.get_persona_type(),
                 readability_score=readability_score,
-                generated_via="openai",
+                generated_via=self.provider,
                 generation_time_ms=int((time.time() - start_time) * 1000),
                 model_used=self.model,
                 is_fallback=False,
