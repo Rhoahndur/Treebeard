@@ -41,7 +41,8 @@ graph TB
     end
 
     subgraph "AI Layer"
-        OPENAI[OpenAI API<br/>gpt-4o-mini]
+        OPENROUTER[OpenRouter API<br/>Free tier - primary]
+        OPENAI[OpenAI API<br/>gpt-4o-mini - fallback]
         CLAUDE[Claude API<br/>Anthropic]
     end
 
@@ -80,6 +81,7 @@ graph TB
     RECOMMEND --> RISK
     RECOMMEND --> EXPLAIN
 
+    EXPLAIN --> OPENROUTER
     EXPLAIN --> OPENAI
     EXPLAIN --> CLAUDE
 
@@ -101,6 +103,7 @@ graph TB
     style API fill:#f3e5f5
     style POSTGRES fill:#ffebee
     style REDIS fill:#fff9c4
+    style OPENROUTER fill:#e0f2f1
     style OPENAI fill:#e0f2f1
     style CLAUDE fill:#e0f2f1
 ```
@@ -147,8 +150,9 @@ graph TB
         end
 
         subgraph "AI Services"
-            NLG_CLAUDE[Claude Explanations<br/>explanation_service.py]
-            NLG_OPENAI[OpenAI Explanations<br/>explanation_service_openai.py]
+            NLG_FACTORY[Explanation Factory<br/>explanation_service.py]
+            NLG_OPENROUTER[OpenRouter Provider<br/>explanation_service_openai.py]
+            NLG_TEMPLATE[Template Fallback<br/>explanation_templates.py]
         end
 
         subgraph "Safety & Quality"
@@ -193,8 +197,9 @@ graph TB
     COST_CALC --> SAVINGS_CALC
     SAVINGS_CALC --> BREAKEVEN
 
-    RANKER --> NLG_CLAUDE
-    RANKER --> NLG_OPENAI
+    RANKER --> NLG_FACTORY
+    NLG_FACTORY --> NLG_OPENROUTER
+    NLG_FACTORY --> NLG_TEMPLATE
     RANKER --> RISK_DETECT
     PROFILER --> QUALITY
 
@@ -210,7 +215,7 @@ graph TB
     style RESULTS fill:#e8f5e9
     style PROFILER fill:#fff3e0
     style MATCHER fill:#f3e5f5
-    style NLG_CLAUDE fill:#e0f2f1
+    style NLG_FACTORY fill:#e0f2f1
     style CACHE fill:#fff9c4
 ```
 
@@ -263,7 +268,7 @@ sequenceDiagram
     participant ExplainGen
     participant Database
     participant Cache
-    participant AI as Claude/OpenAI
+    participant AI as OpenRouter/OpenAI/Claude
 
     User->>Frontend: Complete onboarding
     Frontend->>API: POST /api/v1/recommendations/generate
@@ -557,6 +562,7 @@ graph TB
     end
 
     subgraph "External Services"
+        OPENROUTER_API[OpenRouter API<br/>Free tier models]
         OPENAI_API[OpenAI API<br/>gpt-4o-mini]
         CLAUDE_API[Claude API<br/>Anthropic]
     end
@@ -568,10 +574,12 @@ graph TB
         SLACK[Slack<br/>Notifications]
     end
 
-    subgraph "Source Control"
+    subgraph "Source Control & CI"
         GITHUB[GitHub Repository]
+        CI[GitHub Actions CI<br/>lint + typecheck + test]
     end
 
+    GITHUB -->|PR / push| CI
     GITHUB -->|git push| FE_BUILD
     GITHUB -->|git push| BE_BUILD
     FE_BUILD --> FE_SERVE
@@ -582,6 +590,7 @@ graph TB
     BE_SERVE --> RW_PG
     BE_SERVE --> RW_REDIS
 
+    BE_SERVE --> OPENROUTER_API
     BE_SERVE --> OPENAI_API
     BE_SERVE --> CLAUDE_API
 
@@ -823,11 +832,13 @@ graph TB
 - Tailwind CSS for consistent design system
 - Code splitting by vendor (react, UI, charts) for cache efficiency
 
-### ADR-005: AI Explanations - Dual Provider
-**Decision:** Support both OpenAI and Claude API for explanation generation
-- OpenAI (gpt-4o-mini) as the current primary provider
-- Claude API integration ready for migration
-- Template-based fallback when both APIs unavailable
+### ADR-005: AI Explanations - Multi-Provider with Factory Pattern
+**Decision:** Support OpenRouter, OpenAI, and Claude via `create_explanation_service()` factory
+- OpenRouter (free tier, e.g. `google/gemini-2.0-flash-exp:free`) as primary provider for demo
+- OpenAI (gpt-4o-mini) as fallback when OpenRouter not configured
+- Claude API integration available
+- Template-based fallback when no API keys are set
+- Provider resolution priority: explicit args > OpenRouter > OpenAI > template
 - Readability scoring (Fleisch-Kincaid) for explanation quality
 - 24-hour caching to minimize API costs
 
@@ -852,6 +863,21 @@ graph TB
 | Slow Query Threshold | > 100ms (logged) |
 | Concurrent Users | 10,000+ |
 | Uptime SLA | 99.9% |
+
+## CI/CD Pipeline
+
+**GitHub Actions** (`.github/workflows/ci.yml`) runs on every PR and push to `main`:
+
+| Job | Steps |
+|-----|-------|
+| **Backend** | Install deps, Ruff lint, Black format check, MyPy typecheck, pytest |
+| **Frontend** | Install deps, ESLint, TypeScript `tsc --noEmit`, Vitest |
+
+**Pre-commit hooks** (`.pre-commit-config.yaml`) enforce the same checks locally:
+- Ruff lint + format (Python)
+- MyPy type checking (Python)
+- ESLint + Prettier (Frontend)
+- File hygiene (trailing whitespace, end-of-file, YAML/JSON validation)
 
 ## Key Configuration
 
