@@ -583,6 +583,7 @@ def create_explanation_service(
     redis_client: Any | None = None,
     base_url: str | None = None,
     model: str | None = None,
+    fallback_models: list[str] | None = None,
     **kwargs,
 ) -> OpenAIExplanationService:
     """
@@ -599,6 +600,8 @@ def create_explanation_service(
         redis_client: Optional Redis client
         base_url: Base URL override (e.g. OpenRouter)
         model: Model override
+        fallback_models: Ordered fallback model IDs (OpenRouter only).
+            Overrides `settings.openrouter_fallback_models` when provided.
         **kwargs: Additional configuration
 
     Returns:
@@ -614,6 +617,8 @@ def create_explanation_service(
             api_key = settings.openrouter_api_key
             base_url = base_url or settings.openrouter_base_url
             model = model or settings.openrouter_model
+            if fallback_models is None:
+                fallback_models = settings.openrouter_fallback_models
             provider = "openrouter"
         else:
             api_key = settings.openai_api_key or ""
@@ -629,5 +634,6 @@ def create_explanation_service(
         base_url=base_url,
         model=model,
         provider=provider,
+        fallback_models=fallback_models,
         **kwargs,
     )

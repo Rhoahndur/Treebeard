@@ -5,9 +5,10 @@ Uses Pydantic Settings for environment variable management.
 """
 
 import json
+from typing import Annotated
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -58,8 +59,23 @@ class Settings(BaseSettings):
     # External APIs — OpenRouter (preferred for demo, free tier)
     openrouter_api_key: str | None = Field(None, description="OpenRouter API key (free tier available)")
     openrouter_base_url: str = Field(default="https://openrouter.ai/api/v1", description="OpenRouter API base URL")
+    # `openrouter/free` is OpenRouter's routing pseudo-model — it auto-selects an
+    # available free-tier backend per request, which is why it's the safest default
+    # for a demo that doesn't want to track the rotating free model catalog by hand.
     openrouter_model: str = Field(
-        default="google/gemini-2.0-flash-exp:free", description="OpenRouter model (free tier)"
+        default="openrouter/free", description="OpenRouter primary model (free tier)"
+    )
+    # Optional explicit fallback list. Leave empty to use `openrouter_model` alone
+    # (recommended when the primary is `openrouter/free`, which is already a router).
+    # When non-empty, the service sends `extra_body={"models": [primary, *fallbacks]}`
+    # so OpenRouter tries each in order — useful if you want to pin specific models
+    # instead of trusting the auto-router.
+    #
+    # `NoDecode` disables pydantic-settings' source-level JSON parsing so our
+    # `mode="before"` validator can accept both JSON-array and comma-separated
+    # env var formats without the source layer erroring on non-JSON strings.
+    openrouter_fallback_models: Annotated[list[str], NoDecode] = Field(
+        default_factory=list, description="Ordered fallback model IDs for OpenRouter"
     )
 
     # External APIs — OpenAI (fallback if OpenRouter not configured)
@@ -114,6 +130,24 @@ class Settings(BaseSettings):
         elif isinstance(v, list):
             return v
         return ["http://localhost:3000"]  # Fallback default
+
+    @field_validator("openrouter_fallback_models", mode="before")
+    @classmethod
+    def validate_openrouter_fallback_models(cls, v) -> list[str]:
+        """Parse fallback model list from JSON array or comma-separated env var."""
+        if v is None or v == "":
+            return []
+        if isinstance(v, list):
+            return [str(item).strip() for item in v if str(item).strip()]
+        if isinstance(v, str):
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return [str(item).strip() for item in parsed if str(item).strip()]
+            except json.JSONDecodeError:
+                pass
+            return [item.strip() for item in v.split(",") if item.strip()]
+        return []
 
     @field_validator("environment")
     @classmethod

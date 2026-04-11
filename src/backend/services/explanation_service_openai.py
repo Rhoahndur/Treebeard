@@ -54,6 +54,7 @@ class OpenAIExplanationService:
         model: str = "gpt-4o-mini",
         base_url: str | None = None,
         provider: str | None = None,
+        fallback_models: list[str] | None = None,
         max_tokens: int = 300,
         temperature: float = 0.7,
         timeout: float = 10.0,
@@ -68,6 +69,10 @@ class OpenAIExplanationService:
             redis_client: Optional Redis client for caching
             model: Model to use
             base_url: Optional base URL override (e.g. OpenRouter)
+            fallback_models: Optional ordered list of fallback model IDs. Only used
+                when talking to an OpenRouter-compatible endpoint — sent via
+                `extra_body={"models": [primary, *fallbacks]}` so the gateway tries
+                each in order. Ignored on direct OpenAI calls.
             max_tokens: Maximum tokens for response
             temperature: Temperature for generation (0.7 = consistent but natural)
             timeout: Request timeout in seconds
@@ -79,6 +84,7 @@ class OpenAIExplanationService:
         self.model = model
         self.base_url = base_url
         self.provider = provider or ("openrouter" if base_url else "openai")
+        self.fallback_models = fallback_models or []
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.timeout = timeout
@@ -224,6 +230,13 @@ class OpenAIExplanationService:
         """
         prompt = self._build_prompt(plan, user_profile, preferences, current_plan)
 
+        # When fallback models are configured (OpenRouter only), pass them via
+        # extra_body so the gateway tries each in order — primary first, then the
+        # fallbacks. On direct OpenAI this stays as a plain single-model call.
+        extra_kwargs: dict[str, Any] = {}
+        if self.fallback_models:
+            extra_kwargs["extra_body"] = {"models": [self.model, *self.fallback_models]}
+
         for attempt in range(self.max_retries):
             try:
                 response = await self.client.chat.completions.create(
@@ -237,6 +250,7 @@ class OpenAIExplanationService:
                     ],
                     max_tokens=self.max_tokens,
                     temperature=self.temperature,
+                    **extra_kwargs,
                 )
 
                 # Extract text from response
