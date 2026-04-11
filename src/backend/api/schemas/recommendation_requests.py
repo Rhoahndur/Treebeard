@@ -10,6 +10,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from api.schemas.common import PropertyType
+
 # Request Schemas
 
 
@@ -19,11 +21,7 @@ class UserDataRequest(BaseModel):
     """
 
     zip_code: str = Field(..., min_length=5, max_length=10, description="ZIP code")
-    property_type: str = Field(
-        "residential",
-        pattern="^(residential|commercial)$",
-        description="Property type",
-    )
+    property_type: PropertyType = Field("residential", description="Property type")
 
 
 class MonthlyUsageData(BaseModel):

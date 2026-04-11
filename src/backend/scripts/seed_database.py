@@ -3,8 +3,7 @@ Database Seeding Script for TreeBeard Energy Recommendation MVP
 
 This script populates the database with:
 - Realistic energy suppliers (Texas-based)
-- Diverse energy plans (fixed, variable, renewable options)
-- Coverage across major Texas ZIP codes
+- Diverse energy plans (fixed, variable, renewable) covering major Texas ZIP codes
 
 Run: python backend/scripts/seed_database.py
 """
@@ -19,8 +18,10 @@ from uuid import uuid4
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import sessionmaker
 
+from config.settings import settings
 from models.plan import PlanCatalog, Supplier
 
 # Texas ZIP codes to cover (major cities)
@@ -882,13 +883,8 @@ def main():
     print("TreeBeard Database Seeding")
     print("=" * 60 + "\n")
 
-    # Use DATABASE_URL from settings so local and Railway flows share one source of truth
-    from config.settings import settings
-
     db_url = settings.database_url
-    # Redact credentials before printing
-    printable_url = db_url.split("@", 1)[-1] if "@" in db_url else db_url
-    print(f"Connecting to: {printable_url}")
+    print(f"Connecting to: {make_url(db_url).render_as_string(hide_password=True)}")
     engine = create_engine(db_url)
     SessionLocal = sessionmaker(bind=engine)
     db = SessionLocal()

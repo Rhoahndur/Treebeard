@@ -4,9 +4,11 @@ Common API Schemas.
 Base schemas used across multiple endpoints.
 """
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
+
+PropertyType = Literal["residential", "commercial"]
 
 
 class MessageResponse(BaseModel):

@@ -20,6 +20,7 @@ from api.auth.jwt import (
     verify_password,
 )
 from api.auth_dependencies import CurrentUser, DBSession
+from api.schemas.common import PropertyType
 from models.user import User
 
 router = APIRouter()
@@ -36,11 +37,7 @@ class RegisterRequest(BaseModel):
     password: str = Field(..., min_length=8, description="User password (min 8 chars)")
     name: str = Field(..., min_length=1, description="User name")
     zip_code: str = Field(..., min_length=5, max_length=10, description="ZIP code")
-    property_type: str = Field(
-        "residential",
-        pattern="^(residential|commercial)$",
-        description="Property type",
-    )
+    property_type: PropertyType = Field("residential", description="Property type")
 
 
 class TokenResponse(BaseModel):
