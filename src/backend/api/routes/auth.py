@@ -36,6 +36,11 @@ class RegisterRequest(BaseModel):
     password: str = Field(..., min_length=8, description="User password (min 8 chars)")
     name: str = Field(..., min_length=1, description="User name")
     zip_code: str = Field(..., min_length=5, max_length=10, description="ZIP code")
+    property_type: str = Field(
+        "residential",
+        pattern="^(residential|commercial)$",
+        description="Property type",
+    )
 
 
 class TokenResponse(BaseModel):
@@ -96,6 +101,7 @@ async def register(request: RegisterRequest, db: DBSession):
         name=request.name,
         hashed_password=get_password_hash(request.password),
         zip_code=request.zip_code,
+        property_type=request.property_type,
         is_active=True,
         is_admin=False,
         created_at=datetime.utcnow(),
