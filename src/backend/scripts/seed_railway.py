@@ -17,7 +17,7 @@ from sqlalchemy.orm import sessionmaker
 from config.settings import settings
 
 # Import seed functions from existing script
-from scripts.seed_database import seed_admin_user, seed_demo_user, seed_plans, seed_suppliers
+from scripts.seed_database import seed_plans, seed_suppliers
 
 
 def main():
@@ -36,17 +36,11 @@ def main():
 
     try:
         # Seed in order
-        print("\n[1/4] Seeding suppliers...")
+        print("\n[1/2] Seeding suppliers...")
         suppliers = seed_suppliers(db)
 
-        print("\n[2/4] Seeding energy plans...")
+        print("\n[2/2] Seeding energy plans...")
         plans = seed_plans(db, suppliers)
-
-        print("\n[3/4] Creating admin user...")
-        admin = seed_admin_user(db)
-
-        print("\n[4/4] Creating demo user...")
-        demo_user = seed_demo_user(db)
 
         print("\n" + "=" * 60)
         print("✓ RAILWAY SEEDING COMPLETE!")
@@ -54,9 +48,7 @@ def main():
         print("\nSummary:")
         print(f"  • Suppliers: {len(suppliers)}")
         print(f"  • Plans: {len(plans)}")
-        print("  • Admin user: admin@treebeard.com")
-        print("  • Demo user: user@treebeard.com")
-        print("\n⚠ Remember to change admin password in production!\n")
+        print()
 
     except Exception as e:
         print(f"\n✗ ERROR during seeding: {e}")
