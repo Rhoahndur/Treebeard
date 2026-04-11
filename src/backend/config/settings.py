@@ -75,9 +75,12 @@ class Settings(BaseSettings):
     log_format: str = Field(default="%(asctime)s - %(name)s - %(levelname)s - %(message)s", description="Log format")
 
     # Monitoring & Observability
-    monitoring_enabled: bool = Field(default=True, description="Enable monitoring and metrics")
-    apm_provider: str = Field(default="datadog", description="APM provider: datadog, newrelic, opentelemetry, none")
-    metrics_backend: str = Field(default="datadog", description="Metrics backend: datadog, prometheus, logging")
+    # Defaults off so local and default Railway deploys don't spam startup with
+    # ImportError noise from uninstalled ddtrace. Opt in via env vars in envs that
+    # actually have DataDog/Prometheus wired up.
+    monitoring_enabled: bool = Field(default=False, description="Enable monitoring and metrics")
+    apm_provider: str = Field(default="none", description="APM provider: datadog, newrelic, opentelemetry, none")
+    metrics_backend: str = Field(default="logging", description="Metrics backend: datadog, prometheus, logging")
 
     # DataDog
     datadog_agent_host: str = Field(default="localhost", description="DataDog agent host")
