@@ -11,6 +11,29 @@ from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
+def _parse_list_env(v: object, default: list[str] | None = None) -> list[str]:
+    """Parse a list-of-strings from JSON-array, comma-separated, or list input.
+
+    Strips whitespace and drops empty items. Returns `default` (or []) when the
+    value is None or empty. Shared by the CORS origins and OpenRouter fallback
+    model list validators.
+    """
+    if v is None or v == "":
+        return list(default) if default is not None else []
+    if isinstance(v, list):
+        return [str(item).strip() for item in v if str(item).strip()]
+    if isinstance(v, str):
+        parsed: object = None
+        try:
+            parsed = json.loads(v)
+        except json.JSONDecodeError:
+            pass
+        if isinstance(parsed, list):
+            return [str(item).strip() for item in parsed if str(item).strip()]
+        return [item.strip() for item in v.split(",") if item.strip()]
+    return list(default) if default is not None else []
+
+
 class Settings(BaseSettings):
     """
     Application settings loaded from environment variables.
@@ -65,15 +88,10 @@ class Settings(BaseSettings):
     openrouter_model: str = Field(
         default="openrouter/free", description="OpenRouter primary model (free tier)"
     )
-    # Optional explicit fallback list. Leave empty to use `openrouter_model` alone
-    # (recommended when the primary is `openrouter/free`, which is already a router).
-    # When non-empty, the service sends `extra_body={"models": [primary, *fallbacks]}`
-    # so OpenRouter tries each in order — useful if you want to pin specific models
-    # instead of trusting the auto-router.
-    #
-    # `NoDecode` disables pydantic-settings' source-level JSON parsing so our
-    # `mode="before"` validator can accept both JSON-array and comma-separated
-    # env var formats without the source layer erroring on non-JSON strings.
+    # Optional explicit fallback list; leave empty to let `openrouter_model` handle
+    # routing alone. `NoDecode` skips pydantic-settings' source-level JSON parsing
+    # so the field validator can accept both JSON-array and comma-separated env
+    # var formats (without it the source layer errors on non-JSON strings).
     openrouter_fallback_models: Annotated[list[str], NoDecode] = Field(
         default_factory=list, description="Ordered fallback model IDs for OpenRouter"
     )
@@ -116,38 +134,14 @@ class Settings(BaseSettings):
     @field_validator("cors_origins", mode="before")
     @classmethod
     def validate_cors_origins(cls, v) -> list[str]:
-        """Parse CORS origins from JSON string if needed."""
-        if isinstance(v, str):
-            try:
-                # Try to parse as JSON array
-                parsed = json.loads(v)
-                if isinstance(parsed, list):
-                    return parsed
-                return [v]  # Single origin as string
-            except json.JSONDecodeError:
-                # If not valid JSON, treat as comma-separated list
-                return [origin.strip() for origin in v.split(",")]
-        elif isinstance(v, list):
-            return v
-        return ["http://localhost:3000"]  # Fallback default
+        """Parse CORS origins from JSON array, comma-separated, or list input."""
+        return _parse_list_env(v, default=["http://localhost:3000"])
 
     @field_validator("openrouter_fallback_models", mode="before")
     @classmethod
     def validate_openrouter_fallback_models(cls, v) -> list[str]:
-        """Parse fallback model list from JSON array or comma-separated env var."""
-        if v is None or v == "":
-            return []
-        if isinstance(v, list):
-            return [str(item).strip() for item in v if str(item).strip()]
-        if isinstance(v, str):
-            try:
-                parsed = json.loads(v)
-                if isinstance(parsed, list):
-                    return [str(item).strip() for item in parsed if str(item).strip()]
-            except json.JSONDecodeError:
-                pass
-            return [item.strip() for item in v.split(",") if item.strip()]
-        return []
+        """Parse fallback model list from JSON array, comma-separated, or list input."""
+        return _parse_list_env(v)
 
     @field_validator("environment")
     @classmethod

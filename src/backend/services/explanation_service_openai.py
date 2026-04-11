@@ -230,11 +230,11 @@ class OpenAIExplanationService:
         """
         prompt = self._build_prompt(plan, user_profile, preferences, current_plan)
 
-        # When fallback models are configured (OpenRouter only), pass them via
-        # extra_body so the gateway tries each in order — primary first, then the
-        # fallbacks. On direct OpenAI this stays as a plain single-model call.
+        # When fallback models are configured AND we're talking to OpenRouter, pass
+        # them via extra_body so the gateway tries each in order (primary first).
+        # Gated on provider because direct OpenAI will 400 on extra_body.models.
         extra_kwargs: dict[str, Any] = {}
-        if self.fallback_models:
+        if self.fallback_models and self.provider == "openrouter":
             extra_kwargs["extra_body"] = {"models": [self.model, *self.fallback_models]}
 
         for attempt in range(self.max_retries):
