@@ -33,7 +33,7 @@ export default defineConfig({
         manualChunks: {
           // Vendor chunks - split large dependencies
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-select'],
+          'ui-vendor': ['@radix-ui/react-dialog'],
           'chart-vendor': ['recharts'],
         },
       },
