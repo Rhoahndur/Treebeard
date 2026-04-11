@@ -4,7 +4,6 @@ Database Seeding Script for TreeBeard Energy Recommendation MVP
 This script populates the database with:
 - Realistic energy suppliers (Texas-based)
 - Diverse energy plans (fixed, variable, renewable options)
-- Admin user for management
 - Coverage across major Texas ZIP codes
 
 Run: python backend/scripts/seed_database.py
@@ -22,9 +21,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from api.auth.jwt import get_password_hash
 from models.plan import PlanCatalog, Supplier
-from models.user import User
 
 # Texas ZIP codes to cover (major cities)
 TEXAS_ZIP_CODES = [
@@ -879,74 +876,19 @@ def seed_plans(db, suppliers):
     return plans
 
 
-def seed_admin_user(db):
-    """Create default admin user."""
-    print("Creating admin user...")
-
-    # Check if admin already exists
-    existing_admin = db.query(User).filter(User.email == "admin@treebeard.com").first()
-    if existing_admin:
-        print("⚠ Admin user already exists, skipping...")
-        return existing_admin
-
-    admin = User(
-        id=uuid4(),
-        email="admin@treebeard.com",
-        name="Admin User",
-        hashed_password=get_password_hash("admin123"),  # CHANGE IN PRODUCTION!
-        zip_code="78701",
-        property_type="residential",
-        consent_given=True,
-        is_admin=True,
-        is_active=True,
-        created_at=datetime.utcnow(),
-    )
-    db.add(admin)
-    db.commit()
-
-    print("✓ Created admin user: admin@treebeard.com / admin123")
-    print("⚠ IMPORTANT: Change admin password in production!")
-    return admin
-
-
-def seed_demo_user(db):
-    """Create demo user for testing."""
-    print("Creating demo user...")
-
-    # Check if demo user already exists
-    existing_user = db.query(User).filter(User.email == "user@treebeard.com").first()
-    if existing_user:
-        print("⚠ Demo user already exists, skipping...")
-        return existing_user
-
-    user = User(
-        id=uuid4(),
-        email="user@treebeard.com",
-        name="Demo User",
-        hashed_password=get_password_hash("user123"),
-        zip_code="78701",
-        property_type="residential",
-        consent_given=True,
-        is_admin=False,
-        is_active=True,
-        created_at=datetime.utcnow(),
-    )
-    db.add(user)
-    db.commit()
-
-    print("✓ Created demo user: user@treebeard.com / user123")
-    return user
-
-
 def main():
     """Main seeding function."""
     print("\n" + "=" * 60)
     print("TreeBeard Database Seeding")
     print("=" * 60 + "\n")
 
-    # Create database engine - use explicit connection string
-    db_url = "postgresql://treebeard:dev_password_123@localhost:5432/treebeard_dev"
-    print(f"Connecting to: {db_url}")
+    # Use DATABASE_URL from settings so local and Railway flows share one source of truth
+    from config.settings import settings
+
+    db_url = settings.database_url
+    # Redact credentials before printing
+    printable_url = db_url.split("@", 1)[-1] if "@" in db_url else db_url
+    print(f"Connecting to: {printable_url}")
     engine = create_engine(db_url)
     SessionLocal = sessionmaker(bind=engine)
     db = SessionLocal()
@@ -955,8 +897,6 @@ def main():
         # Seed in order
         suppliers = seed_suppliers(db)
         plans = seed_plans(db, suppliers)
-        admin = seed_admin_user(db)
-        demo_user = seed_demo_user(db)
 
         print("\n" + "=" * 60)
         print("✓ SEEDING COMPLETE!")
@@ -964,10 +904,8 @@ def main():
         print("\nSummary:")
         print(f"  • Suppliers: {len(suppliers)}")
         print(f"  • Plans: {len(plans)}")
-        print("  • Admin user: admin@treebeard.com")
-        print("  • Demo user: user@treebeard.com")
         print(f"  • ZIP codes covered: {len(TEXAS_ZIP_CODES)}")
-        print("\n⚠ Remember to change admin password in production!\n")
+        print()
 
     except Exception as e:
         print(f"\n✗ ERROR during seeding: {e}")
