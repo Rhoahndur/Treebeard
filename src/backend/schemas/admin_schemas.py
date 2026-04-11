@@ -9,6 +9,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+from api.schemas.common import PropertyType
+
 # User Management Schemas
 
 
@@ -19,7 +21,7 @@ class UserListItem(BaseModel):
     email: EmailStr = Field(..., description="User email")
     name: str = Field(..., description="User name")
     zip_code: str = Field(..., description="User ZIP code")
-    property_type: str = Field(..., description="Property type")
+    property_type: PropertyType = Field(..., description="Property type")
     is_active: bool = Field(..., description="Whether the user account is active")
     is_admin: bool = Field(..., description="Whether the user has admin privileges")
     created_at: datetime = Field(..., description="Account creation timestamp")
@@ -56,7 +58,7 @@ class UserDetailResponse(BaseModel):
     email: EmailStr = Field(..., description="User email")
     name: str = Field(..., description="User name")
     zip_code: str = Field(..., description="User ZIP code")
-    property_type: str = Field(..., description="Property type")
+    property_type: PropertyType = Field(..., description="Property type")
     is_active: bool = Field(..., description="Whether the user account is active")
     is_admin: bool = Field(..., description="Whether the user has admin privileges")
     consent_given: bool = Field(..., description="Whether consent was given")

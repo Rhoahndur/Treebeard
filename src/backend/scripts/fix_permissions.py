@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from sqlalchemy.engine import make_url
 
 # Connect as postgres superuser (modify if needed)
 # Try common postgres connection strings
@@ -28,7 +29,7 @@ conn = None
 
 for conn_string in connection_attempts:
     try:
-        print(f"\nTrying connection: {conn_string.split('@')[0]}@...")
+        print(f"\nTrying connection: {make_url(conn_string).render_as_string(hide_password=True)}")
         conn = psycopg2.connect(conn_string)
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         connected = True
