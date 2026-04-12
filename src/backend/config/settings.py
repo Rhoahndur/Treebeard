@@ -4,6 +4,7 @@ Application settings and configuration.
 Uses Pydantic Settings for environment variable management.
 """
 
+import contextlib
 import json
 from typing import Annotated
 
@@ -24,10 +25,8 @@ def _parse_list_env(v: object, default: list[str] | None = None) -> list[str]:
         return [str(item).strip() for item in v if str(item).strip()]
     if isinstance(v, str):
         parsed: object = None
-        try:
+        with contextlib.suppress(json.JSONDecodeError):
             parsed = json.loads(v)
-        except json.JSONDecodeError:
-            pass
         if isinstance(parsed, list):
             return [str(item).strip() for item in parsed if str(item).strip()]
         return [item.strip() for item in v.split(",") if item.strip()]
