@@ -84,9 +84,7 @@ class Settings(BaseSettings):
     # `openrouter/free` is OpenRouter's routing pseudo-model — it auto-selects an
     # available free-tier backend per request, which is why it's the safest default
     # for a demo that doesn't want to track the rotating free model catalog by hand.
-    openrouter_model: str = Field(
-        default="openrouter/free", description="OpenRouter primary model (free tier)"
-    )
+    openrouter_model: str = Field(default="openrouter/free", description="OpenRouter primary model (free tier)")
     # Optional explicit fallback list; leave empty to let `openrouter_model` handle
     # routing alone. `NoDecode` skips pydantic-settings' source-level JSON parsing
     # so the field validator can accept both JSON-array and comma-separated env
