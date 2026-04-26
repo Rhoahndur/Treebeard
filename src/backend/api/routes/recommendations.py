@@ -7,11 +7,12 @@ Story 6.3: Enhanced to include risk detection and stay recommendations.
 """
 
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, HTTPException, status
 
+from api.auth.jwt import get_password_hash
 from api.auth_dependencies import CurrentUser, DBSession, OptionalUser
 from api.schemas.common import MessageResponse
 from api.schemas.recommendation_requests import (
@@ -25,7 +26,8 @@ from api.schemas.recommendation_requests import (
     UsageProfileSummary,
 )
 from models.plan import Supplier
-from models.recommendation import Recommendation
+from models.recommendation import Recommendation, RecommendationPlan
+from models.user import User
 from schemas.usage_analysis import MonthlyUsage
 from services.explanation_service import create_explanation_service
 from services.recommendation_engine import get_enhanced_recommendations
@@ -39,6 +41,49 @@ from services.usage_analysis import UsageAnalysisService
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+
+def _get_or_create_mvp_user(request: GenerateRecommendationRequest, db: DBSession) -> User:
+    """
+    Create a lightweight persisted user for the MVP recommendation flow.
+
+    Full account handling is deferred, but recommendations and feedback need a
+    real database user so returned recommendation IDs are refreshable and linkable.
+    """
+    if not request.user_data.email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email is required to generate a persisted recommendation.",
+        )
+
+    email = str(request.user_data.email).lower()
+    user = db.query(User).filter(User.email == email).first()
+
+    if user:
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User account is inactive.",
+            )
+        user.zip_code = request.user_data.zip_code
+        user.property_type = request.user_data.property_type
+        return user
+
+    user = User(
+        id=uuid4(),
+        email=email,
+        name=email.split("@", 1)[0],
+        hashed_password=get_password_hash(f"mvp-session-{uuid4()}"),
+        zip_code=request.user_data.zip_code,
+        property_type=request.user_data.property_type,
+        is_active=True,
+        is_admin=False,
+        consent_given=True,
+        created_at=datetime.utcnow(),
+    )
+    db.add(user)
+    db.flush()
+    return user
 
 
 @router.post(
@@ -79,12 +124,10 @@ async def generate_recommendations(
         HTTPException: If generation fails
     """
     try:
-        # Create or get user ID - use guest user if not authenticated
         if current_user:
             user_id = current_user.id
         else:
-            # Create a guest user ID for anonymous recommendations
-            user_id = uuid4()
+            user_id = _get_or_create_mvp_user(request, db).id
         logger.info(
             f"Generating recommendations for user {user_id}",
             extra={"user_id": str(user_id)},
@@ -370,21 +413,8 @@ async def generate_recommendations(
             )
             plan_responses.append(plan_response)
 
-        # Create recommendation record in database (only for authenticated users)
         recommendation_id = uuid4()
         generated_at = datetime.utcnow()
-
-        # Only save to database if user is authenticated (not a guest)
-        if current_user:
-            db_recommendation = Recommendation(
-                id=recommendation_id,
-                user_id=user_id,
-                usage_profile=usage_profile.to_dict(),
-                generated_at=generated_at,
-                expires_at=generated_at + timedelta(hours=24),  # Recommendations expire after 24 hours
-            )
-            db.add(db_recommendation)
-            db.commit()
 
         # Build stay recommendation response
         stay_rec_response = None
@@ -409,7 +439,7 @@ async def generate_recommendations(
                 confidence_score=usage_profile.overall_confidence,
             ),
             top_plans=plan_responses,
-            generated_at=datetime.utcnow(),
+            generated_at=generated_at,
             total_plans_analyzed=recommendation_result.total_plans_analyzed,
             warnings=usage_profile.warnings,
             # Risk analysis (Story 6.1)
@@ -421,6 +451,43 @@ async def generate_recommendations(
             stay_recommendation=stay_rec_response,
         )
 
+        db_recommendation = Recommendation(
+            id=recommendation_id,
+            user_id=user_id,
+            usage_profile=usage_profile.to_dict(),
+            result_payload=response.model_dump(mode="json"),
+            generated_at=generated_at,
+            expires_at=generated_at + timedelta(hours=24),  # Recommendations expire after 24 hours
+        )
+        db.add(db_recommendation)
+
+        for plan_response in plan_responses:
+            savings = plan_response.savings
+            db.add(
+                RecommendationPlan(
+                    id=uuid4(),
+                    recommendation_id=recommendation_id,
+                    plan_id=plan_response.plan_id,
+                    rank=plan_response.rank,
+                    composite_score=plan_response.scores.composite_score,
+                    cost_score=plan_response.scores.cost_score,
+                    flexibility_score=plan_response.scores.flexibility_score,
+                    renewable_score=plan_response.scores.renewable_score,
+                    rating_score=plan_response.scores.rating_score,
+                    projected_annual_cost=plan_response.projected_annual_cost,
+                    projected_annual_savings=savings.annual_savings if savings else Decimal("0"),
+                    break_even_months=savings.break_even_months if savings else None,
+                    explanation=plan_response.explanation,
+                    risk_flags={
+                        "risk_warnings": [risk.model_dump(mode="json") for risk in plan_response.risk_warnings],
+                        "risk_count": plan_response.risk_count,
+                        "highest_risk_severity": plan_response.highest_risk_severity,
+                    },
+                )
+            )
+
+        db.commit()
+
         logger.info(
             "Successfully generated recommendations",
             extra={
@@ -431,7 +498,12 @@ async def generate_recommendations(
 
         return response
 
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as exc:
+        if "db" in locals():
+            db.rollback()
         logger.error(
             f"Failed to generate recommendations: {exc}",
             exc_info=True,
@@ -444,7 +516,37 @@ async def generate_recommendations(
 
 
 @router.get(
-    "/{user_id}",
+    "/{recommendation_id}",
+    response_model=GenerateRecommendationResponse,
+    summary="Get Recommendation",
+    description="Retrieve a persisted recommendation result by ID.",
+)
+async def get_recommendation(
+    recommendation_id: UUID,
+    db: DBSession,
+):
+    """
+    Get a persisted recommendation result.
+    """
+    recommendation = db.query(Recommendation).filter(Recommendation.id == recommendation_id).first()
+
+    if not recommendation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recommendation not found",
+        )
+
+    if not recommendation.result_payload:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recommendation result payload is not available",
+        )
+
+    return GenerateRecommendationResponse(**recommendation.result_payload)
+
+
+@router.get(
+    "/user/{user_id}",
     response_model=list[GenerateRecommendationResponse],
     summary="Get User Recommendations",
     description="Retrieve saved recommendations for a user.",
@@ -484,9 +586,11 @@ async def get_user_recommendations(
         .all()
     )
 
-    # Convert to response format
-    # TODO: Implement full conversion from DB model to response
-    return []
+    return [
+        GenerateRecommendationResponse(**recommendation.result_payload)
+        for recommendation in _recommendations
+        if recommendation.result_payload
+    ]
 
 
 @router.delete(
