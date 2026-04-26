@@ -8,7 +8,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 from api.schemas.common import PropertyType
 
@@ -22,6 +22,9 @@ class UserDataRequest(BaseModel):
 
     zip_code: str = Field(..., min_length=5, max_length=10, description="ZIP code")
     property_type: PropertyType = Field("residential", description="Property type")
+    email: EmailStr | None = Field(
+        None, description="Email used to persist MVP recommendation sessions when not authenticated"
+    )
 
 
 class MonthlyUsageData(BaseModel):
@@ -76,7 +79,7 @@ class GenerateRecommendationRequest(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "user_data": {"zip_code": "78701", "property_type": "residential"},
+                "user_data": {"zip_code": "78701", "property_type": "residential", "email": "demo@example.com"},
                 "usage_data": [
                     {"month": "2024-01-01", "kwh": 850},
                     {"month": "2024-02-01", "kwh": 820},
