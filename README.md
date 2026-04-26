@@ -11,7 +11,7 @@ TreeBeard helps customers in deregulated energy markets find the best energy pla
 - **Savings Calculations** - Annual/monthly savings projections, break-even analysis for switching costs, and total cost of ownership comparisons
 - **AI Explanations** - OpenRouter/OpenAI/Claude-powered natural language explanations personalized to user context, with template fallback
 - **Risk Detection** - Flags high termination fees, low-savings situations, data quality issues, variable rate volatility, and contract timing risks
-- **Admin Dashboard** - Plan/supplier management, user administration, audit logs, system statistics
+- **Admin Dashboard** - Plan/supplier management, user administration, audit logs, system statistics (deferred/disabled for MVP)
 - **Feedback System** - User feedback collection with sentiment analysis and analytics
 
 ---
@@ -67,7 +67,7 @@ TreeBeard helps customers in deregulated energy markets find the best energy pla
 ### Backend Setup
 ```bash
 cd src/backend
-python -m venv venv
+python3.11 -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
@@ -261,11 +261,11 @@ All endpoints are prefixed with `/api/v1`.
 |-------|-----------|-------------|
 | **Auth** | `POST /auth/register`, `/login`, `/refresh`, `GET /auth/me` | User registration, JWT authentication |
 | **Users** | `POST /users/preferences`, `GET /users/preferences`, `PUT /users/profile` | Profile and preference management |
-| **Recommendations** | `POST /recommendations/generate`, `GET /recommendations/{user_id}` | Core recommendation engine |
+| **Recommendations** | `POST /recommendations/generate`, `GET /recommendations/{recommendation_id}`, `GET /recommendations/user/{user_id}` | Core recommendation engine |
 | **Plans** | `GET /plans/catalog`, `GET /plans/{plan_id}` | Plan catalog with filtering |
 | **Usage** | `POST /usage/upload`, `GET /usage/history` | Usage data ingestion |
 | **Feedback** | `POST /feedback/plan`, `POST /feedback/recommendation`, `GET /feedback/analytics` | Feedback collection |
-| **Admin** | User CRUD, plan CRUD, statistics, audit logs, cache management | Admin-only operations |
+| **Admin** | User CRUD, plan CRUD, statistics, audit logs, cache management | Deferred for MVP; backend routes disabled unless `ADMIN_API_ENABLED=true` |
 | **Health** | `GET /health` | Health check with DB/Redis status |
 
 ---
