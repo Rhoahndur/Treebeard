@@ -15,7 +15,14 @@ export const recommendationsApi = {
 
   getUserRecommendations: async (userId: string) => {
     const response = await apiClient.get<GenerateRecommendationResponse[]>(
-      `/recommendations/${userId}`
+      `/recommendations/user/${userId}`
+    );
+    return response.data;
+  },
+
+  getRecommendation: async (recommendationId: string) => {
+    const response = await apiClient.get<GenerateRecommendationResponse>(
+      `/recommendations/${recommendationId}`
     );
     return response.data;
   },
