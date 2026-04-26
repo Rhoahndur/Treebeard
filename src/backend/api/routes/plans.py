@@ -10,6 +10,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
+from sqlalchemy import any_
 
 from api.auth_dependencies import DBSession, OptionalUser
 from api.schemas.common import PaginatedResponse
@@ -76,10 +77,13 @@ async def get_plan_catalog(
     query = db.query(PlanCatalog).filter(PlanCatalog.is_active == True)
 
     # Apply filters
+    use_python_zip_filter = False
     if zip_code:
-        # Note: This requires a JSON query for available_regions array
-        # Simplified for now - in production, use proper PostgreSQL JSON queries
-        pass
+        dialect_name = db.bind.dialect.name if db.bind is not None else ""
+        if dialect_name == "postgresql":
+            query = query.filter(zip_code == any_(PlanCatalog.available_regions))
+        else:
+            use_python_zip_filter = True
 
     if plan_type:
         query = query.filter(PlanCatalog.plan_type == plan_type)
@@ -90,12 +94,14 @@ async def get_plan_catalog(
     if max_contract_length is not None:
         query = query.filter(PlanCatalog.contract_length_months <= max_contract_length)
 
-    # Get total count
-    total = query.count()
-
-    # Apply pagination
     offset = (page - 1) * page_size
-    plans = query.offset(offset).limit(page_size).all()
+    if use_python_zip_filter and zip_code:
+        filtered_plans = [plan for plan in query.all() if zip_code in (plan.available_regions or [])]
+        total = len(filtered_plans)
+        plans = filtered_plans[offset : offset + page_size]
+    else:
+        total = query.count()
+        plans = query.offset(offset).limit(page_size).all()
 
     # Convert to response
     items = [
