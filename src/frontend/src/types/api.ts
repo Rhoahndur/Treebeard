@@ -4,6 +4,7 @@ export interface GenerateRecommendationRequest {
   user_data: {
     zip_code: string;
     property_type: 'residential' | 'commercial';
+    email?: string;
   };
   usage_data: Array<{
     month: string;

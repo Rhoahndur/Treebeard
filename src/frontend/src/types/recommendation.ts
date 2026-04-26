@@ -11,6 +11,7 @@ export interface UsageData {
 export interface UserData {
   zip_code: string;        // 5-10 digits
   property_type: 'residential' | 'commercial';
+  email?: string;
 }
 
 export interface Preferences {
