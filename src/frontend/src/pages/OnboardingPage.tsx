@@ -124,6 +124,7 @@ export const OnboardingPage: React.FC = () => {
         user_data: {
           zip_code: formData.user.zip_code,
           property_type: formData.user.property_type,
+          email: formData.user.email,
         },
         usage_data: formData.usage_data,
         preferences: data,
@@ -142,7 +143,7 @@ export const OnboardingPage: React.FC = () => {
       clearOnboardingData();
 
       // Navigate to results page with recommendation data
-      navigate('/results', {
+      navigate(`/results/${response.recommendation_id}`, {
         state: {
           recommendation: response,
           userEmail: formData.user.email,
