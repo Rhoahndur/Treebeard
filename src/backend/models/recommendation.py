@@ -45,6 +45,12 @@ class Recommendation(Base, UUIDPrimaryKeyMixin):
         comment="Analyzed usage patterns and projections used for recommendations",
     )
 
+    result_payload: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB().with_variant(JSON, "sqlite"),
+        nullable=True,
+        comment="Serialized API response payload for refreshable MVP results pages",
+    )
+
     generated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
