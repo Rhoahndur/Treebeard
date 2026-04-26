@@ -13,6 +13,7 @@ from uuid import uuid4
 # Settings() reads these values instead of production defaults.
 os.environ.setdefault("ENVIRONMENT", "test")
 os.environ.setdefault("MONITORING_ENABLED", "false")
+os.environ.setdefault("ADMIN_API_ENABLED", "true")
 
 import pytest
 from fastapi.testclient import TestClient
