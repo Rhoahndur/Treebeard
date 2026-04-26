@@ -389,22 +389,40 @@ Generate the explanation now. Do not include labels or headers, just the explana
 
             score = textstat.flesch_reading_ease(text)
             return max(0.0, min(100.0, score))
-        except ImportError:
-            # Fallback: simple heuristic based on sentence and word length
-            sentences = text.count(".") + text.count("!") + text.count("?")
-            words = len(text.split())
-            avg_words_per_sentence = words / max(sentences, 1)
+        except Exception as e:
+            logger.warning(f"Readability calculation failed: {e}")
+            return self._estimate_reading_ease(text)
 
-            # Rough estimate: shorter sentences = higher score
-            # Target: 15-20 words per sentence = ~60 score
-            if avg_words_per_sentence <= 15:
-                return 70.0
-            elif avg_words_per_sentence <= 20:
-                return 60.0
-            elif avg_words_per_sentence <= 25:
-                return 50.0
-            else:
-                return 40.0
+    @staticmethod
+    def _estimate_reading_ease(text: str) -> float:
+        """Estimate reading ease when textstat is unavailable."""
+        sentences = max(text.count(".") + text.count("!") + text.count("?"), 1)
+        cleaned = "".join(char.lower() if char.isalpha() else " " for char in text)
+        words = [word for word in cleaned.split() if word]
+
+        if not words:
+            return 0.0
+
+        syllables = sum(ClaudeExplanationService._estimate_syllables(word) for word in words)
+        score = 206.835 - (1.015 * (len(words) / sentences)) - (84.6 * (syllables / len(words)))
+        return max(0.0, min(100.0, score))
+
+    @staticmethod
+    def _estimate_syllables(word: str) -> int:
+        vowels = "aeiouy"
+        groups = 0
+        previous_was_vowel = False
+
+        for char in word:
+            is_vowel = char in vowels
+            if is_vowel and not previous_was_vowel:
+                groups += 1
+            previous_was_vowel = is_vowel
+
+        if word.endswith("e") and groups > 1:
+            groups -= 1
+
+        return max(groups, 1)
 
     async def _get_cached_explanation(
         self,
