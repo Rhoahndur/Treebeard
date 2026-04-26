@@ -18,7 +18,6 @@ from api.middleware.logging import LoggingMiddleware
 from api.middleware.rate_limit import RateLimitMiddleware
 from api.middleware.request_id import RequestIDMiddleware
 from api.routes import (
-    admin,
     auth,
     feedback,
     health,
@@ -136,7 +135,14 @@ app.add_middleware(
 # 5. Rate limit to prevent abuse
 # 6. Error handler last to catch all errors
 app.add_middleware(ErrorHandlerMiddleware)
-app.add_middleware(RateLimitMiddleware)
+app.add_middleware(
+    RateLimitMiddleware,
+    requests_per_minute_per_user=settings.rate_limit_per_user,
+    requests_per_hour_per_ip=settings.rate_limit_per_ip,
+    custom_limits={
+        f"{settings.api_v1_prefix}/recommendations/generate": settings.recommendation_rate_limit_per_minute,
+    },
+)
 app.add_middleware(CacheMiddleware)
 app.add_middleware(AuditMiddleware)
 app.add_middleware(LoggingMiddleware)
@@ -157,7 +163,12 @@ app.include_router(usage.router, prefix=f"{settings.api_v1_prefix}/usage", tags=
 
 app.include_router(feedback.router, prefix=settings.api_v1_prefix, tags=["Feedback"])
 
-app.include_router(admin.router, prefix=f"{settings.api_v1_prefix}/admin", tags=["Admin"])
+if settings.admin_api_enabled:
+    from api.routes import admin
+
+    app.include_router(admin.router, prefix=f"{settings.api_v1_prefix}/admin", tags=["Admin"])
+else:
+    logger.info("Admin API routes are disabled")
 
 
 @app.get("/")
