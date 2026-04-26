@@ -88,7 +88,8 @@ Integrates:
 - Key differentiators and trade-offs
 
 ### Story 3.3: Supporting Endpoints ✅
-- `GET /api/v1/recommendations/{user_id}` - Retrieve saved recommendations
+- `GET /api/v1/recommendations/{recommendation_id}` - Retrieve a saved recommendation result
+- `GET /api/v1/recommendations/user/{user_id}` - Retrieve saved recommendations for a user
 - `POST /api/v1/users/preferences` - Save user preferences
 - `GET /api/v1/users/preferences` - Get user preferences
 - `GET /api/v1/plans/catalog` - Get plan catalog with filters
