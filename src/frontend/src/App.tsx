@@ -1,8 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { OnboardingPage } from '@/pages/OnboardingPage';
 import { ResultsPage } from '@/pages/ResultsPage';
 import { ComparisonPage } from '@/pages/ComparisonPage';
 import { ScenarioPage } from '@/pages/ScenarioPage';
+import { recommendationsApi } from '@/api/recommendations';
+import type { GenerateRecommendationResponse } from '@/types/recommendation';
 // Admin routes disabled for demo — re-enable by uncommenting these imports + the /admin block below
 // import { RequireAdmin } from '@/components/auth/RequireAdmin';
 // import { AdminLayout } from '@/components/admin/AdminLayout';
@@ -15,11 +18,68 @@ import { ScenarioPage } from '@/pages/ScenarioPage';
 import '@/styles/index.css';
 
 // Wrapper component to read navigation state and pass to ResultsPage
+type ResultsLocationState = {
+  recommendation?: GenerateRecommendationResponse;
+  userEmail?: string;
+};
+
 function ResultsPageWrapper() {
   const location = useLocation();
-  const state = location.state as { recommendation?: any } | null;
+  const { recommendationId } = useParams();
+  const state = location.state as ResultsLocationState | null;
+  const stateRecommendation =
+    state?.recommendation && (!recommendationId || state.recommendation.recommendation_id === recommendationId)
+      ? state.recommendation
+      : null;
+  const [recommendation, setRecommendation] = useState<GenerateRecommendationResponse | null>(
+    stateRecommendation
+  );
+  const [isLoading, setIsLoading] = useState(Boolean(recommendationId && !stateRecommendation));
+  const [error, setError] = useState<string | null>(null);
 
-  return <ResultsPage recommendation={state?.recommendation || null} />;
+  useEffect(() => {
+    if (stateRecommendation) {
+      setRecommendation(stateRecommendation);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    if (!recommendationId) {
+      setRecommendation(null);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoading(true);
+    setError(null);
+
+    recommendationsApi
+      .getRecommendation(recommendationId)
+      .then((data) => {
+        if (isMounted) {
+          setRecommendation(data);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setError('This recommendation could not be loaded. It may have expired or the link may be incorrect.');
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [recommendationId, stateRecommendation]);
+
+  return <ResultsPage recommendation={recommendation} isLoading={isLoading} error={error} />;
 }
 
 function App() {
@@ -30,6 +90,7 @@ function App() {
           <Route path="/" element={<Navigate to="/onboarding" replace />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/results" element={<ResultsPageWrapper />} />
+          <Route path="/results/:recommendationId" element={<ResultsPageWrapper />} />
           <Route path="/comparison" element={<ComparisonPage />} />
           <Route path="/scenarios" element={<ScenarioPage />} />
 
